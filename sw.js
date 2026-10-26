@@ -2,7 +2,7 @@
  * App 本身：先用快取打開（離線也能開），同時在背景抓新版，下次打開就是新版。
  * 天氣、匯率等即時資料：一律走網路，不快取。
  * 改版時把 VERSION 加 1。 */
-var VERSION = "v7";
+var VERSION = "v8";
 var CACHE = "travel-app-" + VERSION;
 var SHELL = [
   "./",
@@ -14,6 +14,7 @@ var SHELL = [
   "./apple-touch-icon.png",
   "./themes/croc/theme.css",
   "./themes/croc/theme.js",
+  "./themes/croc/img/bg-meadow.webp",
   "./themes/croc/img/budget-near.webp",
   "./themes/croc/img/budget-ok.webp",
   "./themes/croc/img/budget-over.webp",

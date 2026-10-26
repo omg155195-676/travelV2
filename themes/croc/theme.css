@@ -3,16 +3,69 @@
    排版原則：鱷魚一律放在「自己的位置」（版面中的一欄，或事先留好的空白區），
    不浮在文字、金額、按鈕上面；空間不夠時依序 縮小 → 移動 → 隱藏。 */
 
-/* --- 配色：原本的粉紅為主，加上鱷魚灰、米白、少量自然綠與提醒黃 --- */
+/* =====================================================================
+   🐊 鱷魚旅行 Design System（只在鱷魚主題生效）
+   方向：奶油手帳紙 × 草綠 × 粉紅點綴；鱷魚灰作為角色色。
+   各頁面的 Layout 不同，但都只用下面這些 token，所以看起來是同一個 App。
+   ===================================================================== */
 html[data-ac=croc]{
-  --ac:#d6457a; --acd:#ff8fb3;
-  --g1:#ff8fb3; --g2:#ffb79e;
-  --tx:#38333a; --sub:#7f7480;
-  --bg:#fff7f6;
-  --bd:#f3d4dd;
-  --soft:#ffe9ef;
-  --croc:#5c5c62; --cream:#fff8ec; --leaf:#7fb069; --sun:#ffc94d;
+  /* 色彩：App 原本使用的變數（其他元件會自動跟著變） */
+  --ac:#4a8a3a; --acd:#9fd17f; --acx:#ffffff;      /* 主色＝草綠：標題、選中狀態、連結 */
+  --g1:#cfeaf7; --g2:#d7edb8;                       /* 漸層：天空 → 草地 */
+  --tx:#3b3428; --sub:#857a68;                      /* 文字：暖深咖、輔助灰咖 */
+  --bg:#f8f3e4;                                     /* 頁面：奶油 */
+  --card:#fffdf6;                                   /* 卡片：手帳紙 */
+  --bd:#e7dcc2;                                     /* 邊框：淡木色 */
+  --soft:#edf5e1;                                   /* 淡綠底：選中、膠囊 */
+  --ok:#3f8f4f; --bad:#d0534f;
+  /* 色彩：設計系統專用 */
+  --pink:#e2577f; --pink-soft:#fde8ee;             /* 粉紅點綴：主要按鈕、提醒、今天 */
+  --leaf:#4a8a3a; --leaf-soft:#edf5e1; --leaf-2:#7cb562;
+  --sky:#e3f2fa; --sun:#f6c445; --wood:#b48a5a; --paper-2:#f5eedb;
+  --croc:#56565b; --cream:#fff8e8;
+  /* 圓角：依層級不同 */
+  --r-xl:22px; --r-lg:18px; --r-md:14px; --r-sm:10px; --r-xs:7px; --r-pill:999px;
+  /* 陰影：柔和、自然 */
+  --sh-1:0 1px 2px rgba(92,72,32,.06),0 3px 10px rgba(92,72,32,.06);
+  --sh-2:0 2px 4px rgba(92,72,32,.07),0 8px 22px rgba(92,72,32,.09);
+  /* 字級 */
+  --fs-page:20px; --fs-sec:16px; --fs-card:15px; --fs-body:15px; --fs-sub:12.5px; --fs-num:30px; --fs-hero:40px;
+  /* 間距（手機版） */
+  --gut:14px; --gap:12px; --gap-sec:20px; --pad:14px;
+  /* 背景圖：使用者提供的草地天空 */
+  --croc-bg-img:url(img/bg-meadow.webp);
 }
+/* 頁面背景：草地天空圖固定在畫面後方（iPhone 不支援 background-attachment:fixed，所以用固定的偽元素），
+   卡片是不透明的手帳紙，文字永遠在卡片上，不會被背景干擾。 */
+html[data-ac=croc] body{background:#cfe9b5}
+html[data-ac=croc] body:before{content:"";position:fixed;inset:0;z-index:-1;background:var(--croc-bg-img) center 38%/cover no-repeat,#cfe9b5;pointer-events:none}
+
+/* --- 共用元件：卡片 --- */
+html[data-ac=croc] .card{background:var(--card);border-color:var(--bd);border-radius:var(--r-lg);box-shadow:var(--sh-1);padding:var(--pad);margin-bottom:var(--gap)}
+html[data-ac=croc] .ds-main{border-radius:var(--r-xl);box-shadow:var(--sh-2)}            /* 主卡 */
+html[data-ac=croc] .ds-paper{background:var(--cream)}                                     /* 手帳紙卡 */
+html[data-ac=croc] .ds-info{border-radius:var(--r-md)}                                    /* 資訊卡 */
+html[data-ac=croc] .ds-sec{display:flex;align-items:center;gap:8px;font-size:var(--fs-sec);font-weight:800;color:var(--tx);margin:var(--gap-sec) 2px 8px}
+html[data-ac=croc] .ds-sec .ds-more{margin-left:auto;font-size:13px;font-weight:700;color:var(--leaf);background:none;border:0;padding:6px 2px;min-height:32px;cursor:pointer}
+html[data-ac=croc] .ds-num{font-size:var(--fs-num);font-weight:800;color:var(--leaf);line-height:1.1;font-variant-numeric:tabular-nums}
+html[data-ac=croc] .ds-chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:2px 9px;border-radius:var(--r-pill);background:var(--leaf-soft);color:var(--leaf);white-space:nowrap}
+html[data-ac=croc] .ds-chip.pink{background:var(--pink-soft);color:var(--pink)}
+
+/* --- 共用元件：按鈕 --- */
+html[data-ac=croc] .btn{border-radius:var(--r-md);background:var(--pink);color:#fff;box-shadow:0 2px 0 rgba(150,40,70,.18)}
+html[data-ac=croc] .btn.sec{background:var(--card);color:var(--leaf);border:1.5px solid var(--leaf-2);box-shadow:none}
+html[data-ac=croc] .btn.dg{background:var(--bad)}
+html[data-ac=croc] .ds-icon-btn{width:36px;height:36px;border-radius:var(--r-pill);border:1px solid var(--bd);background:var(--card);color:var(--sub);font-size:18px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+html[data-ac=croc] .seg button{border-radius:var(--r-md);background:var(--card);border-color:var(--bd)}
+html[data-ac=croc] .seg button.on{background:var(--leaf);border-color:var(--leaf);color:#fff}
+html[data-ac=croc] .tdy{background:var(--pink)}
+html[data-ac=croc] input,html[data-ac=croc] select,html[data-ac=croc] textarea{border-radius:var(--r-sm);background:#fff;border-color:var(--bd)}
+
+/* --- 頂部與底部導覽 --- */
+html[data-ac=croc] .top{background:color-mix(in srgb,var(--card) 92%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom-color:var(--bd)}
+html[data-ac=croc] .top h1{color:var(--leaf)}
+html[data-ac=croc] #nav{background:color-mix(in srgb,var(--card) 95%,transparent);border-top-color:var(--bd);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+html[data-ac=croc] #nav button.on{background:var(--leaf-soft);color:var(--leaf)}
 
 /* --- 角色共用 --- */
 html[data-ac=croc] .thc{display:block;object-fit:contain;pointer-events:none;-webkit-user-select:none;user-select:none}
@@ -89,3 +142,110 @@ html[data-ac=croc][data-theme="dark"] .ctip{background:#2d272a;border-color:#4a3
 html[data-ac=croc][data-theme="dark"] .ctip .cbub{background:#211a1d;border-color:#4a3d42;color:#f6e9ee}
 html[data-ac=croc][data-theme="dark"] .ctip .cbub:before{border-right-color:#4a3d42}
 html[data-ac=croc][data-theme="dark"] .ctip .cbub:after{border-right-color:#211a1d}
+
+/* =====================================================================
+   🏠 首頁 Layout（鱷魚主題）
+   ===================================================================== */
+/* ① 主要功能：左邊大卡（快速記帳），右邊兩張小卡 */
+html[data-ac=croc] .ch-main{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);grid-template-rows:1fr 1fr;gap:10px;margin-bottom:10px}
+html[data-ac=croc] .ch-q{position:relative;display:flex;align-items:center;gap:6px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:var(--r-lg);box-shadow:var(--sh-1);font:inherit;text-align:left;cursor:pointer;padding:10px 12px;min-width:0;-webkit-tap-highlight-color:transparent}
+html[data-ac=croc] .ch-q:active{transform:translateY(1px)}
+/* 這些卡片是原本的快捷按鈕（.q）搬過來的：覆蓋舊的置中直排與大 emoji 字級 */
+html[data-ac=croc] .ch-q.q{flex-direction:row;justify-content:flex-start;min-height:0;font-size:inherit;font-weight:400;background:var(--card);color:var(--tx);border-color:var(--bd)}
+html[data-ac=croc] .ch-q span{font-size:inherit;line-height:inherit;display:inline}
+html[data-ac=croc] .ch-q .ch-q-txt{display:flex}
+html[data-ac=croc] .ch-q .ch-q-sub{display:block;font-size:12px;line-height:1.35;color:var(--sub)}
+html[data-ac=croc] .ch-q-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+html[data-ac=croc] .ch-q-txt>b{font-size:var(--fs-card);font-weight:800;white-space:nowrap}
+html[data-ac=croc] .ch-q-sub{font-size:12px;color:var(--sub);line-height:1.35}
+html[data-ac=croc] .ch-q-img{flex:none;width:46px;height:42px}
+/* 大卡 */
+html[data-ac=croc] .ch-big.ch-q{grid-row:1 / 3;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:14px;background:var(--cream);border-radius:var(--r-xl);box-shadow:var(--sh-2);min-height:136px}
+html[data-ac=croc] .ch-big .ch-q-txt>b{font-size:19px}
+html[data-ac=croc] .ch-big .ch-q-img{width:72px;height:62px;align-self:flex-start}
+html[data-ac=croc] .ch-q .ch-plus{display:block;position:absolute;right:12px;bottom:12px;width:44px;height:44px;border-radius:50%;background:var(--pink);color:#fff;font-size:26px;font-weight:700;line-height:44px;text-align:center;box-shadow:0 3px 0 rgba(150,40,70,.2)}
+/* 小卡 */
+html[data-ac=croc] .ch-sm{min-height:62px}
+/* ② 今日資訊卡（3 張） */
+html[data-ac=croc] .ch-info{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:var(--gap)}
+html[data-ac=croc] .ch-stat.ch-q{flex-direction:column;align-items:flex-start;gap:2px;padding:10px 10px 10px;border-radius:var(--r-md);min-height:112px}
+html[data-ac=croc] .ch-stat .ch-q-img{order:-1;width:44px;height:38px;margin-bottom:2px}
+html[data-ac=croc] .ch-stat .ch-q-txt>b{font-size:14px}
+html[data-ac=croc] .ch-stat .ch-q-sub{font-size:12px;color:var(--sub);white-space:nowrap}
+html[data-ac=croc] .ch-stat .ds-num{font-size:22px;font-weight:800}
+html[data-ac=croc] .ch-empty{color:var(--sub)}
+html[data-ac=croc] .ch-q .ch-chev{display:block;font-size:18px;position:absolute;right:8px;top:10px;color:var(--sub);font-size:18px;line-height:1}
+
+/* ③ 旅行主卡：手帳紙 */
+html[data-ac=croc] .ch-trip{position:relative;padding:14px 14px 10px;border:1.5px dashed #dccb9f;background:linear-gradient(var(--cream),var(--cream)) padding-box}
+html[data-ac=croc] .ch-trip-head{display:flex;align-items:center;justify-content:space-between;min-height:32px}
+html[data-ac=croc] .ch-year{display:inline-block;transform:rotate(-4deg);background:#f4e6bf;color:#7a6236;font-weight:800;font-size:14px;letter-spacing:.06em;padding:3px 12px;border-radius:var(--r-xs);box-shadow:0 1px 0 rgba(0,0,0,.06)}
+html[data-ac=croc] .ch-menu{position:relative;margin-left:auto}
+html[data-ac=croc] .ch-pop{display:none;position:absolute;right:0;top:40px;z-index:5;min-width:150px;background:var(--card);border:1px solid var(--bd);border-radius:var(--r-md);box-shadow:var(--sh-2);padding:6px}
+html[data-ac=croc] .ch-menu.open .ch-pop{display:block}
+html[data-ac=croc] .ch-pop-i{display:block;width:100%;margin:0;text-align:left;background:none;border:0;border-radius:var(--r-sm);padding:10px 10px;font:inherit;font-size:14px;color:var(--tx);cursor:pointer;min-height:40px}
+html[data-ac=croc] .ch-pop-i:active{background:var(--leaf-soft)}
+html[data-ac=croc] .ch-trip-body{display:flex;gap:12px;align-items:stretch;margin-top:6px}
+html[data-ac=croc] .ch-trip-txt{flex:1;min-width:0}
+html[data-ac=croc] .ch-trip-title{font-size:22px;font-weight:900;line-height:1.25;color:var(--tx);overflow-wrap:anywhere}
+html[data-ac=croc] .ch-trip-date{margin-top:6px;font-size:13px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html[data-ac=croc] .ch-trip-days{margin-top:2px;font-size:17px;font-weight:800;color:var(--leaf)}
+html[data-ac=croc] .ch-trip-deco{display:flex;align-items:flex-end;gap:8px;margin-top:6px}
+html[data-ac=croc] .ch-trip-deco .thc{width:76px;height:68px}
+html[data-ac=croc] .ch-plane{flex:1;min-width:0;height:26px;border-bottom:2px dashed #cdbb8f;color:#6aa7d6;font-size:18px;text-align:right;margin-bottom:22px;line-height:1}
+html[data-ac=croc] .ch-polaroid{flex:none;width:40%;max-width:170px;align-self:center;padding:6px 6px 18px;background:#fff;border:0;border-radius:4px;box-shadow:var(--sh-2);transform:rotate(3deg);cursor:pointer}
+html[data-ac=croc] .ch-polaroid img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:2px}
+
+/* ④ 倒數卡：數字是視覺中心，鱷魚在自己的右欄 */
+html[data-ac=croc] .ch-count{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:14px 14px 12px;text-align:left}
+html[data-ac=croc] .ch-count-txt .big{font-size:22px;font-weight:800;color:var(--leaf);line-height:1.1;margin:2px 0 4px}
+html[data-ac=croc] .ch-count-n{font-size:58px;font-weight:900;letter-spacing:-.02em;color:var(--leaf);vertical-align:-4px}
+html[data-ac=croc] .ch-count-txt>.sub:first-child{font-size:14px;font-weight:700;color:var(--tx)}
+html[data-ac=croc] .ch-count-side{display:flex;flex-direction:column;align-items:center;gap:4px}
+html[data-ac=croc] .ch-count-side .thc{width:92px;height:84px}
+html[data-ac=croc] .ch-bubble{font-size:11.5px;line-height:1.35;color:var(--tx);background:#fff;border:1px solid var(--bd);border-radius:12px;padding:5px 8px;text-align:center;white-space:nowrap}
+
+/* ⑤ 下一個行程 */
+html[data-ac=croc] .ch-next-head{display:flex;align-items:center;gap:8px}
+html[data-ac=croc] .ch-next-head>b{font-size:var(--fs-sec)}
+html[data-ac=croc] .ch-next-head .ds-more{margin-left:auto;font-size:13px;font-weight:700;color:var(--leaf);background:none;border:0;padding:6px 0;min-height:36px;cursor:pointer;white-space:nowrap}
+html[data-ac=croc] .ch-next-body{display:flex;gap:10px;align-items:flex-start;margin-top:6px}
+html[data-ac=croc] .ch-date{flex:none;width:58px;text-align:center;background:var(--pink-soft);color:var(--pink);border-radius:var(--r-sm);padding:8px 2px;line-height:1.2}
+html[data-ac=croc] .ch-date b{display:block;font-size:16px}
+html[data-ac=croc] .ch-date span{font-size:12px}
+html[data-ac=croc] .ch-next-main{flex:1;min-width:0}
+html[data-ac=croc] .ch-next-name{font-weight:800;font-size:15px;margin-top:4px;overflow-wrap:anywhere}
+html[data-ac=croc] .ch-time{font-weight:600;color:var(--leaf);font-variant-numeric:tabular-nums}
+html[data-ac=croc] .ch-next-place{font-size:13px;color:var(--sub);margin-top:2px;overflow-wrap:anywhere}
+html[data-ac=croc] .ch-next-more{font-size:13px;color:var(--tx);margin-top:6px;padding-top:6px;border-top:1px dashed var(--bd);overflow-wrap:anywhere}
+html[data-ac=croc] .ch-next-img{flex:none;width:58px;height:54px;align-self:flex-end}
+
+/* 區塊標題放在背景上：給一層半透明底，確保看得清楚 */
+html[data-ac=croc] #v>.ds-sec{display:inline-flex;background:color-mix(in srgb,var(--card) 88%,transparent);border-radius:var(--r-pill);padding:4px 12px;box-shadow:var(--sh-1)}
+/* 直接放在背景上的輔助文字，同樣加底 */
+html[data-ac=croc] #v>.sub{display:inline-block;background:color-mix(in srgb,var(--card) 88%,transparent);border-radius:var(--r-pill);padding:3px 10px}
+
+/* 窄螢幕：先縮小角色，再隱藏，資訊優先 */
+@media (max-width:359px){
+  html[data-ac=croc] .ch-big .ch-q-img{width:58px;height:50px}
+  html[data-ac=croc] .ch-q-img{width:38px;height:34px}
+  html[data-ac=croc] .ch-sm .ch-q-sub{display:none}
+  html[data-ac=croc] .ch-stat .ch-q-img{width:36px;height:32px}
+  html[data-ac=croc] .ch-count-n{font-size:48px}
+  html[data-ac=croc] .ch-count-side .thc{width:72px;height:66px}
+  html[data-ac=croc] .ch-trip-title{font-size:20px}
+  html[data-ac=croc] .ch-next-img{display:none}
+}
+@media (max-width:339px){
+  html[data-ac=croc] .ch-bubble{display:none}
+  html[data-ac=croc] .ch-stat .ds-num{font-size:19px}
+}
+
+/* 深色模式：背景圖調暗，卡片用深色紙 */
+@media (prefers-color-scheme:dark){
+  html[data-ac=croc]:not([data-theme="light"]) body:before{filter:brightness(.42) saturate(.8)}
+  html[data-ac=croc]:not([data-theme="light"]) .ds-paper,html[data-ac=croc]:not([data-theme="light"]) .ch-big,html[data-ac=croc]:not([data-theme="light"]) .ch-trip{background:var(--card)}
+  html[data-ac=croc]:not([data-theme="light"]) .ch-bubble,html[data-ac=croc]:not([data-theme="light"]) .ch-polaroid{background:var(--card)}
+  html[data-ac=croc]:not([data-theme="light"]) .ch-year{background:#4a3f2a;color:#f1dfae}
+}
+html[data-ac=croc][data-theme="dark"] body:before{filter:brightness(.42) saturate(.8)}

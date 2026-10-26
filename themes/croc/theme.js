@@ -137,8 +137,132 @@
     });
   }
 
+
+  /* =====================================================================
+     🏠 首頁 Layout（只在鱷魚主題）：
+     主要功能（1 大＋2 小）→ 今日資訊卡（真實數字）→ 旅行主卡 → 倒數 → 下一個行程 → 其餘原有卡片
+     作法：搬動「既有」的按鈕與卡片（點擊行為完全不變），只新增純顯示用的旅行主卡與下一個行程卡。
+     ===================================================================== */
+  function h(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+  function E(x) { return typeof esc === "function" ? esc(x) : String(x); }
+  function realPlans() { return (S.plan || []).filter(function (p) { return p.time !== "23:59"; }); }
+
+  function quickCard(btn, cls, title, sub, pose, extra) {
+    btn.classList.add("ch-q", cls);
+    btn.innerHTML = '<span class="ch-q-txt"><b>' + E(title) + '</b>' + (sub ? '<span class="ch-q-sub">' + sub + '</span>' : '') + '</span>' + (extra || "");
+    btn.insertBefore(img(pose, "ch-q-img"), cls === "ch-big" ? btn.lastChild : null);
+    return btn;
+  }
+
+  function nextPlan() {
+    var t = today(), d = new Date(), hm = ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+    var L = realPlans().filter(function (p) { return !p.done && !p.skip && p.date && (p.date > t || (p.date === t && (!p.time || p.time >= hm))); });
+    L.sort(function (a, b) { return (a.date + (a.time || "")).localeCompare(b.date + (b.time || "")); });
+    return L[0] || null;
+  }
+
+  function tripCard() {
+    var ti = tripInfo(), cu = S.cover ? imgUrl(S.cover) : "", yr = (ti.first || "").slice(0, 4);
+    var name = String(S.trip || ""), title = yr && name.indexOf(yr) === 0 ? name.slice(yr.length).trim() : name;
+    var c = h("div", "card ds-main ds-paper ch-trip");
+    var menu = "";
+    if (typeof phOn === "function" && phOn()) {
+      menu = '<div class="ch-menu"><button class="ds-icon-btn" aria-label="封面設定" onclick="this.parentNode.classList.toggle(\'open\')">⋯</button><div class="ch-pop">'
+        + '<label class="ch-pop-i"><span id="cvm">📷 ' + (S.cover ? '更換封面' : '設定封面') + '</span><input type="file" accept="image/*" style="display:none" onchange="setCover(this)"></label>'
+        + (S.cover ? '<button class="ch-pop-i" onclick="clrCv()">🗑️ 移除封面</button>' : '') + '</div></div>';
+    }
+    c.innerHTML = '<div class="ch-trip-head">' + (yr ? '<span class="ch-year">' + E(yr) + '</span>' : '') + menu + '</div>'
+      + '<div class="ch-trip-body"><div class="ch-trip-txt"><div class="ch-trip-title">' + E(title || "我的旅行") + '</div>'
+      + (ti.n ? '<div class="ch-trip-date">🗓️ ' + E(ti.first) + ' ～ ' + E(ti.last) + '</div><div class="ch-trip-days">' + ti.n + ' 天・' + Math.max(0, ti.n - 1) + ' 夜</div>'
+              : '<div class="ch-trip-date">還沒有安排日期</div>') + '</div>'
+      + (cu ? '<button class="ch-polaroid" aria-label="查看封面" onclick="zoom(\'' + E(S.cover) + '\')"><img alt="" src="' + E(cu) + '"></button>' : '') + '</div>';
+    var body = c.querySelector(".ch-trip-txt");
+    var deco = h("div", "ch-trip-deco"); deco.appendChild(img("walk")); deco.appendChild(h("span", "ch-plane", "✈"));
+    body.appendChild(deco);
+    return c;
+  }
+
+  function nextCard(p) {
+    var n = dayNum(p.date), same = realPlans().filter(function (x) { return x.date === p.date && !x.done && !x.skip && x.id !== p.id && (x.time || "") >= (p.time || ""); })
+      .sort(function (a, b) { return (a.time || "").localeCompare(b.time || ""); }).slice(0, 2);
+    var c = h("div", "card ds-info ch-next");
+    c.innerHTML = '<div class="ch-next-head"><b>📍 下一個行程</b><button class="ds-more" onclick="planMode=\'day\';planDay=\'' + E(p.date) + '\';go(\'plan\')">查看完整行程 ›</button></div>'
+      + '<div class="ch-next-body"><div class="ch-date"><b>' + E(md(p.date)) + '</b><span>（' + wk(p.date) + '）</span></div>'
+      + '<div class="ch-next-main">' + (n > 0 ? '<span class="ds-chip pink">DAY ' + n + '</span>' : '')
+      + '<div class="ch-next-name">' + (planTime(p) ? '<span class="ch-time">' + E(planTime(p)) + '</span> ' : '') + E(p.name) + '</div>'
+      + (p.place ? '<div class="ch-next-place">📍 ' + E(p.place) + '</div>' : '')
+      + same.map(function (x) { return '<div class="ch-next-more">' + (x.time ? '<span class="ch-time">' + E(planTime(x)) + '</span> ' : '') + E(x.name) + '</div>'; }).join("")
+      + '</div></div>';
+    c.querySelector(".ch-next-body").appendChild(img(n === 1 ? "depart" : "map", "ch-next-img"));
+    return c;
+  }
+
+  function homeLayout(root) {
+    if (root.querySelector(".ch-main")) return;
+    var q = root.querySelector(":scope > .qgrid"); if (!q) return;
+    var B = {}; Array.prototype.forEach.call(q.querySelectorAll("button"), function (b) { B[b.textContent.replace(/\s/g, "").replace(/^\S{0,2}(?=快速|今天|票券|今日|行程)/, "")] = b; });
+    var key = function (k) { for (var x in B) if (x.indexOf(k) >= 0) return B[x]; return null; };
+    var bAdd = key("快速記帳"), bToday = key("今天"), bTix = key("票券中心"), bPh = key("今日照片"), bTr = key("今日交通"), bPl = key("行程");
+    if (!bAdd || !bToday || !bTix || !bPh || !bTr || !bPl) return;
+
+    var d = (typeof focusDate !== "undefined" && focusDate) || today(), ti = tripInfo(), inTrip = ti.n && d >= ti.first && d <= ti.last;
+    var nPh = (typeof P !== "undefined" ? P : []).filter(function (p) { return albumP(p) && p.date === d; }).length;
+    var nTr = transEvents(d).length;
+    var nPlToday = realPlans().filter(function (p) { return p.date === d; }).length, nPlAll = realPlans().length;
+    var tixN = (S.trans || []).filter(function (t) { return t.ticketStatus === "已購票" || t.ticketStatus === "已取票"; }).length;
+
+    /* ① 主要功能：快速記帳（大）＋今天、票券中心（小） */
+    var main = h("div", "ch-main");
+    main.appendChild(quickCard(bAdd, "ch-big", "快速記帳", "記下今天的花費", "budgetOk", '<span class="ch-plus" aria-hidden="true">＋</span>'));
+    main.appendChild(quickCard(bToday, "ch-sm", "今天", "查看今日行程", "map"));
+    main.appendChild(quickCard(bTix, "ch-sm", "票券中心", tixN ? "已購 " + tixN + " 張" : "查看票券", "ticket"));
+
+    /* ② 今日資訊卡：真實數字；沒有資料時顯示空狀態文字 */
+    var info = h("div", "ch-info");
+    info.appendChild(quickCard(bPh, "ch-stat", "今日照片", nPh ? '<span class="ds-num">' + nPh + '</span> 張' : '<span class="ch-empty">還沒有</span>', "camera", '<span class="ch-chev">›</span>'));
+    info.appendChild(quickCard(bTr, "ch-stat", "今日交通", nTr ? '<span class="ds-num">' + nTr + '</span> 筆' : '<span class="ch-empty">今天沒有</span>', "train", '<span class="ch-chev">›</span>'));
+    info.appendChild(quickCard(bPl, "ch-stat", "行程", inTrip ? (nPlToday ? '今天 <span class="ds-num">' + nPlToday + '</span> 項' : '<span class="ch-empty">今天沒有</span>') : (nPlAll ? '共 <span class="ds-num">' + nPlAll + '</span> 項' : '<span class="ch-empty">還沒有</span>'), "map", '<span class="ch-chev">›</span>'));
+
+    q.parentNode.insertBefore(main, q); q.parentNode.insertBefore(info, q); q.remove();
+
+    /* ③ 旅行主卡：取代原本的頂部旅行卡（封面管理收進右上角 ⋯） */
+    var heroes = Array.prototype.filter.call(root.children, function (e) {
+      return e.matches('div[style*="var(--g1),var(--g2)"]') || (e.classList.contains("card") && e.querySelector(':scope > img[onclick^="zoom"]'));
+    });
+    heroes.forEach(function (e) { e.remove(); });
+    var anchor = info.nextSibling;
+    var trip = tripCard(); root.insertBefore(trip, anchor);
+    var after = trip;
+
+    /* ④ 倒數卡（出發前才有）：「X 天」是視覺中心 */
+    var cd = Array.prototype.filter.call(root.querySelectorAll(":scope > .card"), function (c) { return /^距離旅行還有/.test((c.querySelector(".sub") || {}).textContent || ""); })[0];
+    if (cd) {
+      cd.removeAttribute("style"); cd.classList.add("ds-main", "ds-paper", "ch-count");
+      var txt = h("div", "ch-count-txt"); while (cd.firstChild) txt.appendChild(cd.firstChild);
+      var big = txt.querySelector(".big"); if (big) { big.removeAttribute("style"); var m = /(\d+)\s*天/.exec(big.textContent); if (m) big.innerHTML = '<span class="ch-count-n">' + m[1] + '</span> 天'; }
+      cd.appendChild(txt);
+      var side = h("div", "ch-count-side", '<span class="ch-bubble">準備好了嗎？<br>一起出發吧！</span>'); side.appendChild(img("depart"));
+      cd.appendChild(side);
+      root.insertBefore(cd, after.nextSibling); after = cd;
+    }
+
+    /* 小鱷魚提示：放在倒數／旅行卡之後，當作旅伴的提醒 */
+    var tip = root.querySelector(":scope > .ctip");
+    if (tip) { root.insertBefore(tip, after.nextSibling); after = tip; }
+
+    /* ⑤ 下一個行程 */
+    var np = nextPlan();
+    if (np) { var nc = nextCard(np); root.insertBefore(nc, after.nextSibling); after = nc; }
+
+    /* 其餘原有卡片（天氣、出發前、預算、旅行中的今日區塊…）順序不變，前面加一個區塊標題 */
+    var phase = !ti.n ? "📝 開始規劃" : inTrip ? "📋 今天的細節" : (d > ti.last ? "🌸 旅程回顧" : "🧳 旅行準備");
+    if (after.nextSibling) root.insertBefore(h("div", "ds-sec", phase), after.nextSibling);
+  }
+
   function decorate(tab, root) {
     if (!on() || !root) return;
+
+    if (tab === "home") { try { homeLayout(root); } catch (e) { if (window.console) console.warn("croc home", e); } }
 
     /* 頂部漸層卡（沒有封面照片時）：鱷魚放在卡片上方的留白區，不碰標題 */
     var hero = root.querySelector(':scope > div[style*="var(--g1),var(--g2)"]');
