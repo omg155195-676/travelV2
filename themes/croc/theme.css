@@ -394,3 +394,21 @@ html[data-ac=croc] .ct-stub .tile img{border-radius:6px;border:1px solid var(--b
 @media (max-width:359px){html[data-ac=croc] .ct-head-img{width:52px;height:50px}}
 @media (max-width:339px){html[data-ac=croc] .ct-head-img{display:none}}
 @media (prefers-color-scheme:dark){html[data-ac=croc]:not([data-theme="light"]) .ct-stub:before,html[data-ac=croc]:not([data-theme="light"]) .ct-stub:after{background:#171214}}
+
+/* =====================================================================
+   ➕ 快速記帳（鱷魚主題）：金額為焦點
+   ===================================================================== */
+html[data-ac=croc] .cq{background:var(--card)}
+html[data-ac=croc] .cq-amt{display:flex;align-items:baseline;justify-content:center;gap:6px;margin:4px 0 6px;padding:14px 12px 10px;border-radius:var(--r-lg);background:var(--cream);border:1px solid var(--bd)}
+html[data-ac=croc] .cq-sym{font-size:28px;font-weight:800;color:var(--leaf);flex:none}
+html[data-ac=croc] .cq-amt #q_a{flex:1;min-width:0;max-width:240px;height:auto!important;font-size:44px!important;font-weight:900;text-align:center;color:var(--tx);background:transparent;border:0;border-bottom:2px dashed var(--leaf-2);border-radius:0;padding:2px 4px;font-variant-numeric:tabular-nums}
+html[data-ac=croc] .cq-amt #q_a:focus{outline:none;border-bottom-color:var(--pink)}
+html[data-ac=croc] .cq-cats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:4px 0 2px}
+html[data-ac=croc] .cq-cat{min-height:44px;padding:4px 2px;border:1px solid var(--bd);border-radius:var(--r-md);background:#fff;color:var(--tx);font:inherit;font-size:12.5px;font-weight:700;line-height:1.25;cursor:pointer;overflow-wrap:anywhere}
+html[data-ac=croc] .cq-cat.on{background:var(--leaf);border-color:var(--leaf);color:#fff}
+html[data-ac=croc] .cq-hidden{display:none!important}
+html[data-ac=croc] .cq .sh-f .btn:last-child{font-size:17px;min-height:52px}
+@media (max-width:359px){html[data-ac=croc] .cq-cats{grid-template-columns:repeat(4,minmax(0,1fr))}html[data-ac=croc] .cq-amt #q_a{font-size:38px!important}}
+@media (prefers-color-scheme:dark){html[data-ac=croc]:not([data-theme="light"]) .cq-cat{background:var(--card)}html[data-ac=croc]:not([data-theme="light"]) .cq-amt{background:var(--soft)}}
+html[data-ac=croc] .cq-amt #q_a::-webkit-inner-spin-button,html[data-ac=croc] .cq-amt #q_a::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+html[data-ac=croc] .cq-amt #q_a{-moz-appearance:textfield;appearance:textfield}

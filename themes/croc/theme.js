@@ -446,6 +446,34 @@
     });
   }
 
+
+  /* =====================================================================
+     ➕ 快速記帳（只在鱷魚主題）：金額是焦點、分類用膠囊一點即選
+     原本的欄位與存檔流程完全不變；分類膠囊只是幫原本的下拉選單選值。
+     ===================================================================== */
+  function quickAddLayout(md) {
+    var a = md.querySelector("#q_a"), sel = md.querySelector("#q_c");
+    if (!a || !sel || md.querySelector(".cq-amt")) return;
+    var sheet = md.querySelector(".sheet"); if (sheet) sheet.classList.add("cq");
+    var u = md.querySelector("#q_u");
+    var symOf = function () { var c = u ? u.value : "JPY"; return (typeof SYM !== "undefined" && SYM[c]) || (CSYM[c] || c + " "); };
+    var wrap = h("div", "cq-amt"), sym = h("span", "cq-sym", E(String(symOf()).trim()));
+    a.parentNode.insertBefore(wrap, a); wrap.appendChild(sym); wrap.appendChild(a);
+    if (u) u.addEventListener("change", function () { sym.textContent = String(symOf()).trim(); });
+    /* 分類膠囊 */
+    var chips = h("div", "cq-cats");
+    Array.prototype.forEach.call(sel.options, function (o) {
+      var b = h("button", "cq-cat", E(o.textContent.trim())); b.type = "button"; b.setAttribute("data-v", o.value);
+      b.addEventListener("click", function () { sel.value = o.value; sel.dispatchEvent(new Event("change", { bubbles: true })); });
+      chips.appendChild(b);
+    });
+    var sync = function () { Array.prototype.forEach.call(chips.children, function (b) { b.classList.toggle("on", b.getAttribute("data-v") === sel.value); }); };
+    sel.addEventListener("change", sync); sync();
+    sel.classList.add("cq-hidden"); sel.parentNode.insertBefore(chips, sel);
+    /* 外部（例如錢包分類）用程式設定選單值時，也同步一次 */
+    setTimeout(sync, 80);
+  }
+
   function decorate(tab, root) {
     if (!on() || !root) return;
 
@@ -520,6 +548,7 @@
         if (!on()) return;
         var g = md.querySelector(".mgrid"), hd = md.querySelector(".sh-h");
         if (g && hd && !hd.querySelector(".thc")) hd.insertBefore(img("map"), hd.lastElementChild);
+        try { quickAddLayout(md); } catch (e) {}
       }).observe(md, { childList: true, subtree: true });
     }
   }
