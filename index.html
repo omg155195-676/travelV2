@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>旅行控制中心（鱷魚版）</title>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#d6457a"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="旅行控制中心">
 <style>
 :root{--ac:#d6457a;--acd:#ff8fb3;--g1:#ff8fb3;--g2:#c77dff;--acx:#fff;--tx:#3a2530;--sub:#8a6f7b;--bad:#c0392b;--bg:color-mix(in srgb,var(--ac) 7%,#fff);--card:#fff;--bd:color-mix(in srgb,var(--ac) 22%,#fff);--soft:color-mix(in srgb,var(--ac) 12%,#fff);--ok:#2f9e5b;color-scheme:light}
 html[data-ac=maple]{--ac:#c8481c;--acd:#ff9a5c;--g1:#ff8a3d;--g2:#d6336c}
@@ -1552,4 +1553,5 @@ VIEWS.set=function(){var h=_crocSet(),c='<div class="card"><div class="l"><b>�
 
 
 boot();
-</script></body></html>
+</script><script>if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+</body></html>
