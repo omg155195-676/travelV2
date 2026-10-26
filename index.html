@@ -324,7 +324,7 @@ function render(){
 }
 function applyTheme(){document.documentElement.setAttribute("data-ac",S.ac||"sakura")}
 function zoom(a){if(!a)return;var z=$("zm");z.querySelector("img").src=imgUrl(a);z.classList.remove("hide")}
-function imgUrl(a){if(!a)return "";if(a.charAt(0)==="L")return (typeof LURL!=="undefined"&&LURL[a])||"";if(typeof claude==="undefined"||!claude||typeof claude.use!=="function")return "";return "/_blob/"+encodeURIComponent(a)}
+function imgUrl(a){if(!a)return "";if(/\.(jpe?g|png|webp)$/i.test(a))return a;if(a.charAt(0)==="L")return (typeof LURL!=="undefined"&&LURL[a])||"";if(typeof claude==="undefined"||!claude||typeof claude.use!=="function")return "";return "/_blob/"+encodeURIComponent(a)}
 function mapLink(q){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q)}
 function placeLink(pl){return pl?'<div class="sub"><a target="_blank" rel="noopener" href="'+mapLink(pl)+'">📍'+esc(pl)+'</a></div>':''}
 function tripInfo(){var ds=[];S.plan.forEach(function(p){if(p.date&&ds.indexOf(p.date)<0)ds.push(p.date)});ds.sort();return{ds:ds,n:ds.length,first:ds[0]||"",last:ds[ds.length-1]||""}}
@@ -819,7 +819,8 @@ function phUpload(d){
    +'<div class="sub" id="km" style="margin-top:6px">'+esc(kMsg)+'</div></div>'}
 function cloudBanner(){
   var pn=pendingPh();
-  return '<div class="card sub">'+(cl==="ok"?'☁️ Cloud 已連線，照片會自動備份。':'📵 Cloud 未連線（'+esc(cloudErr||"連線中")+'）｜照片先存在這台裝置，之後連線會自動備份。<div style="margin-top:6px"><button class="btn sec sm" onclick="retryCloud()">重新連線 Cloud</button></div>')+(pn?'<div>等待備份：'+pn+' 張</div>':'')+(phLocal?'':'<div class="warn">⚠️ 這個瀏覽器無法使用本機照片儲存。</div>')+'</div>'}
+  var noEnv=(typeof claude==="undefined"||!claude||typeof claude.use!=="function");
+  return '<div class="card sub">'+(noEnv?'📱 照片存在這台裝置（這個瀏覽器）。換手機或清除瀏覽器資料前，記得先匯出備份。':cl==="ok"?'☁️ Cloud 已連線，照片會自動備份。':'📵 Cloud 未連線（'+esc(cloudErr||"連線中")+'）｜照片先存在這台裝置，之後連線會自動備份。<div style="margin-top:6px"><button class="btn sec sm" onclick="retryCloud()">重新連線 Cloud</button></div>')+(pn?'<div>等待備份：'+pn+' 張</div>':'')+(phLocal?'':'<div class="warn">⚠️ 這個瀏覽器無法使用本機照片儲存。</div>')+'</div>'}
 function vPhoto(){
   if(!phOn())return cloudBanner();
   var CP=P.filter(albumP),h=cloudBanner();
@@ -1109,7 +1110,7 @@ function vBook(){
 VIEWS.book=vBook;
 
 /* ===== Review（回顧）===== */
-var revId=null,COVER0="9ca0a9658d6a3e1bd24d1dc4f50f1259";
+var revId=null,COVER0="";
 function allTrips(){return[{id:S.tid,cur:1,name:S.trip,cover:S.cover,items:S.items,plan:S.plan,gosh:S.gosh,trans:S.trans,resv:S.resv,dayNotes:S.dayNotes}].concat((S.trips||[]).slice().reverse())}
 function rs(T){
   var pl=T.plan.filter(function(p){return p.time!=="23:59"}),ds=[];T.plan.forEach(function(p){if(p.date&&ds.indexOf(p.date)<0)ds.push(p.date)});ds.sort();
@@ -1220,6 +1221,7 @@ function seedGosh(){var dn={};S.gosh.forEach(function(g){if(g.done)dn[g.name]=1}
 function boot(){
   try{S=load()}catch(e){S=defState();LOADERR="啟動時讀取資料失敗，使用空白資料。你的原始資料仍在瀏覽器中，請到設定查看本機備份。"}
   syncP();
+  try{if(S.cover&&S.cover.charAt(0)!=="L"&&!/\.(jpe?g|png|webp)$/i.test(S.cover)&&(typeof claude==="undefined"||!claude))S.cover="";}catch(e){}
   try{
     if(S.tid==="t1"){
       if(!S.plan.length&&S.seedV!==4){seedPlan();}
