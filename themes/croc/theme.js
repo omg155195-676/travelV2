@@ -161,16 +161,53 @@
     return L[0] || null;
   }
 
+  /* 共用元件：「更多 ⋯」選單，收納封面設定（沿用原本的 setCover／clrCv） */
+  function coverMenu() {
+    if (!(typeof phOn === "function" && phOn())) return "";
+    return '<div class="ch-menu"><button class="ds-icon-btn" aria-label="封面設定" onclick="this.parentNode.classList.toggle(\'open\')">⋯</button><div class="ch-pop">'
+      + '<label class="ch-pop-i"><span id="cvm">📷 ' + (S.cover ? '更換封面' : '設定封面') + '</span><input type="file" accept="image/*" style="display:none" onchange="setCover(this)"></label>'
+      + (S.cover ? '<button class="ch-pop-i" onclick="clrCv()">🗑️ 移除封面</button>' : '') + '</div></div>';
+  }
+
+  /* =====================================================================
+     🗺️ 行程頁 Layout（只在鱷魚主題）：精簡頁首 → 日期卡 → 時間軸（樣式在 theme.css）
+     ===================================================================== */
+  function planLayout(root) {
+    if (root.querySelector(".cp-head")) return;
+    var heroes = Array.prototype.filter.call(root.children, function (e) {
+      return e.matches('div[style*="var(--g1),var(--g2)"]') || (e.classList.contains("card") && e.querySelector(':scope > img[onclick^="zoom"]'));
+    });
+    if (!heroes.length) return;
+    var ti = tripInfo(), done = realPlans().filter(function (p) { return p.done; }).length, all = realPlans().length;
+    var c = h("div", "card ds-main ds-paper cp-head");
+    c.innerHTML = '<div class="cp-head-txt"><div class="cp-title">🗺️ 旅行時間軸</div>'
+      + '<div class="cp-sub">' + E(S.trip || "") + '</div>'
+      + (ti.n ? '<div class="cp-meta"><span class="ds-chip">' + ti.n + ' 天</span><span class="ds-chip pink">' + done + ' / ' + all + ' 完成</span></div>' : '')
+      + '</div>' + coverMenu();
+    c.insertBefore(img("map", "cp-head-img"), c.querySelector(".ch-menu"));
+    root.insertBefore(c, heroes[0]);
+    heroes.forEach(function (e) { e.remove(); });
+  }
+  /* 展開的那天：時間軸結尾放一隻小鱷魚陪伴（只是顯示，不影響任何操作） */
+  function planTrailEnd(root) {
+    root.querySelectorAll(".pday.is-open").forEach(function (card) {
+      var body = card.querySelector(".pday-body"), slot = card.querySelector(".pday-char[data-date]");
+      if (!body || !slot || body.querySelector(".cp-end")) return;
+      var d = slot.getAttribute("data-date"), its = realPlans().filter(function (p) { return p.date === d && !p.skip; });
+      if (!its.length) return;
+      var left = its.filter(function (p) { return !p.done; }).length;
+      var end = h("div", "cp-end");
+      end.appendChild(img(left ? "walk" : "sleep"));
+      end.appendChild(h("span", "cp-end-txt", left ? "還有 " + left + " 項，慢慢來～" : "今天的行程都完成了，辛苦啦！"));
+      body.appendChild(end);
+    });
+  }
+
   function tripCard() {
     var ti = tripInfo(), cu = S.cover ? imgUrl(S.cover) : "", yr = (ti.first || "").slice(0, 4);
     var name = String(S.trip || ""), title = yr && name.indexOf(yr) === 0 ? name.slice(yr.length).trim() : name;
     var c = h("div", "card ds-main ds-paper ch-trip");
-    var menu = "";
-    if (typeof phOn === "function" && phOn()) {
-      menu = '<div class="ch-menu"><button class="ds-icon-btn" aria-label="封面設定" onclick="this.parentNode.classList.toggle(\'open\')">⋯</button><div class="ch-pop">'
-        + '<label class="ch-pop-i"><span id="cvm">📷 ' + (S.cover ? '更換封面' : '設定封面') + '</span><input type="file" accept="image/*" style="display:none" onchange="setCover(this)"></label>'
-        + (S.cover ? '<button class="ch-pop-i" onclick="clrCv()">🗑️ 移除封面</button>' : '') + '</div></div>';
-    }
+    var menu = coverMenu();
     c.innerHTML = '<div class="ch-trip-head">' + (yr ? '<span class="ch-year">' + E(yr) + '</span>' : '') + menu + '</div>'
       + '<div class="ch-trip-body"><div class="ch-trip-txt"><div class="ch-trip-title">' + E(title || "我的旅行") + '</div>'
       + (ti.n ? '<div class="ch-trip-date">🗓️ ' + E(ti.first) + ' ～ ' + E(ti.last) + '</div><div class="ch-trip-days">' + ti.n + ' 天・' + Math.max(0, ti.n - 1) + ' 夜</div>'
@@ -273,7 +310,7 @@
     }
 
     decorateBudget(root);
-    if (tab === "plan") decoratePlan(root);
+    if (tab === "plan") { try { planLayout(root); } catch (e) {} decoratePlan(root); try { planTrailEnd(root); } catch (e) {} }
 
     /* 錯誤卡 */
     root.querySelectorAll(".card").forEach(function (c) {

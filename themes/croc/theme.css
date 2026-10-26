@@ -249,3 +249,51 @@ html[data-ac=croc] #v>.sub{display:inline-block;background:color-mix(in srgb,var
   html[data-ac=croc]:not([data-theme="light"]) .ch-year{background:#4a3f2a;color:#f1dfae}
 }
 html[data-ac=croc][data-theme="dark"] body:before{filter:brightness(.42) saturate(.8)}
+
+/* =====================================================================
+   🗺️ 行程頁：鱷魚旅行時間軸（鱷魚主題）
+   ===================================================================== */
+/* 頁首：精簡，鱷魚在自己的欄位 */
+html[data-ac=croc] .cp-head{display:flex;align-items:center;gap:10px;padding:12px 12px 12px 16px}
+html[data-ac=croc] .cp-head-txt{flex:1;min-width:0}
+html[data-ac=croc] .cp-title{font-size:var(--fs-page);font-weight:900;color:var(--tx)}
+html[data-ac=croc] .cp-sub{font-size:13px;color:var(--sub);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html[data-ac=croc] .cp-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+html[data-ac=croc] .cp-head-img{flex:none;width:64px;height:58px}
+html[data-ac=croc] .cp-head .ch-menu{align-self:flex-start;margin-left:0}
+
+/* 日期卡：草綠路線條、DAY 膠囊、大日期 */
+html[data-ac=croc] .pday{border-radius:var(--r-lg);box-shadow:var(--sh-1)}
+html[data-ac=croc] .pday:before{width:5px;background:var(--leaf-2);opacity:1}
+html[data-ac=croc] .pday-no{background:var(--leaf-soft);color:var(--leaf);padding:2px 8px;border-radius:var(--r-pill);font-size:11px;letter-spacing:.06em}
+html[data-ac=croc] .pday-top{align-items:center}
+html[data-ac=croc] .pday-date{font-size:18px;font-weight:800}
+html[data-ac=croc] .pday-pill.st-part{background:var(--pink-soft);color:var(--pink)}
+html[data-ac=croc] .pday-pill.st-ok{background:var(--leaf-soft);color:var(--leaf)}
+html[data-ac=croc] .pday.is-open .pday-chev{color:var(--leaf)}
+/* 今天：粉紅點綴 */
+html[data-ac=croc] .pday.is-today{background:var(--card);border-color:#f2b8c9}
+html[data-ac=croc] .pday.is-today:before{background:var(--pink)}
+html[data-ac=croc] .pday-today{background:var(--pink);color:#fff}
+html[data-ac=croc] .pday.is-today .pday-no{background:var(--pink-soft);color:var(--pink)}
+
+/* 時間軸：草綠虛線＋小圓點，完成的圓點變實心 */
+html[data-ac=croc] .pday-body{border-top:1px dashed var(--bd);background:linear-gradient(var(--card),var(--card))}
+html[data-ac=croc] .pday-body>.item:before{border-color:var(--leaf-2);width:10px;height:10px;left:1px;top:15px}
+html[data-ac=croc] .pday-body>.item:after{background:none;border-left:2px dashed #cfe2bd;left:5px;width:0}
+html[data-ac=croc] .pday-body>.item:has(input:checked):before{background:var(--leaf-2)}
+html[data-ac=croc] .pday-body>.item.evt:before{border-color:#7fb4d8;background:#e3f2fa}
+html[data-ac=croc] .pday-body .chk input{accent-color:var(--leaf)}
+/* 時間軸結尾的小鱷魚 */
+html[data-ac=croc] .cp-end{display:flex;align-items:center;gap:8px;margin:4px 0 2px;padding:8px 10px;border-radius:var(--r-md);background:var(--leaf-soft)}
+html[data-ac=croc] .cp-end .thc{flex:none;width:46px;height:40px}
+html[data-ac=croc] .cp-end-txt{font-size:13px;font-weight:700;color:var(--leaf);min-width:0}
+
+/* 單日模式的切換列與工具列 */
+html[data-ac=croc] .pday-tools .btn{background:var(--card);border-color:var(--bd);color:var(--leaf)}
+
+@media (max-width:359px){html[data-ac=croc] .cp-head-img{width:48px;height:44px}}
+@media (max-width:339px){html[data-ac=croc] .cp-head-img{display:none}}
+/* 窄螢幕：日期永遠完整，「今天」標籤空間不夠時換到下一行 */
+html[data-ac=croc] .pday-top{flex-wrap:wrap;row-gap:3px}
+html[data-ac=croc] .pday-date{flex:none}
