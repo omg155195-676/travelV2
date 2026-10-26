@@ -480,3 +480,28 @@ html[data-ac=croc] .cx-head.cx-wrap{flex-wrap:wrap}
 html[data-ac=croc] .cx-head.cx-wrap>.cx-stamps{flex-basis:100%;max-width:none;grid-template-columns:repeat(auto-fill,minmax(30px,1fr))}
 /* 交通／預約的日期列（可展開）與分類列 */
 html[data-ac=croc] [data-ctab=trans] .catbar,html[data-ac=croc] [data-ctab=list] .catbar{font-size:13px}
+
+/* =====================================================================
+   第二批：每日總覽、統計、地圖、回顧、旅行手冊
+   ===================================================================== */
+/* 地區色日期列：淡綠底＋左側地區色細條（取代大面積紫／紅色塊） */
+html[data-ac=croc] .daybar.cx-daybar{background:var(--leaf-soft)!important;color:var(--tx);border-left:5px solid var(--rg,var(--leaf-2));text-shadow:none}
+html[data-ac=croc] .daybar.cx-daybar>b{color:var(--tx)}
+html[data-ac=croc] .daybar.cx-daybar>span{color:var(--leaf);font-weight:700;font-size:13px;white-space:nowrap}
+/* 每日總覽：計數膠囊 */
+html[data-ac=croc] [data-ctab=days] .ov{gap:6px}
+html[data-ac=croc] [data-ctab=days] .ov>span{font-size:12px;padding:2px 8px;border-radius:var(--r-pill);background:var(--cream);border:1px solid var(--bd)}
+html[data-ac=croc] [data-ctab=days] .ov>span.cx-zero{opacity:.45}
+/* 統計：長條圖用主題色 */
+html[data-ac=croc] [data-ctab=stat] .bar{height:10px;background:var(--paper-2)}
+html[data-ac=croc] [data-ctab=stat] .card>b:first-child{font-size:var(--fs-sec)}
+/* 地圖：地點連結像小路標 */
+html[data-ac=croc] [data-ctab=map] .card a{color:var(--leaf);font-weight:700}
+html[data-ac=croc] [data-ctab=map] .btn.sec{border-style:dashed}
+/* 回顧：旅程卡像手帳頁 */
+html[data-ac=croc] [data-ctab=rev] .card{background:var(--cream)}
+/* 旅行手冊：範本選項 */
+html[data-ac=croc] [data-ctab=book] .tpl{background:var(--card);border-color:var(--bd);border-radius:var(--r-md)}
+html[data-ac=croc] [data-ctab=book] .tpl.on{background:var(--leaf-soft);border-color:var(--leaf-2)}
+html[data-ac=croc] [data-ctab=book] .chip{background:var(--card);border-color:var(--bd)}
+html[data-ac=croc] [data-ctab=book] input[type=radio],html[data-ac=croc] [data-ctab=book] input[type=checkbox]{accent-color:var(--leaf)}

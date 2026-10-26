@@ -600,6 +600,49 @@
     root.querySelectorAll(":scope > .card .daytot").forEach(function (d) { d.classList.add("cx-daytot"); });
   }
 
+
+  /* ---------- 第二批：每日總覽、統計、地圖、回顧、旅行手冊 ---------- */
+  /* 開頭的說明卡（.card.sub）收進頁首 */
+  function takeIntro(root) {
+    var c = root.querySelector(":scope > .card.sub");
+    if (!c || c.querySelector("button,input,select,.grid")) return { text: "", before: c };
+    var t = c.textContent.trim(), nx = c.nextSibling; c.remove(); return { text: E(t), before: nx };
+  }
+  /* 大面積地區色的日期列 → 淡底＋左側地區色細條（只改外觀） */
+  function softDaybars(root) {
+    root.querySelectorAll(".daybar[style*='background']").forEach(function (d) {
+      if (d.classList.contains("cx-daybar")) return;
+      var c = d.style.backgroundColor || ""; d.style.setProperty("--rg", c); d.classList.add("cx-daybar");
+    });
+  }
+  function daysLayout(root) {
+    var ti = tripInfo(), it = takeIntro(root);
+    pageHead(root, "", "📅 每日總覽", it.text || "點日期可以看當天所有資料，也能寫今日備註。",
+      ti.n ? [chip(ti.n + " 天"), chip(E(md(ti.first)) + " ～ " + E(md(ti.last)))] : [], "map", it.before || root.firstChild);
+    softDaybars(root);
+    root.querySelectorAll(".ov>span").forEach(function (sp) { if (/\s0$/.test(sp.textContent.trim())) sp.classList.add("cx-zero"); });
+  }
+  function statLayout(root) {
+    var L = S.items || [], days = {}; L.forEach(function (i) { days[i.date] = 1; });
+    pageHead(root, "", "📊 旅行統計", "花費分類、每天的變化和這趟的重點紀錄。",
+      [chip(L.length + " 筆"), chip(Object.keys(days).length + " 天有花費"), L.length ? chip("合計 " + E(sumShow(L)), true) : ""], "budgetOk", root.firstChild);
+  }
+  function mapLayout(root) {
+    var it = takeIntro(root), m = /共\s*(\d+)\s*個地點/.exec(it.text || ""), ti = tripInfo();
+    pageHead(root, "", "🗺️ 旅行地圖", "點地點會開 Google 地圖，「開啟當天路線」會依行程順序帶入。",
+      [m ? chip(m[1] + " 個地點") : "", ti.n ? chip(ti.n + " 天") : ""], "map", it.before || root.firstChild);
+    softDaybars(root);
+  }
+  function revLayout(root) {
+    var it = takeIntro(root), n = 1 + ((S.trips || []).length);
+    pageHead(root, "", "🌸 旅程回顧", it.text || "每一趟旅程各自整理在這裡。", [chip(n + " 趟旅程")], "rest", it.before || root.firstChild);
+    softDaybars(root);
+  }
+  function bookLayout(root) {
+    var it = takeIntro(root);
+    pageHead(root, "", "📖 旅行手冊", it.text || "選範本與內容，匯出 PDF 或 Word。", [chip("PDF"), chip("Word")], "idea", it.before || root.firstChild);
+  }
+
   function decorate(tab, root) {
     if (!on() || !root) return;
 
@@ -614,13 +657,14 @@
     }
 
     root.setAttribute("data-ctab", tab);
-    var PAGES = { pack: packLayout, trans: transLayout, resv: resvLayout, gosh: goshLayout, list: listLayout };
+    var PAGES = { pack: packLayout, trans: transLayout, resv: resvLayout, gosh: goshLayout, list: listLayout,
+                  days: daysLayout, stat: statLayout, map: mapLayout, rev: revLayout, book: bookLayout };
     if (PAGES[tab]) { try { PAGES[tab](root); } catch (e) { if (window.console) console.warn("croc " + tab, e); } }
     if (tab === "set") { try { settingsLayout(root); } catch (e) { if (window.console) console.warn("croc set", e); } }
     if (tab === "tix") { try { tixLayout(root); } catch (e) { if (window.console) console.warn("croc tix", e); } }
     if (tab === "photo") { try { photoLayout(root); } catch (e) { if (window.console) console.warn("croc photo", e); } }
     if (tab === "add") { try { walletLayout(root); } catch (e) { if (window.console) console.warn("croc wallet", e); } }
-    decorateBudget(root);
+    if (tab !== "stat") decorateBudget(root);   /* 統計頁頁首已有鱷魚，不重複 */
     if (tab === "plan") { try { planLayout(root); } catch (e) {} decoratePlan(root); try { planTrailEnd(root); } catch (e) {} }
 
     /* 錯誤卡 */
