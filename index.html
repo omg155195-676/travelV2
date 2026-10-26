@@ -1494,7 +1494,7 @@ try{CROC_OFF=localStorage.getItem("croc-off")==="1"}catch(e){}
  +'.ctip .csub{font-size:12px;color:#8a6f7b;margin-top:2px}'
  +'.ctip .cx{flex:none;border:0;background:none;color:#8a6f7b;font-size:16px;min-width:32px;min-height:32px;cursor:pointer;padding:0;margin:0}';
  document.head.appendChild(st)})();
-function crocOn(){return themeChar()==="croc"&&!CROC_OFF&&!crocHid}
+function crocOn(){return !CROC_OFF&&!crocHid}
 function crocBox(k,msg,sub,cls){
   return '<div class="ctip '+(cls||"")+'"><img class="cimg" alt="" src="'+(CROC_IMG[k]||"")+'"><div class="cbub"><div>'+esc(msg)+'</div>'+(sub?'<div class="csub">'+esc(sub)+'</div>':'')+'</div>'
    +(cls&&cls.indexOf("nox")>=0?'':'<button class="cx" aria-label="先隱藏小鱷魚提示" onclick="crocHide()">✕</button>')+'</div>'}
@@ -1547,7 +1547,7 @@ VIEWS.pack=function(){var h="";
 /* 完成當天最後一項行程時，給一句小鼓勵（只是 toast，不動資料） */
 var _crocTgl=tgl;
 tgl=function(id){var p=S.plan.filter(function(x){return x.id===id})[0];_crocTgl(id);
-  try{if(CROC_OFF||themeChar()!=="croc"||!p||!p.done)return;var its=S.plan.filter(function(x){return x.date===p.date&&x.time!=="23:59"&&!x.skip});
+  try{if(CROC_OFF||!p||!p.done)return;var its=S.plan.filter(function(x){return x.date===p.date&&x.time!=="23:59"&&!x.skip});
     if(its.length>=2&&its.every(function(x){return x.done}))toast("🐊 今天的行程都完成囉，辛苦了～")}catch(e){}};
 /* 交通表單：跨日提醒（只是提示，不改欄位） */
 function crocTransUpd(){
@@ -1555,7 +1555,7 @@ function crocTransUpd(){
   var d=$("t_d")&&$("t_d").value,a=$("t_a")&&$("t_a").value,tt=$("t_t")&&$("t_t").value,te=$("t_e")&&$("t_e").value,h="";
   if(d&&a&&a>d)h=crocBox("train","這趟交通是跨日的，抵達日期記得看清楚喔！",md(d)+" "+(tt||"--:--")+" 出發 → "+md(a)+" "+(te||"--:--")+" 抵達","sm nox");
   else if(d&&a&&a===d&&tt&&te&&te<tt)h=crocBox("train","抵達時間比出發早，是不是要按「隔天抵達」呢？","","sm nox");
-  el.innerHTML=(CROC_OFF||themeChar()!=="croc")?"":h}
+  el.innerHTML=CROC_OFF?"":h}
 var _crocEdit=editTrans;
 editTrans=function(){_crocEdit.apply(this,arguments);
   try{var bt=document.querySelector('#md button[onclick="tfNext()"]');if(bt&&!$("ctipt")){bt.insertAdjacentHTML("afterend",'<div id="ctipt" style="margin-top:6px"></div>');crocTransUpd()}}catch(e){}};
@@ -1564,7 +1564,7 @@ tfNext=function(){_crocNext();crocTransUpd()};
 ["input","change"].forEach(function(ev){document.addEventListener(ev,function(e){var id=e.target&&e.target.id;if(id==="t_d"||id==="t_t"||id==="t_a"||id==="t_e")crocTransUpd()})});
 /* 設定頁：開關 */
 var _crocSet=VIEWS.set;
-VIEWS.set=function(){var h=_crocSet();if(themeChar()!=="croc")return h;var c='<div class="card"><div class="l"><b>🐊 小鱷魚提示</b><button class="btn sec sm" onclick="crocToggle()">'+(CROC_OFF?'開啟':'關閉')+'</button></div><div class="sub" style="margin-top:4px">'
+VIEWS.set=function(){var h=_crocSet(),c='<div class="card"><div class="l"><b>🐊 小鱷魚提示</b><button class="btn sec sm" onclick="crocToggle()">'+(CROC_OFF?'開啟':'關閉')+'</button></div><div class="sub" style="margin-top:4px">'
   +(CROC_OFF?'目前已關閉，不會出現小鱷魚。':'首頁、行李頁和交通表單會出現簡短提示；只是提醒，不會改動任何資料。')+'（只記在這台裝置）</div></div>';
   var k='<div class="card"><b>備份與還原</b>';return h.indexOf(k)>=0?h.replace(k,c+k):h+c};
 
