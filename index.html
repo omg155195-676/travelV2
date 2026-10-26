@@ -130,6 +130,11 @@ a{color:var(--ac)}
 .pday-body>.item:has(input:checked):before{background:var(--ac)}
 .pday-body>.item.evt:before{border-radius:3px;border-color:var(--sub)}
 .pday-tools .btn{border-color:var(--bd);background:var(--card)}
+
+/* 日期標題列：沒有指定地區底色的（明細、交通、預約、票券中心按日期）用淡粉底深色字，避免白字配透明底看不見 */
+.daybar:not([style*="background"]){background:var(--soft);color:var(--tx);padding:8px 12px;margin-bottom:6px}
+.daybar:not([style*="background"])>b{color:var(--ac);overflow-wrap:anywhere}
+.daybar:not([style*="background"])>span{flex:none;font-size:13px;color:var(--sub);white-space:nowrap}
 </style></head><body>
 <header class="top"><span id="net"></span><h1 id="ttl" role="button" onclick="tripPicker()">旅行控制中心</h1><button class="tdy" onclick="goToday()">📍 今天</button></header>
 <main id="v"></main>
