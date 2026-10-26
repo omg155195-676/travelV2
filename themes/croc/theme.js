@@ -296,6 +296,84 @@
     if (after.nextSibling) root.insertBefore(h("div", "ds-sec", phase), after.nextSibling);
   }
 
+
+  /* =====================================================================
+     💰 記帳頁 Layout：旅行錢包（只在鱷魚主題）
+     錢包卡（今日支出＋預算狀態）→ 快速記帳 → 分類 → 消費明細 → 匯率 → 完整表單
+     數字全部用 App 原本的計算函式；明細列用原本的 expItemRow（可編輯、刪除）。
+     ===================================================================== */
+  var WCATS = [["餐飲", "飲食"], ["交通", "交通"], ["購物", "購物"], ["門票", "門票"], ["住宿", "住宿"], ["*", "其他"]];
+  function catItems(c) {
+    var main = WCATS.slice(0, 5).map(function (x) { return x[0]; });
+    return S.items.filter(function (i) { return c === "*" ? main.indexOf(i.cat) < 0 : i.cat === c; });
+  }
+  /* 顯示用加總：顯示幣別相同的花費直接加原金額（避免先換台幣取整再換回的誤差），其他幣別才換算 */
+  function sumShow(list) {
+    var c = lc();
+    if (c === "TWD") return "NT$ " + fmt(sumTwd(list));
+    var r = S.rates[c], v = list.reduce(function (s, i) { return s + (i.cur === c ? (+i.amount || 0) : twd(i) / r); }, 0);
+    return (CSYM[c] || c + " ") + fmt(v);
+  }
+  function walletState() {
+    var b = budgetInfo(), ti = tripInfo(), t = today(), inTrip = ti.n && t >= ti.first && t <= ti.last;
+    var r = inTrip && b.tb != null && b.tb > 0 ? b.st / b.tb : (S.budget > 0 ? b.spent / S.budget : 0);
+    var k = r > 1 ? "budgetOver" : r >= 0.8 ? "budgetNear" : "budgetOk";
+    var label = { budgetOk: "預算正常", budgetNear: "接近預算", budgetOver: "超出預算" }[k];
+    var hint = inTrip && b.tb != null ? "以今日建議預算計算" : "以總預算計算";
+    return { k: k, label: label, hint: hint, b: b };
+  }
+  window.crocQuickCat = function (c) {
+    qAdd();
+    setTimeout(function () { var sel = document.getElementById("q_c"); if (sel) { sel.value = c === "*" ? "其他" : c; sel.dispatchEvent(new Event("change", { bubbles: true })); } var a = document.getElementById("q_a"); if (a) try { a.focus(); } catch (e) {} }, 30);
+  };
+  function walletLayout(root) {
+    if (root.querySelector(".cw-wallet")) return;
+    var sum = Array.prototype.filter.call(root.querySelectorAll(":scope > .card"), function (c) {
+      var x = c.querySelector(":scope > .sub"); return x && /^總支出/.test(x.textContent.trim()) && c.querySelector(".big");
+    })[0];
+    if (!sum) return;
+    var t = today(), st = walletState(), b = st.b, spentT = spentOn(t), left = S.budget - b.spent,
+        todayItems = S.items.filter(function (i) { return i.date === t; });
+    var pct = S.budget > 0 ? Math.min(100, b.spent / S.budget * 100) : 0;
+    var w = h("div", "card ds-main ds-paper cw-wallet");
+    w.innerHTML = '<div class="cw-head"><b>👛 旅行錢包</b>' + (typeof curPill === "function" ? curPill() : "") + '</div>'
+      + '<div class="cw-top"><div class="cw-main"><div class="cw-label">今日支出・' + E(md(t)) + '（' + wk(t) + '）</div>'
+      + '<div class="cw-amt">' + E(sumShow(todayItems)) + '</div>'
+      + (lc() !== "TWD" ? '<div class="cw-approx">≈ NT$ ' + fmt(spentT) + '</div>' : '')
+      + '<span class="ds-chip ' + (st.k === "budgetOk" ? "" : "pink") + ' cw-state">🐊 ' + st.label + '</span><span class="cw-hint">' + st.hint + '</span></div></div>'
+      + '<div class="bar' + (left < 0 ? ' over' : '') + '"><i style="width:' + pct + '%"></i></div>'
+      + '<div class="cw-stats"><div><span>總支出</span><b>' + E(sumShow(S.items)) + '</b></div><div><span>預算</span><b>' + E(dm(S.budget)) + '</b></div>'
+      + '<div><span>' + (left < 0 ? '超支' : '剩餘') + '</span><b class="' + (left < 0 ? 'warn' : '') + '">' + E(dm(Math.abs(left))) + '</b></div></div>'
+      + (typeof rateNote === "function" ? rateNote() : "");
+    w.querySelector(".cw-top").appendChild(img(st.k, "cw-img"));
+    var pill = w.querySelector(".cw-head button"); if (pill) pill.classList.add("cw-pill");
+    root.insertBefore(w, sum); sum.remove();
+
+    /* 分類（真實金額）：點一下開快速記帳並預選分類 */
+    var qa = Array.prototype.filter.call(root.querySelectorAll(":scope > button.btn"), function (x) { return /快速記帳/.test(x.textContent); })[0];
+    var anchor = qa ? qa.nextSibling : w.nextSibling;
+    var cats = h("div", "cw-cats");
+    WCATS.forEach(function (x) {
+      var L = catItems(x[0]), v = L.length, ic = x[0] === "*" ? "📦" : (CAT_ICON[x[0]] || "📦");
+      var tile = h("button", "cw-cat" + (v ? "" : " is-zero"));
+      tile.setAttribute("onclick", "crocQuickCat('" + x[0] + "')");
+      tile.setAttribute("aria-label", "記一筆" + x[1]);
+      tile.innerHTML = '<span class="cw-cat-ic">' + ic + '</span><span class="cw-cat-n">' + x[1] + '</span><span class="cw-cat-v">' + (v ? E(sumShow(L)) : "—") + '</span>';
+      cats.appendChild(tile);
+    });
+    root.insertBefore(h("div", "ds-sec", "🗂️ 分類"), anchor); root.insertBefore(cats, anchor);
+
+    /* 消費明細：今天的；沒有就最近 5 筆 */
+    var todays = S.items.filter(function (i) { return i.date === t; });
+    var list = todays.length ? todays : S.items.slice().sort(function (a, c) { return (c.date || "").localeCompare(a.date || ""); }).slice(0, 5);
+    var sec = h("div", "ds-sec", (todays.length ? "🧾 今天的消費" : "🧾 最近的消費") + '<button class="ds-more" onclick="go(\'list\')">全部明細 ›</button>');
+    var box = h("div", "card ds-info cw-list");
+    if (list.length && typeof expItemRow === "function") box.innerHTML = list.map(function (i) { return (todays.length ? "" : '<div class="cw-date">' + E(md(i.date)) + '</div>') + expItemRow(i); }).join("");
+    else { box.classList.add("thc-empty"); box.appendChild(img("budgetOk")); box.appendChild(h("div", "thc-txt", '<div class="sub">還沒有消費紀錄。按「＋ 快速記帳」記下第一筆吧！</div>')); }
+    root.insertBefore(sec, anchor); root.insertBefore(box, anchor);
+    if (anchor && anchor.nodeType === 1) root.insertBefore(h("div", "ds-sec", "⚙️ 匯率與完整表單"), anchor);
+  }
+
   function decorate(tab, root) {
     if (!on() || !root) return;
 
@@ -309,6 +387,7 @@
       hero.classList.add("thc-hero"); hero.appendChild(img(hk));
     }
 
+    if (tab === "add") { try { walletLayout(root); } catch (e) { if (window.console) console.warn("croc wallet", e); } }
     decorateBudget(root);
     if (tab === "plan") { try { planLayout(root); } catch (e) {} decoratePlan(root); try { planTrailEnd(root); } catch (e) {} }
 

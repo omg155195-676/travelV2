@@ -297,3 +297,40 @@ html[data-ac=croc] .pday-tools .btn{background:var(--card);border-color:var(--bd
 /* 窄螢幕：日期永遠完整，「今天」標籤空間不夠時換到下一行 */
 html[data-ac=croc] .pday-top{flex-wrap:wrap;row-gap:3px}
 html[data-ac=croc] .pday-date{flex:none}
+
+/* =====================================================================
+   💰 記帳頁：旅行錢包（鱷魚主題）
+   ===================================================================== */
+html[data-ac=croc] .cw-wallet{padding:14px 14px 12px}
+html[data-ac=croc] .cw-head{display:flex;align-items:center;gap:8px;min-height:30px}
+html[data-ac=croc] .cw-head>b{font-size:var(--fs-sec)}
+html[data-ac=croc] .cw-head .cw-pill{float:none!important;margin:0 0 0 auto!important}
+html[data-ac=croc] .cw-top{display:flex;align-items:center;gap:8px;margin:6px 0 4px}
+html[data-ac=croc] .cw-main{flex:1;min-width:0}
+html[data-ac=croc] .cw-label{font-size:13px;color:var(--sub);font-weight:700}
+html[data-ac=croc] .cw-amt{font-size:38px;font-weight:900;color:var(--leaf);line-height:1.15;letter-spacing:-.01em;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+html[data-ac=croc] .cw-approx{font-size:13px;color:var(--sub)}
+html[data-ac=croc] .cw-state{margin-top:6px}
+html[data-ac=croc] .cw-hint{display:block;font-size:11px;color:var(--sub);margin-top:3px}
+html[data-ac=croc] .cw-img{flex:none;width:84px;height:76px}
+html[data-ac=croc] .cw-wallet .bar{margin:10px 0 8px}
+html[data-ac=croc] .cw-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+html[data-ac=croc] .cw-stats>div{background:var(--card);border:1px solid var(--bd);border-radius:var(--r-sm);padding:6px 8px;min-width:0}
+html[data-ac=croc] .cw-stats span{display:block;font-size:11px;color:var(--sub)}
+html[data-ac=croc] .cw-stats b{display:block;font-size:14px;font-weight:800;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+/* 分類格 */
+html[data-ac=croc] .cw-cats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:var(--gap)}
+html[data-ac=croc] .cw-cat{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:10px 10px 9px;border:1px solid var(--bd);border-radius:var(--r-md);background:var(--card);box-shadow:var(--sh-1);color:var(--tx);font:inherit;text-align:left;cursor:pointer;min-width:0;min-height:76px}
+html[data-ac=croc] .cw-cat:active{transform:translateY(1px)}
+html[data-ac=croc] .cw-cat-ic{font-size:20px;line-height:1.2}
+html[data-ac=croc] .cw-cat-n{font-size:13px;font-weight:800}
+html[data-ac=croc] .cw-cat-v{font-size:13px;font-weight:700;color:var(--leaf);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums}
+html[data-ac=croc] .cw-cat.is-zero .cw-cat-v{color:var(--sub);font-weight:400}
+/* 明細 */
+html[data-ac=croc] .cw-list{padding-top:4px;padding-bottom:4px}
+html[data-ac=croc] .cw-date{font-size:11px;font-weight:700;color:var(--leaf);margin-top:8px}
+html[data-ac=croc] .cw-list .item:last-child{border-bottom:0}
+html[data-ac=croc] .ds-sec .ds-more{margin-left:auto}
+
+@media (max-width:359px){html[data-ac=croc] .cw-img{width:62px;height:56px}html[data-ac=croc] .cw-amt{font-size:32px}}
+@media (max-width:339px){html[data-ac=croc] .cw-img{display:none}html[data-ac=croc] .cw-stats b{font-size:12.5px}}
