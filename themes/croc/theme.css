@@ -434,3 +434,49 @@ html[data-ac=croc] .cs-sub{font-size:12px;color:var(--sub);margin-top:3px;line-h
 html[data-ac=croc] .cs-head-img{flex:none;width:64px;height:62px}
 html[data-ac=croc] [data-ctab=set] .card>b:first-child{font-size:var(--fs-card)}
 @media (max-width:339px){html[data-ac=croc] .cs-head-img{display:none}}
+
+/* =====================================================================
+   共用頁首（各頁專屬頁面）
+   ===================================================================== */
+html[data-ac=croc] .cx-head{display:flex;align-items:center;gap:10px;padding:12px 12px 12px 16px}
+html[data-ac=croc] .cx-head-txt{flex:1;min-width:0}
+html[data-ac=croc] .cx-title{font-size:var(--fs-page);font-weight:900;color:var(--tx)}
+html[data-ac=croc] .cx-sub{font-size:12px;color:var(--sub);margin-top:3px;line-height:1.45}
+html[data-ac=croc] .cx-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+html[data-ac=croc] .cx-meta .tag{margin:0;font-size:12px;font-weight:700;padding:2px 9px}
+html[data-ac=croc] .cx-head-img{flex:none;width:66px;height:62px;align-self:center}
+@media (max-width:359px){html[data-ac=croc] .cx-head-img{width:50px;height:48px}}
+@media (max-width:339px){html[data-ac=croc] .cx-head-img{display:none}}
+
+/* 🎒 行李：勾選格像背包裡的小口袋 */
+html[data-ac=croc] .cx-pack .pk{border-bottom:1px dashed var(--bd);min-height:52px}
+html[data-ac=croc] .cx-pack .pkb{border-color:var(--leaf-2);border-radius:var(--r-sm);color:#fff}
+html[data-ac=croc] .cx-pack .pk.dn .pkb{background:var(--leaf-2)}
+html[data-ac=croc] .cx-pack .pkt{font-size:16px}
+html[data-ac=croc] .cx-pack>.l>b{font-size:var(--fs-sec);color:var(--leaf)}
+
+/* 🚆 交通：卡片左邊一條路線 */
+html[data-ac=croc] [data-ctab=trans] .catbar{background:var(--leaf-soft);color:var(--leaf)}
+html[data-ac=croc] [data-ctab=trans] .cx-route{position:relative;padding-left:16px;border-bottom:1px dashed var(--bd)}
+html[data-ac=croc] [data-ctab=trans] .cx-route:before{content:"";position:absolute;left:3px;top:14px;bottom:14px;width:3px;border-radius:3px;background:linear-gradient(var(--leaf-2),#7fb4d8)}
+html[data-ac=croc] [data-ctab=trans] .cx-route:last-child{border-bottom:0}
+
+/* 📌 預約：每筆像一張小票 */
+html[data-ac=croc] [data-ctab=resv] .card .item{background:var(--cream);border:1px solid var(--bd);border-radius:var(--r-md);padding:10px 12px;margin:8px 0}
+
+/* ⛩️ 御朱印：印章格 */
+html[data-ac=croc] .cx-stamps{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;margin-top:10px;max-width:280px}
+html[data-ac=croc] .cx-stamp{aspect-ratio:1;border-radius:50%;border:1.5px dashed #e3b9b9;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#c23b3b;background:#fff}
+html[data-ac=croc] .cx-stamp.on{border:2px solid #c23b3b;background:#fff3f1;transform:rotate(-10deg)}
+html[data-ac=croc] .cx-gosh-list .item{padding:12px 0;border-bottom:1px dashed var(--bd)}
+html[data-ac=croc] .cx-gosh-list .stamp{border-color:#c23b3b;color:#c23b3b}
+html[data-ac=croc] .cx-gosh-list .chk input{accent-color:#c23b3b}
+
+/* 🧾 明細：帳本合計 */
+html[data-ac=croc] [data-ctab=list] .catbar{background:var(--leaf-soft);color:var(--leaf)}
+html[data-ac=croc] .cx-daytot{border-top:2px dashed var(--leaf-2)!important;color:var(--leaf)}
+/* 頁首內容較多（例如集章格）時：上面標題＋角色一列，下面整寬 */
+html[data-ac=croc] .cx-head.cx-wrap{flex-wrap:wrap}
+html[data-ac=croc] .cx-head.cx-wrap>.cx-stamps{flex-basis:100%;max-width:none;grid-template-columns:repeat(auto-fill,minmax(30px,1fr))}
+/* 交通／預約的日期列（可展開）與分類列 */
+html[data-ac=croc] [data-ctab=trans] .catbar,html[data-ac=croc] [data-ctab=list] .catbar{font-size:13px}

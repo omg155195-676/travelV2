@@ -528,6 +528,78 @@
     root.insertBefore(frag, root.firstChild);
   }
 
+
+  /* =====================================================================
+     共用元件：頁首（標題、說明、數字膠囊、角色），各頁都用同一個格式
+     ===================================================================== */
+  function pageHead(root, cls, title, sub, chips, pose, before) {
+    if (root.querySelector(".cx-head")) return null;
+    var c = h("div", "card ds-main ds-paper cx-head " + (cls || ""));
+    c.innerHTML = '<div class="cx-head-txt"><div class="cx-title">' + title + '</div>' + (sub ? '<div class="cx-sub">' + sub + '</div>' : '')
+      + (chips && chips.length ? '<div class="cx-meta">' + chips.join("") + '</div>' : '') + '</div>';
+    c.appendChild(img(pose, "cx-head-img"));
+    root.insertBefore(c, before || root.firstChild);
+    return c;
+  }
+  function chip(t, pink) { return '<span class="ds-chip' + (pink ? ' pink' : '') + '">' + t + '</span>'; }
+  function bodyCards(root) { return Array.prototype.filter.call(root.querySelectorAll(":scope > .card"), function (c) { return !c.classList.contains("cx-head"); }); }
+
+  /* 🎒 行李：背包勾選表 */
+  function packLayout(root) {
+    var seg = root.querySelector(":scope > .seg"); if (!seg) return;
+    var all = S.pack || [], done = all.filter(function (k) { return k.done; }).length;
+    var tip = root.querySelector(":scope > .ctip");
+    pageHead(root, "", "🎒 行李背包", "出發前、每天出門、回國前，一項一項勾起來。",
+      [chip("已打包 " + done + " / " + all.length), done === all.length && all.length ? chip("🎉 全部帶齊", true) : ""], done === all.length && all.length ? "happy" : "walk", tip || seg);
+    var list = Array.prototype.filter.call(root.querySelectorAll(":scope > .card"), function (c) { return c.querySelector(".pk") || (c.querySelector(".bar") && !c.classList.contains("cx-head")); })[0];
+    if (list) list.classList.add("cx-pack");
+  }
+  /* 🚆 交通：路線卡 */
+  function transLayout(root) {
+    var add = root.querySelector(":scope > button.btn"); if (!add) return;
+    var L = S.trans || [], bought = L.filter(function (t) { return t.ticketStatus === "已購票" || t.ticketStatus === "已取票"; }).length;
+    var tot = Array.prototype.filter.call(root.querySelectorAll(":scope > .card"), function (c) { return /票價合計/.test(c.textContent); })[0];
+    var totTxt = tot ? (tot.querySelector("b") || {}).textContent : "";
+    pageHead(root, "", "🚆 交通路線", "新幹線、JR、巴士、船班，依日期排好。",
+      [chip(L.length + " 段交通"), chip("已購票 " + bought), totTxt ? chip("票價 " + E(totTxt), true) : ""], "train", add);
+    if (tot) tot.remove();
+    root.querySelectorAll(".tcard, :scope > .card .item").forEach(function (x) { x.classList.add("cx-route"); });
+  }
+  /* 📌 預約：狀態膠囊放進頁首 */
+  function resvLayout(root) {
+    var add = root.querySelector(":scope > button.btn"); if (!add) return;
+    var cards = bodyCards(root), st = cards[0] && !cards[0].querySelector(".daybar") ? cards[0] : null;
+    var chips = [chip((S.resv || []).length + " 筆預約")];
+    if (st) { Array.prototype.forEach.call(st.querySelectorAll(".tag"), function (t) { chips.push(t.outerHTML); }); st.remove(); }
+    pageHead(root, "", "📌 預約清單", "飯店、門票、餐廳的確認號碼和 QR Code。", chips, "ticket", add);
+  }
+  /* ⛩️ 御朱印：集章冊 */
+  function goshLayout(root) {
+    var cards = bodyCards(root), prog = cards[0] && /收集進度/.test(cards[0].textContent) ? cards[0] : null; if (!prog) return;
+    var t = (S.gosh || []).length, n = (S.gosh || []).filter(function (g) { return g.done; }).length;
+    var head = pageHead(root, "cx-gosh", "⛩️ 御朱印集章冊", "每收集一枚，就蓋上一個「済」。",
+      [chip("已收集 " + n + " / " + t), t && n === t ? chip("🎉 集滿", true) : ""], n && n === t ? "happy" : "idea", prog);
+    /* 進度改成一格一格的印章格 */
+    if (head && t) {
+      var grid = h("div", "cx-stamps");
+      (S.gosh || []).slice().sort(typeof byDate === "function" ? byDate : function () { return 0; }).forEach(function (g) {
+        grid.appendChild(h("span", "cx-stamp" + (g.done ? " on" : ""), g.done ? "済" : ""));
+      });
+      head.appendChild(grid); head.classList.add("cx-wrap");
+    }
+    prog.remove();
+    var list = bodyCards(root).filter(function (c) { return c.querySelector(".item"); })[0];
+    if (list) list.classList.add("cx-gosh-list");
+  }
+  /* 🧾 明細：帳本 */
+  function listLayout(root) {
+    var add = root.querySelector(":scope > button.btn"); if (!add) return;
+    var L = S.items || [], days = {}; L.forEach(function (i) { days[i.date] = 1; });
+    pageHead(root, "", "🧾 旅行帳本", "每天的花費依分類整理，點日期展開。",
+      [chip(L.length + " 筆"), chip(Object.keys(days).length + " 天"), L.length ? chip("合計 " + E(typeof sumShow === "function" ? sumShow(L) : dm(sumTwd(L))), true) : ""], "budgetOk", add);
+    root.querySelectorAll(":scope > .card .daytot").forEach(function (d) { d.classList.add("cx-daytot"); });
+  }
+
   function decorate(tab, root) {
     if (!on() || !root) return;
 
@@ -542,6 +614,8 @@
     }
 
     root.setAttribute("data-ctab", tab);
+    var PAGES = { pack: packLayout, trans: transLayout, resv: resvLayout, gosh: goshLayout, list: listLayout };
+    if (PAGES[tab]) { try { PAGES[tab](root); } catch (e) { if (window.console) console.warn("croc " + tab, e); } }
     if (tab === "set") { try { settingsLayout(root); } catch (e) { if (window.console) console.warn("croc set", e); } }
     if (tab === "tix") { try { tixLayout(root); } catch (e) { if (window.console) console.warn("croc tix", e); } }
     if (tab === "photo") { try { photoLayout(root); } catch (e) { if (window.console) console.warn("croc photo", e); } }
