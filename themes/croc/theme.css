@@ -366,3 +366,31 @@ html[data-ac=croc] .swp{border-radius:var(--r-lg);margin-bottom:var(--gap)}
 html[data-ac=croc] .swp>.card{margin-bottom:0;border-radius:var(--r-lg)}
 html[data-ac=croc] .swp-act button{border-radius:var(--r-lg) 0 0 var(--r-lg)}
 html[data-ac=croc] [data-ctab=photo] .tile>.cph-local{display:none}
+
+/* =====================================================================
+   🎫 票券中心：旅行票夾（鱷魚主題）
+   ===================================================================== */
+html[data-ac=croc] .ct-head{display:flex;align-items:center;gap:10px;padding:12px 12px 12px 16px}
+html[data-ac=croc] .ct-head-txt{flex:1;min-width:0}
+html[data-ac=croc] .ct-title{font-size:var(--fs-page);font-weight:900}
+html[data-ac=croc] .ct-sub{font-size:12px;color:var(--sub);margin-top:3px;line-height:1.45}
+html[data-ac=croc] .ct-meta{margin-top:7px}
+html[data-ac=croc] .ct-head-img{flex:none;width:68px;height:66px}
+html[data-ac=croc] .ct-date{margin-top:14px}
+html[data-ac=croc] .ct-count{font-size:12px;font-weight:700;color:var(--sub);margin-left:6px}
+/* 票根卡：上半部票券資訊、撕線（兩側半圓缺口）、下半部 QR／圖片 */
+html[data-ac=croc] .ct-ticket{position:relative;padding:0;overflow:visible;border-radius:var(--r-md);border:1px solid var(--bd);background:var(--card)}
+html[data-ac=croc] .ct-ticket:before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:5px;border-radius:0 4px 4px 0;background:var(--leaf-2)}
+html[data-ac=croc] .ct-top{padding:6px 14px 4px 18px}
+html[data-ac=croc] .ct-top>.item{border-bottom:0}
+html[data-ac=croc] .ct-top>.item b{font-size:var(--fs-card)}
+html[data-ac=croc] .ct-stub{position:relative;padding:10px 14px 8px 18px;border-top:2px dashed var(--bd)}
+html[data-ac=croc] .ct-stub:before,html[data-ac=croc] .ct-stub:after{content:"";position:absolute;top:-10px;width:18px;height:18px;border-radius:50%;background:var(--bg);border:1px solid var(--bd)}
+html[data-ac=croc] .ct-stub:before{left:-10px;clip-path:inset(0 0 0 50%)}
+html[data-ac=croc] .ct-stub:after{right:-10px;clip-path:inset(0 50% 0 0)}
+html[data-ac=croc] .ct-stub>div{padding:0!important}
+html[data-ac=croc] .ct-stub .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+html[data-ac=croc] .ct-stub .tile img{border-radius:6px;border:1px solid var(--bd)}
+@media (max-width:359px){html[data-ac=croc] .ct-head-img{width:52px;height:50px}}
+@media (max-width:339px){html[data-ac=croc] .ct-head-img{display:none}}
+@media (prefers-color-scheme:dark){html[data-ac=croc]:not([data-theme="light"]) .ct-stub:before,html[data-ac=croc]:not([data-theme="light"]) .ct-stub:after{background:#171214}}

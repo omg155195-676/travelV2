@@ -409,6 +409,43 @@
     });
   }
 
+
+  /* =====================================================================
+     🎫 票券中心 Layout：旅行票夾（只在鱷魚主題）
+     頁首（張數＋拿票券的鱷魚）→ 原本的切換與新增按鈕 → 日期標籤 → 每張票一張票根卡
+     票根卡由原本的票券列與圖片區「搬過去」組成，點擊編輯、加圖片、刪圖片都不變。
+     ===================================================================== */
+  function tixLayout(root) {
+    if (root.querySelector(".ct-head")) return;
+    var seg = root.querySelector(":scope > .seg"); if (!seg) return;
+    var groups = Array.prototype.filter.call(root.querySelectorAll(":scope > .card"), function (c) { return c.querySelector(":scope > .item"); });
+    var n = groups.reduce(function (s, c) { return s + c.querySelectorAll(":scope > .item").length; }, 0);
+    var head = h("div", "card ds-main ds-paper ct-head", '<div class="ct-head-txt"><div class="ct-title">🎫 旅行票夾</div><div class="ct-sub">新幹線、JR、船班、景點門票和預約 QR Code，都收在這裡。</div>'
+      + '<div class="ct-meta"><span class="ds-chip">' + (tixMode === "today" ? "今天 " : "共 ") + n + ' 張</span></div></div>');
+    head.appendChild(img("ticket", "ct-head-img"));
+    root.insertBefore(head, seg);
+    groups.forEach(function (c) {
+      var bar = c.querySelector(":scope > .daybar"), isFocus = c.id === "focus-card";
+      if (bar) {
+        var b = bar.querySelector("b"), sp = bar.querySelector("span");
+        var lab = h("div", "ds-sec ct-date", "📅 " + E(b ? b.textContent : "") + (sp ? '<span class="ct-count">' + E(sp.textContent) + '</span>' : ""));
+        root.insertBefore(lab, c);
+      }
+      var kids = Array.prototype.slice.call(c.children).filter(function (x) { return x !== bar; });
+      var first = null;
+      for (var i = 0; i < kids.length; i++) {
+        if (!kids[i].classList.contains("item")) continue;
+        var t = h("div", "card ct-ticket"), top = h("div", "ct-top"), stub = h("div", "ct-stub");
+        top.appendChild(kids[i]);
+        if (kids[i + 1] && !kids[i + 1].classList.contains("item")) { stub.appendChild(kids[i + 1]); i++; }
+        t.appendChild(top); if (stub.firstChild) t.appendChild(stub);
+        root.insertBefore(t, c); if (!first) first = t;
+      }
+      if (isFocus && first) first.id = "focus-card";
+      c.remove();
+    });
+  }
+
   function decorate(tab, root) {
     if (!on() || !root) return;
 
@@ -423,6 +460,7 @@
     }
 
     root.setAttribute("data-ctab", tab);
+    if (tab === "tix") { try { tixLayout(root); } catch (e) { if (window.console) console.warn("croc tix", e); } }
     if (tab === "photo") { try { photoLayout(root); } catch (e) { if (window.console) console.warn("croc photo", e); } }
     if (tab === "add") { try { walletLayout(root); } catch (e) { if (window.console) console.warn("croc wallet", e); } }
     decorateBudget(root);
