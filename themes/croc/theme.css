@@ -39,9 +39,11 @@ html[data-ac=croc] .thc-empty>.thc{flex:none;width:60px;height:54px}
 html[data-ac=croc] .thc-empty>.thc-txt{flex:1;min-width:0}
 @media (max-width:339px){html[data-ac=croc] .thc-empty>.thc{width:46px;height:42px}}
 
-/* ---------- 行程：每天標題列左側留好位置給小鱷魚頭 ---------- */
-html[data-ac=croc] .daybar.thc-day{position:relative;padding-left:44px}
-html[data-ac=croc] .daybar>.thc{position:absolute;left:7px;top:50%;margin-top:-15px;width:30px;height:30px;background:rgba(255,255,255,.92);border-radius:50%;padding:2px}
+/* ---------- 行程 Day 卡片：角色插槽（在版面裡佔自己的位置，不蓋任何資訊） ---------- */
+html[data-ac=croc] .pday-char{flex:none;width:40px;height:40px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center}
+html[data-ac=croc] .pday-char>.thc{width:34px;height:32px}
+@media (max-width:359px){html[data-ac=croc] .pday-char{width:34px;height:34px}html[data-ac=croc] .pday-char>.thc{width:28px;height:27px}}
+@media (max-width:339px){html[data-ac=croc] .pday-char{display:none}}
 
 /* ---------- 天氣卡：右側留好位置 ---------- */
 html[data-ac=croc] .thc-wx{position:relative;padding-right:74px;min-height:78px}
@@ -82,7 +84,6 @@ html[data-ac=croc] .ctip.sm .cimg{width:50px;height:44px}
   html[data-ac=croc]:not([data-theme="light"]) .ctip .cbub{background:#211a1d;border-color:#4a3d42;color:#f6e9ee}
   html[data-ac=croc]:not([data-theme="light"]) .ctip .cbub:before{border-right-color:#4a3d42}
   html[data-ac=croc]:not([data-theme="light"]) .ctip .cbub:after{border-right-color:#211a1d}
-  html[data-ac=croc]:not([data-theme="light"]) .daybar>.thc{background:rgba(255,255,255,.8)}
 }
 html[data-ac=croc][data-theme="dark"] .ctip{background:#2d272a;border-color:#4a3d42;color:#f6e9ee}
 html[data-ac=croc][data-theme="dark"] .ctip .cbub{background:#211a1d;border-color:#4a3d42;color:#f6e9ee}

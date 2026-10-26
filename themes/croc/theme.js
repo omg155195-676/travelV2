@@ -94,26 +94,23 @@
     });
   }
 
-  /* ---------- 行程：每天標題列前的小鱷魚，依當天內容挑動作 ---------- */
+  /* ---------- 行程：Day 卡片留給角色的插槽（.pday-char），依當天內容挑動作 ----------
+     行程頁本身不知道鱷魚：它只留一個空插槽，由目前的角色主題決定放什麼。 */
   function dayPose(date, idx) {
     var its = (S.plan || []).filter(function (p) { return p.date === date && p.time !== "23:59" && !p.skip; });
     if (its.length >= 2 && its.every(function (p) { return p.done; })) return "happy";
     if (idx === 0) return "depart";
     var t = its.map(function (p) { return (p.name || "") + " " + (p.place || ""); }).join(" ");
-    if (/✈️|機場|新幹線|JR|etSETOra|→|搭船|港/.test(t)) return "train";
+    if (/🚲|E-bike|自行車|單車|騎/.test(t)) return "walk";
+    if (/✈️|機場|新幹線|etSETOra|→ *廣島|→ *福山|搭船|港/.test(t)) return "train";
     if (/攝影|拍|夜景|點燈|紅葉|夕陽|夕景/.test(t)) return "camera";
-    if (/神社|寺|城|美術館|博物館|資料館|朱印/.test(t)) return "idea";
-    if (/休息|咖啡|溫泉/.test(t)) return "rest";
-    if (/拉麵|燒|市場|屋台|美食/.test(t)) return "eat";
-    return idx % 2 ? "walk" : "map";
+    if (/休息|溫泉/.test(t)) return "rest";
+    return "map";
   }
   function decoratePlan(root) {
-    var i = 0;
-    root.querySelectorAll(".daybar").forEach(function (d) {
-      if (d.querySelector(".thc")) return;
-      var m = /'(\d{4}-\d{2}-\d{2})'/.exec(d.getAttribute("onclick") || "");
-      if (!m) return;
-      d.classList.add("thc-day"); d.insertBefore(img(dayPose(m[1], i++)), d.firstChild);
+    root.querySelectorAll(".pday-char[data-date]").forEach(function (slot) {
+      if (slot.firstChild) return;
+      slot.appendChild(img(dayPose(slot.getAttribute("data-date"), +slot.getAttribute("data-i") || 0)));
     });
   }
 

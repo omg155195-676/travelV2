@@ -98,6 +98,38 @@ a{color:var(--ac)}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.chip{display:inline-flex;align-items:center;gap:6px;margin:0;padding:8px 12px;border:1px solid var(--bd);border-radius:99px;color:var(--tx);font-size:14px}
 .chip input{width:18px;height:18px}
 
+
+/* ===== 行程頁 Day 卡片（旅行手帳風格）：只作用在 .pday，不影響其他頁的 .daybar ===== */
+.pday{position:relative;padding:0;overflow:hidden;box-shadow:0 2px 8px color-mix(in srgb,var(--ac) 7%,transparent)}
+.pday:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--rg,var(--ac));opacity:.55}
+.pday.is-today{background:color-mix(in srgb,var(--ac) 5%,var(--card));border-color:color-mix(in srgb,var(--ac) 45%,var(--bd))}
+.pday.is-today:before{background:var(--ac);opacity:1}
+.pday-h{display:flex;align-items:center;gap:10px;padding:12px 12px 12px 16px;min-height:64px;-webkit-tap-highlight-color:transparent}
+.pday-h[role=button]{cursor:pointer}
+.pday-h[role=button]:focus-visible{outline:2px solid var(--ac);outline-offset:-2px;border-radius:16px}
+.pday-char:empty{display:none}
+.pday-main{flex:1;min-width:0}
+.pday-top{display:flex;align-items:baseline;gap:8px;white-space:nowrap;min-width:0}
+.pday-no{flex:none;font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--ac)}
+.pday-date{font-size:17px;font-weight:700;color:var(--tx);overflow:hidden;text-overflow:ellipsis}
+.pday-today{flex:none;font-size:11px;font-weight:700;padding:1px 7px;border-radius:99px;background:var(--ac);color:var(--acx)}
+.pday-meta{display:flex;align-items:center;gap:8px;margin-top:3px;min-width:0}
+.pday-loc{flex:1;min-width:0;font-size:13px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pday-pill{flex:none;font-size:12px;font-weight:700;line-height:1.5;padding:1px 9px;border-radius:99px;white-space:nowrap;background:color-mix(in srgb,var(--sub) 13%,transparent);color:var(--sub)}
+.pday-pill.st-part{background:var(--soft);color:var(--ac)}
+.pday-pill.st-ok{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
+.pday-pill.st-none{font-weight:400}
+.pday-chev{flex:none;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--sub);font-size:22px;line-height:1;transition:transform .2s}
+.pday.is-open .pday-chev{transform:rotate(90deg);color:var(--ac)}
+.pday-body{padding:2px 14px 8px 16px;border-top:1px dashed var(--bd)}
+/* 展開後：時間軸（只是視覺，列內容與操作完全不變） */
+.pday-body>.item{position:relative;padding-left:22px;border-bottom:0}
+.pday-body>.item:before{content:"";position:absolute;left:2px;top:16px;width:8px;height:8px;border-radius:50%;background:var(--card);border:2px solid var(--ac);z-index:1}
+.pday-body>.item:after{content:"";position:absolute;left:7px;top:28px;bottom:-16px;width:2px;background:var(--bd)}
+.pday-body>.item:last-child:after{display:none}
+.pday-body>.item:has(input:checked):before{background:var(--ac)}
+.pday-body>.item.evt:before{border-radius:3px;border-color:var(--sub)}
+.pday-tools .btn{border-color:var(--bd);background:var(--card)}
 </style></head><body>
 <header class="top"><span id="net"></span><h1 id="ttl" role="button" onclick="tripPicker()">旅行控制中心</h1><button class="tdy" onclick="goToday()">📍 今天</button></header>
 <main id="v"></main>
@@ -539,8 +571,17 @@ function planRow(p){
    +placeLink(p.place)+(p.note?'<div class="sub">'+esc(p.note)+'</div>':'')+planPh(p)+'</div>'
    +'<div class="amt"><button class="bt" onclick="editPlan('+p.id+')">✏️</button><button class="bt d" onclick="askDel(\'plan\','+p.id+')">刪除</button></div></div>'}
 function dayCard(d,list,open,toggle){
-  list=list.slice().sort(byTime);var rg=regionOf(list),tt=list.filter(function(p){return p.time!=="23:59"}),dn=tt.filter(function(p){return p.done}).length;
-  return '<div class="card"><div class="daybar" style="background:'+rg.c+'"'+(toggle?' onclick="togDay(\''+d+'\')"':'')+'><b>'+(toggle?(open?'▾ ':'▸ '):'')+'第'+dayNum(d)+'天・'+esc(d)+'（週'+wk(d)+'）</b><span>'+(rg.n?esc(rg.n)+'・':'')+dn+' / '+tt.length+'</span></div>'+(open?((list.length||transEvents(d).length)?mergeRows(d,list,planRow):'<div class="sub" style="padding:8px 0">這天沒有行程</div>'):'')+'</div>'}
+  list=list.slice().sort(byTime);var rg=regionOf(list),tt=list.filter(function(p){return p.time!=="23:59"}),dn=tt.filter(function(p){return p.done}).length,
+      n=dayNum(d),isT=d===today(),st=!tt.length?"none":dn===tt.length?"ok":dn?"part":"todo";
+  /* 行程頁 Day 卡片：DAY 編號 → 日期 → 地點 → 完成度；.pday-char 是留給角色主題的空插槽（原本主題不顯示） */
+  return '<div class="card pday'+(isT?' is-today':'')+(st==="ok"?' is-done':'')+(open?' is-open':'')+'" style="--rg:'+rg.c+'">'
+   +'<div class="pday-h"'+(toggle?' role="button" tabindex="0" aria-expanded="'+(open?'true':'false')+'" onclick="togDay(\''+d+'\')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();togDay(\''+d+'\')}"':'')+'>'
+   +'<span class="pday-char" aria-hidden="true" data-date="'+esc(d)+'" data-i="'+(n-1)+'"></span>'
+   +'<div class="pday-main"><div class="pday-top"><span class="pday-no">DAY '+(n>0&&n<10?'0':'')+(n>0?n:'–')+'</span><span class="pday-date">'+esc(md(d))+'（'+wk(d)+'）</span>'+(isT?'<span class="pday-today">今天</span>':'')+'</div>'
+   +'<div class="pday-meta">'+(rg.n?'<span class="pday-loc">📍 '+esc(rg.n)+'</span>':'<span class="pday-loc"></span>')
+   +'<span class="pday-pill st-'+st+'">'+(st==="none"?'無行程':dn+' / '+tt.length+(st==="ok"?' ✓':''))+'</span></div></div>'
+   +(toggle?'<span class="pday-chev" aria-hidden="true">›</span>':'')+'</div>'
+   +(open?'<div class="pday-body">'+((list.length||transEvents(d).length)?mergeRows(d,list,planRow):'<div class="sub" style="padding:8px 0">這天沒有行程</div>')+'</div>':'')+'</div>'}
 function isOpen(d){if(OP===null){OP={};var t=today(),pick=S.plan.some(function(p){return p.date===t})?t:S.plan.filter(function(p){return p.time!=="23:59"&&!p.done}).map(function(p){return p.date}).sort()[0];if(pick)OP[pick]=1}return !!OP[d]}
 function togDay(d){isOpen(d);OP[d]=!OP[d];render()}
 function allDays(v){isOpen("");OP={};if(v)S.plan.forEach(function(p){OP[p.date]=1});render()}
@@ -554,7 +595,7 @@ function vPlan(){
     if(!planDay)planDay=ti.first||today();
     var d=planDay,list=S.plan.filter(function(p){return p.date===d});
     return h+'<div class="card"><div class="row" style="align-items:center"><div><button class="btn sec sm" style="width:100%" onclick="shiftDay(-1)">← 昨天</button></div><div><button class="btn sm" style="width:100%" onclick="planDay=today();render()">今天</button></div><div><button class="btn sec sm" style="width:100%" onclick="shiftDay(1)">明天 →</button></div></div><div class="sub" style="text-align:center;margin-top:8px">'+(d===today()?'今天・':'')+esc(d)+'（週'+wk(d)+'）</div></div>'+dayCard(d,list,true,false)}
-  return h+'<div class="row" style="margin-bottom:12px"><div><button class="btn sec sm" style="width:100%" onclick="allDays(1)">全部展開</button></div><div><button class="btn sec sm" style="width:100%" onclick="allDays(0)">全部收合</button></div></div>'
+  return h+'<div class="row pday-tools" style="margin-bottom:12px"><div><button class="btn sec sm" style="width:100%" onclick="allDays(1)">⌄ 全部展開</button></div><div><button class="btn sec sm" style="width:100%" onclick="allDays(0)">⌃ 全部收合</button></div></div>'
    +ti.ds.map(function(d){return dayCard(d,S.plan.filter(function(p){return p.date===d}),isOpen(d),true)}).join("")
    +'<button class="btn sec" style="border-color:var(--bad);color:var(--bad)" onclick="confirmBox(\'這會刪除目前旅程的全部行程，確定嗎？\',\'清空\',clrPlan)">清空所有行程</button>'}
 function clrPlan(){var old=S.plan;S.plan=[];S.seedV=4;save();render();toast("已清空全部行程","復原",function(){S.plan=old;save();render()})}
