@@ -334,3 +334,35 @@ html[data-ac=croc] .ds-sec .ds-more{margin-left:auto}
 
 @media (max-width:359px){html[data-ac=croc] .cw-img{width:62px;height:56px}html[data-ac=croc] .cw-amt{font-size:32px}}
 @media (max-width:339px){html[data-ac=croc] .cw-img{display:none}html[data-ac=croc] .cw-stats b{font-size:12.5px}}
+
+/* =====================================================================
+   📷 照片頁：旅行照片手帳（鱷魚主題）
+   ===================================================================== */
+html[data-ac=croc] .cph-head{display:flex;align-items:center;gap:10px;padding:12px 12px 12px 16px}
+html[data-ac=croc] .cph-head-txt{flex:1;min-width:0}
+html[data-ac=croc] .cph-title{font-size:var(--fs-page);font-weight:900;color:var(--tx)}
+html[data-ac=croc] .cph-meta{margin-top:6px}
+html[data-ac=croc] .cph-note{margin-top:6px;font-size:12px;line-height:1.45;color:var(--sub)}
+html[data-ac=croc] .cph-note .btn{margin-top:6px}
+html[data-ac=croc] .cph-head-img{flex:none;width:70px;height:64px}
+html[data-ac=croc] .cph-date{font-weight:800}
+html[data-ac=croc] .cph-group>b{font-size:var(--fs-card)}
+/* 照片牆：拍立得（只在照片頁；其他頁的小縮圖不受影響） */
+html[data-ac=croc] [data-ctab=photo] .grid{gap:10px 8px;padding:4px 2px 2px}
+html[data-ac=croc] [data-ctab=photo] .tile{background:#fff;padding:5px 5px 6px;border-radius:4px;box-shadow:0 1px 2px rgba(80,60,20,.12),0 4px 10px rgba(80,60,20,.10);transform:rotate(-1.2deg)}
+html[data-ac=croc] [data-ctab=photo] .tile:nth-child(3n+2){transform:rotate(1deg)}
+html[data-ac=croc] [data-ctab=photo] .tile:nth-child(3n){transform:rotate(-.4deg)}
+html[data-ac=croc] [data-ctab=photo] .tile img,html[data-ac=croc] [data-ctab=photo] .tile .tph{border-radius:2px}
+html[data-ac=croc] [data-ctab=photo] .tile>.sub{font-size:11px;margin-top:4px;line-height:1.35}
+html[data-ac=croc] [data-ctab=photo] .tile>.bt{font-size:12px;padding:6px 4px;min-height:32px}
+html[data-ac=croc] [data-ctab=photo] .swp-in .grid{margin-top:8px}
+/* 加照片區：拍照為主要按鈕、相簿為次要 */
+html[data-ac=croc] [data-ctab=photo] label.btn{border-radius:var(--r-md)}
+@media (max-width:359px){html[data-ac=croc] .cph-head-img{width:52px;height:48px}}
+@media (max-width:339px){html[data-ac=croc] .cph-head-img{display:none}}
+@media (prefers-color-scheme:dark){html[data-ac=croc]:not([data-theme="light"]) [data-ctab=photo] .tile{background:#2a2326}}
+/* 可滑動刪除的日期卡：卡片貼齊底下的刪除鈕，不露出紅色 */
+html[data-ac=croc] .swp{border-radius:var(--r-lg);margin-bottom:var(--gap)}
+html[data-ac=croc] .swp>.card{margin-bottom:0;border-radius:var(--r-lg)}
+html[data-ac=croc] .swp-act button{border-radius:var(--r-lg) 0 0 var(--r-lg)}
+html[data-ac=croc] [data-ctab=photo] .tile>.cph-local{display:none}

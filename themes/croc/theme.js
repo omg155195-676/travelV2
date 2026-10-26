@@ -374,6 +374,41 @@
     if (anchor && anchor.nodeType === 1) root.insertBefore(h("div", "ds-sec", "⚙️ 匯率與完整表單"), anchor);
   }
 
+
+  /* =====================================================================
+     📷 照片頁 Layout：旅行照片手帳（只在鱷魚主題）
+     頁首（相簿名稱、張數、儲存說明、拿相機的鱷魚）→ 加照片 → 照片牆（拍立得，CSS）
+     日期標題拆成「日期＋📍地點標籤」；鱷魚只在頁首與空狀態，不放在照片上。
+     ===================================================================== */
+  function splitDatePlace(b) {
+    if (!b || b.querySelector(".ds-chip")) return;
+    var m = /^(\d{1,2}\/\d{1,2}（週.）)｜(.+)$/.exec(b.textContent.trim());
+    if (m) b.innerHTML = '<span class="cph-date">' + E(m[1]) + '</span> <span class="ds-chip">📍 ' + E(m[2]) + '</span>';
+    else if (/^\d{1,2}\/\d{1,2}（週.）$/.test(b.textContent.trim())) b.innerHTML = '<span class="cph-date">' + E(b.textContent.trim()) + '</span>';
+  }
+  function photoLayout(root) {
+    if (root.querySelector(".cph-head")) return;
+    var first = root.querySelector(":scope > .card.sub");
+    if (first && /照片|Cloud/.test(first.textContent)) {
+      var n = (typeof P !== "undefined" ? P : []).filter(function (p) { return albumP(p); }).length;
+      var note = h("div", "cph-note"); while (first.firstChild) note.appendChild(first.firstChild);
+      first.classList.remove("sub"); first.classList.add("ds-main", "ds-paper", "cph-head");
+      var tx = h("div", "cph-head-txt", '<div class="cph-title">📷 旅行相簿</div><div class="cph-meta"><span class="ds-chip">共 ' + n + ' 張</span></div>');
+      if (typeof claude === "undefined" || !claude || typeof claude.use !== "function")
+        Array.prototype.forEach.call(note.querySelectorAll("div"), function (x) { if (/^等待備份/.test(x.textContent.trim())) x.style.display = "none"; });
+      tx.appendChild(note); first.appendChild(tx); first.appendChild(img("camera", "cph-head-img"));
+    }
+    /* 日期卡、單日標題、地點／來源群組：標題整理成日期＋地點標籤 */
+    root.querySelectorAll(".swp-in .l>b, #focus-card>b").forEach(splitDatePlace);
+    /* 這個環境沒有雲端時，每張都是「僅本機」，標籤只會造成雜訊（頁首已說明照片存在這台裝置） */
+    if (typeof claude === "undefined" || !claude || typeof claude.use !== "function")
+      root.querySelectorAll(".tile>.sub").forEach(function (x) { if (/僅本機/.test(x.textContent)) x.classList.add("cph-local"); });
+    root.querySelectorAll(":scope > .card").forEach(function (c) {
+      var b = c.querySelector(":scope > b"), g = c.querySelector(":scope > .grid");
+      if (b && g && !c.classList.contains("cph-group")) c.classList.add("cph-group");
+    });
+  }
+
   function decorate(tab, root) {
     if (!on() || !root) return;
 
@@ -387,6 +422,8 @@
       hero.classList.add("thc-hero"); hero.appendChild(img(hk));
     }
 
+    root.setAttribute("data-ctab", tab);
+    if (tab === "photo") { try { photoLayout(root); } catch (e) { if (window.console) console.warn("croc photo", e); } }
     if (tab === "add") { try { walletLayout(root); } catch (e) { if (window.console) console.warn("croc wallet", e); } }
     decorateBudget(root);
     if (tab === "plan") { try { planLayout(root); } catch (e) {} decoratePlan(root); try { planTrailEnd(root); } catch (e) {} }
