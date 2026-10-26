@@ -1223,7 +1223,7 @@ function delLocal(i){var k=localBackups()[i];if(!k)return;confirmBox("刪除這�
 function saveSettings(){
   var b=num($("s_b").value),p=Math.floor(num($("s_p").value)),n=$("s_n").value.trim();
   if(!n){toast("旅程名稱不能空白");return}if(!(b>=0)){toast("預算請輸入數字");return}if(!(p>=1&&p<=99)){toast("預設人數請輸入 1–99");return}
-  var nr={};for(var k in S.rates){var v=num($("s_r_"+k).value);if(!(v>0)){toast("匯率 "+k+" 必須大於 0");return}nr[k]=v}nr.TWD=1;
+  var nr={};for(var k in S.rates){if(k==="TWD"||!$("s_r_"+k))continue;var v=num($("s_r_"+k).value);if(!(v>0)){toast("匯率 "+k+" 必須大於 0");return}nr[k]=v}nr.TWD=1;
   var fm=fxMeta();Object.keys(nr).forEach(function(k){if(k!=="TWD"&&Math.abs(nr[k]-S.rates[k])>1e-12){fm.manualOverride[k]=nr[k]}});
   S.trip=n;S.budget=b;S.defPeople=p;S.rates=nr;save();render();toast("✅ 已儲存設定")}
 function setTheme(a){S.ac=a;save();render()}

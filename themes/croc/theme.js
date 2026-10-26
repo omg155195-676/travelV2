@@ -474,6 +474,60 @@
     setTimeout(sync, 80);
   }
 
+
+  /* =====================================================================
+     🎒 更多：旅行背包（只在鱷魚主題）
+     「更多」選單依用途分組；設定頁依旅程／匯率／外觀／資料／關於分區。
+     都是把原本的按鈕與卡片搬進分組，點擊行為不變。
+     ===================================================================== */
+  var MORE_GROUPS = [
+    ["🎫 旅途隨身", ["tix", "trans", "resv", "map"]],
+    ["📒 旅行紀錄", ["days", "gosh", "rev", "book"]],
+    ["💰 帳務", ["list", "stat"]],
+    ["🧳 準備與設定", ["pack", "set"]]
+  ];
+  function moreLayout(md) {
+    var g = md.querySelector(".mgrid"); if (!g || md.querySelector(".cm-group")) return;
+    var byKey = {}, rest = [];
+    Array.prototype.forEach.call(g.querySelectorAll("button"), function (b) { var m = /go\('(\w+)'\)/.exec(b.getAttribute("onclick") || ""); if (m) byKey[m[1]] = b; else rest.push(b); });
+    var box = h("div", "cm-groups"), used = {};
+    MORE_GROUPS.forEach(function (grp) {
+      var items = grp[1].filter(function (k) { return byKey[k]; }); if (!items.length) return;
+      var sec = h("div", "cm-group", '<div class="cm-title">' + grp[0] + '</div>'), grid = h("div", "mgrid cm-grid");
+      items.forEach(function (k) { grid.appendChild(byKey[k]); used[k] = 1; });
+      sec.appendChild(grid); box.appendChild(sec);
+    });
+    var others = Object.keys(byKey).filter(function (k) { return !used[k]; }).map(function (k) { return byKey[k]; }).concat(rest);
+    if (others.length) { var sec2 = h("div", "cm-group", '<div class="cm-title">🧩 其他</div>'), g2 = h("div", "mgrid cm-grid"); others.forEach(function (b) { g2.appendChild(b); }); sec2.appendChild(g2); box.appendChild(sec2); }
+    g.parentNode.insertBefore(box, g); g.remove();
+    var hd = md.querySelector(".sh-h");
+    if (hd) { var t = hd.firstElementChild || hd; if (t && /更多功能/.test(t.textContent)) t.textContent = "🎒 旅行背包"; var old = hd.querySelector(".thc"); if (old) old.remove(); hd.insertBefore(img("walk"), hd.lastElementChild); }
+  }
+  var SET_GROUPS = [
+    ["✈️ 旅程", ["旅程設定", "開始新旅程"]],
+    ["💱 匯率", ["💱 匯率"]],
+    ["🎨 外觀與主題", ["主題色", "🐊 小鱷魚提示"]],
+    ["💾 資料管理", ["備份與還原", "危險操作"]]
+  ];
+  function settingsLayout(root) {
+    if (root.querySelector(".cs-head")) return;
+    var cards = Array.prototype.slice.call(root.querySelectorAll(":scope > .card"));
+    var byTitle = {}; cards.forEach(function (c) { var t = firstB(c); if (t && !byTitle[t]) byTitle[t] = c; });
+    if (!byTitle["旅程設定"]) return;
+    var head = h("div", "card ds-main ds-paper cs-head", '<div class="cs-head-txt"><div class="cs-title">🎒 旅行背包</div><div class="cs-sub">旅程、匯率、主題和資料備份都整理在這裡。</div></div>');
+    head.appendChild(img("walk", "cs-head-img"));
+    var frag = document.createDocumentFragment(), used = [];
+    frag.appendChild(head);
+    SET_GROUPS.forEach(function (grp) {
+      var list = grp[1].map(function (t) { return byTitle[t]; }).filter(Boolean); if (!list.length) return;
+      frag.appendChild(h("div", "ds-sec", grp[0]));
+      list.forEach(function (c) { frag.appendChild(c); used.push(c); });
+    });
+    var rest = cards.filter(function (c) { return used.indexOf(c) < 0; });
+    if (rest.length) { frag.appendChild(h("div", "ds-sec", "ℹ️ 關於與其他")); rest.forEach(function (c) { frag.appendChild(c); }); }
+    root.insertBefore(frag, root.firstChild);
+  }
+
   function decorate(tab, root) {
     if (!on() || !root) return;
 
@@ -488,6 +542,7 @@
     }
 
     root.setAttribute("data-ctab", tab);
+    if (tab === "set") { try { settingsLayout(root); } catch (e) { if (window.console) console.warn("croc set", e); } }
     if (tab === "tix") { try { tixLayout(root); } catch (e) { if (window.console) console.warn("croc tix", e); } }
     if (tab === "photo") { try { photoLayout(root); } catch (e) { if (window.console) console.warn("croc photo", e); } }
     if (tab === "add") { try { walletLayout(root); } catch (e) { if (window.console) console.warn("croc wallet", e); } }
@@ -547,7 +602,7 @@
       new MutationObserver(function () {
         if (!on()) return;
         var g = md.querySelector(".mgrid"), hd = md.querySelector(".sh-h");
-        if (g && hd && !hd.querySelector(".thc")) hd.insertBefore(img("map"), hd.lastElementChild);
+        try { moreLayout(md); } catch (e) {}
         try { quickAddLayout(md); } catch (e) {}
       }).observe(md, { childList: true, subtree: true });
     }
