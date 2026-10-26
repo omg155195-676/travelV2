@@ -135,6 +135,39 @@ a{color:var(--ac)}
 .daybar:not([style*="background"]){background:var(--soft);color:var(--tx);padding:8px 12px;margin-bottom:6px}
 .daybar:not([style*="background"])>b{color:var(--ac);overflow-wrap:anywhere}
 .daybar:not([style*="background"])>span{flex:none;font-size:13px;color:var(--sub);white-space:nowrap}
+
+/* ===== 行程：一天一頁＋左右滑動（共用版面；各主題只覆寫外觀） ===== */
+.pd-strip{display:flex;gap:6px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -14px 10px;padding:4px 14px 8px}
+.pd-strip::-webkit-scrollbar{display:none}
+.pd-d{flex:none;scroll-snap-align:center;width:56px;min-height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;border:1px solid var(--bd);border-radius:14px;background:var(--card);color:var(--tx);font:inherit;cursor:pointer;padding:4px 2px;position:relative;transition:transform .15s,box-shadow .15s,background .15s}
+.pd-d b{font-size:14px;line-height:1.25;font-variant-numeric:tabular-nums}
+.pd-dw{font-size:11px;color:var(--sub)}
+.pd-dn{font-size:10px;color:var(--sub);font-weight:700;letter-spacing:.04em}
+.pd-d.on{background:var(--ac);border-color:var(--ac);color:var(--acx);transform:scale(1.08);box-shadow:0 4px 12px color-mix(in srgb,var(--ac) 30%,transparent)}
+.pd-d.on .pd-dw,.pd-d.on .pd-dn{color:inherit;opacity:.85}
+.pd-d.is-today:not(.on){border-color:var(--ac);border-width:2px}
+.pd-wrap{touch-action:pan-y;overflow-x:clip;margin:0 -14px;padding:0 14px}
+.pd-page{will-change:transform}
+@keyframes pdInR{from{transform:translateX(35%);opacity:0}to{transform:none;opacity:1}}
+@keyframes pdInL{from{transform:translateX(-35%);opacity:0}to{transform:none;opacity:1}}
+.pd-in-r{animation:pdInR .2s ease-out}.pd-in-l{animation:pdInL .2s ease-out}
+@media (prefers-reduced-motion:reduce){.pd-in-r,.pd-in-l{animation:none}.pd-d{transition:none}}
+.pd-hero{position:relative;display:flex;align-items:center;gap:12px;padding:16px 14px 14px 18px;overflow:hidden}
+.pd-hero:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--rg,var(--ac))}
+.pd-hero.is-today{border-color:var(--ac)}
+.pd-art:empty{display:none}
+.pd-hero-txt{flex:1;min-width:0}
+.pd-no{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--ac)}
+.pd-title{font-size:20px;font-weight:800;line-height:1.3;margin-top:2px;overflow-wrap:anywhere}
+.pd-key{font-weight:700;color:var(--sub);font-size:15px}
+.pd-date{font-size:14px;color:var(--sub);margin-top:2px}
+.pd-meta{margin-top:8px}
+.pd-arrows{position:absolute;right:8px;top:8px;display:flex;gap:4px}
+.pd-arr{width:32px;height:32px;border-radius:50%;border:1px solid var(--bd);background:var(--card);color:var(--sub);font-size:20px;line-height:1;cursor:pointer;padding:0}
+.pd-arr:disabled{opacity:.3;cursor:default}
+.pd-hero .pd-hero-txt{padding-right:64px}
+.pd-hint{text-align:center;font-size:12px;opacity:.7;margin:-4px 0 12px}
+@media (hover:hover) and (pointer:fine){.pd-hint{display:none}}
 </style></head><body>
 <header class="top"><span id="net"></span><h1 id="ttl" role="button" onclick="tripPicker()">旅行控制中心</h1><button class="tdy" onclick="goToday()">📍 今天</button></header>
 <main id="v"></main>
@@ -563,7 +596,7 @@ function budgetCard(b){
 VIEWS.home=vHomeBase;VIEWS.add=vAdd;VIEWS.list=vList;VIEWS.stat=vStat;
 
 /* ===== Plans（行程）===== */
-var planMode="all",planDay=null,OP=null;
+var planMode="day",planDay=null,OP=null,pdAnim=0;
 function planTime(p){if(p.time==="23:59")return p.lab||"住宿";if(p.time&&p.end)return p.time+"–"+p.end;return p.lab||p.time||""}
 function statusTag(s){if(!s)return"";var c=(s==="已預約"||s==="已付款"||s==="已完成")?"g":(s==="已取消"?"r":(s==="待確認"||s==="待預約"?"y":""));return '<span class="tag '+c+'">'+esc(s)+'</span>'}
 function seedPlan(){
@@ -592,14 +625,69 @@ function togDay(d){isOpen(d);OP[d]=!OP[d];render()}
 function allDays(v){isOpen("");OP={};if(v)S.plan.forEach(function(p){OP[p.date]=1});render()}
 function setPlanMode(m){planMode=m;if(m==="day"){var ti=tripInfo();if(!planDay)planDay=(ti.ds.indexOf(today())>=0)?today():(ti.first||today())}render()}
 function shiftDay(n){planDay=addDays(planDay||today(),n);render()}
+/* ===== 行程：一天一頁＋左右滑動換日期（所有主題共用；主題只改外觀） =====
+   左右滑＝換日期、上下滑＝看當天、點日期＝跳到那天。資料、列與按鈕都沿用原本的。 */
+function pdTitle(list){var rg=regionOf(list),real=list.filter(function(p){return p.time!=="23:59"&&!p.skip}),
+  key=real.filter(function(p){return p.imp===2})[0]||real.filter(function(p){return p.imp===1})[0]||real.filter(function(p){return !/→|退房|早餐|午餐|晚餐|Check|起床|休息|抵達|出發|返回|回飯店|取行李|寄放/.test(p.name)})[0]||real[0];
+  return {rg:rg,key:key?key.name:""}}
+function pdView(d,ti){
+  var i=ti.ds.indexOf(d),prev=i>0?ti.ds[i-1]:"",next=i>=0&&i<ti.ds.length-1?ti.ds[i+1]:"",list=S.plan.filter(function(p){return p.date===d}).sort(byTime),
+      tt=list.filter(function(p){return p.time!=="23:59"}),dn=tt.filter(function(p){return p.done}).length,n=i+1,isT=d===today(),t=pdTitle(list),
+      st=!tt.length?"none":dn===tt.length?"ok":dn?"part":"todo";
+  var strip='<div class="pd-strip" id="pds" role="tablist" aria-label="選擇日期">'+ti.ds.map(function(x,j){
+    return '<button class="pd-d'+(x===d?' on':'')+(x===today()?' is-today':'')+'" role="tab" aria-selected="'+(x===d)+'" data-d="'+esc(x)+'" onclick="pdGo(\''+esc(x)+'\')"><span class="pd-dw">'+wk(x)+'</span><b>'+esc(md(x))+'</b><span class="pd-dn">D'+(j+1)+'</span></button>'}).join("")+'</div>';
+  var hero='<div class="card pd-hero'+(isT?' is-today':'')+'" style="--rg:'+t.rg.c+'">'
+    +'<span class="pd-art pday-char" aria-hidden="true" data-date="'+esc(d)+'" data-i="'+Math.max(0,i)+'"></span>'
+    +'<div class="pd-hero-txt"><div class="pd-no">DAY '+(n>0&&n<10?'0':'')+(n>0?n:'–')+(isT?' <span class="pday-today">今天</span>':'')+'</div>'
+    +'<div class="pd-title">'+(t.rg.n?esc(t.rg.n):'行程')+(t.key?'<span class="pd-key">・'+esc(t.key)+'</span>':'')+'</div>'
+    +'<div class="pd-date">'+esc(md(d))+'（'+wk(d)+'）</div>'
+    +'<div class="pd-meta"><span class="pday-pill st-'+st+'">'+(st==="none"?'無行程':dn+' / '+tt.length+' 完成'+(st==="ok"?' ✓':''))+'</span></div></div>'
+    +'<div class="pd-arrows"><button class="pd-arr" aria-label="上一天" '+(prev?'onclick="pdGo(\''+prev+'\',-1)"':'disabled')+'>‹</button><button class="pd-arr" aria-label="下一天" '+(next?'onclick="pdGo(\''+next+'\',1)"':'disabled')+'>›</button></div></div>';
+  var body=(list.length||transEvents(d).length)?mergeRows(d,list,planRow):'<div class="sub" style="padding:8px 0">這天沒有行程</div>';
+  return strip+'<div class="pd-wrap" id="pdw" data-prev="'+esc(prev)+'" data-next="'+esc(next)+'"><div class="pd-page'+(pdAnim>0?' pd-in-r':pdAnim<0?' pd-in-l':'')+'">'
+    +hero+'<div class="card pday is-open pd-tl" data-date="'+esc(d)+'"><div class="pday-body">'+body+'</div></div>'
+    +'<div class="pd-hint sub">← 左右滑動切換日期 →</div></div></div>'}
+function pdReduce(){try{return window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){return false}}
+function pdGo(d,dir){
+  if(!d||d===planDay)return;if(!dir)dir=d>planDay?1:-1;
+  var pg=document.querySelector(".pd-page");
+  if(pg&&!pdReduce()){pg.style.transition="transform .16s ease-in,opacity .16s ease-in";pg.style.transform="translateX("+(dir>0?"-":"")+"35%)";pg.style.opacity="0";
+    setTimeout(function(){planDay=d;pdAnim=dir;render()},140)}
+  else{planDay=d;pdAnim=dir;render()}}
+function pdAfter(){
+  var dir=pdAnim;pdAnim=0;
+  var strip=$("pds"),on=strip&&strip.querySelector(".pd-d.on");
+  if(strip&&on){var sl=window.__pdSL;if(sl!=null)strip.scrollLeft=sl;
+    var target=on.offsetLeft-(strip.clientWidth-on.offsetWidth)/2;
+    try{strip.scrollTo({left:target,behavior:(sl!=null&&!pdReduce())?"smooth":"auto"})}catch(e){strip.scrollLeft=target}
+    strip.onscroll=function(){window.__pdSL=strip.scrollLeft}}
+  if(dir&&strip){var top=strip.getBoundingClientRect().top;if(top<0)try{window.scrollBy(0,top-70)}catch(e){}}
+  var w=$("pdw");if(!w||w._sw)return;w._sw=1;
+  var x0=null,y0=0,dx=0,lock=0,t0=0,pg=null;
+  function reset(){if(pg){pg.style.transition="transform .2s ease";pg.style.transform=""}x0=null;lock=0}
+  w.addEventListener("touchstart",function(e){if(e.touches.length!==1){x0=null;return}var t=e.touches[0];x0=t.clientX;y0=t.clientY;dx=0;lock=0;t0=Date.now();pg=w.querySelector(".pd-page")},{passive:true});
+  w.addEventListener("touchmove",function(e){if(x0==null)return;var t=e.touches[0],mx=t.clientX-x0,my=t.clientY-y0;
+    if(!lock){if(Math.abs(mx)<8&&Math.abs(my)<8)return;lock=Math.abs(mx)>Math.abs(my)*1.2?1:2}
+    if(lock!==1)return;if(e.cancelable)e.preventDefault();
+    var has=mx<0?w.getAttribute("data-next"):w.getAttribute("data-prev");dx=has?mx:mx*0.3;
+    pg.style.transition="none";pg.style.transform="translateX("+dx+"px)"},{passive:false});
+  w.addEventListener("touchend",function(){if(x0==null||lock!==1){x0=null;lock=0;return}
+    var tg=dx<0?w.getAttribute("data-next"):w.getAttribute("data-prev"),v=Math.abs(dx)/Math.max(1,Date.now()-t0);
+    if(tg&&(Math.abs(dx)>w.clientWidth*0.22||v>0.45)){var dir2=dx<0?1:-1;pg.style.transition="transform .15s ease-out,opacity .15s";pg.style.transform="translateX("+(dir2>0?-1:1)*w.clientWidth+"px)";pg.style.opacity="0";x0=null;lock=0;
+      setTimeout(function(){planDay=tg;pdAnim=dir2;render()},130)}
+    else reset()},{passive:true});
+  w.addEventListener("touchcancel",reset,{passive:true})}
+document.addEventListener("keydown",function(e){if(tab!=="plan"||planMode!=="day")return;var el=document.activeElement;if(el&&/INPUT|TEXTAREA|SELECT/.test(el.tagName))return;
+  if(!$("md").classList.contains("hide"))return;var w=$("pdw");if(!w)return;
+  if(e.key==="ArrowLeft"&&w.getAttribute("data-prev"))pdGo(w.getAttribute("data-prev"),-1);if(e.key==="ArrowRight"&&w.getAttribute("data-next"))pdGo(w.getAttribute("data-next"),1)});
+VIEWS.after_plan=function(){if(planMode==="day")pdAfter()};
 function vPlan(){
-  var ti=tripInfo(),h=hero()+'<div class="seg"><button class="'+(planMode==="all"?'on':'')+'" onclick="setPlanMode(\'all\')">📅 全部行程</button><button class="'+(planMode==="day"?'on':'')+'" onclick="setPlanMode(\'day\')">📍 單日</button></div>'
+  var ti=tripInfo(),h=(planMode==="day"&&S.plan.length?'':hero())+'<div class="seg"><button class="'+(planMode==="all"?'on':'')+'" onclick="setPlanMode(\'all\')">📅 全部行程</button><button class="'+(planMode==="day"?'on':'')+'" onclick="setPlanMode(\'day\')">📍 單日</button></div>'
    +'<button class="btn sec" style="margin:0 0 12px" onclick="editPlan(0)">＋ 新增行程</button>';
   if(!S.plan.length)return h+'<div class="card"><div class="sub">還沒有行程，先新增第一個活動吧。</div>'+((S.tid==="t1"&&SEED.length)?'<button class="btn sec" onclick="confirmBox(\'載入預設 18 天行程？\',\'載入\',function(){seedPlan();render()},\'載入預設行程\')">載入預設 18 天行程</button>':'')+'</div>';
   if(planMode==="day"){
-    if(!planDay)planDay=ti.first||today();
-    var d=planDay,list=S.plan.filter(function(p){return p.date===d});
-    return h+'<div class="card"><div class="row" style="align-items:center"><div><button class="btn sec sm" style="width:100%" onclick="shiftDay(-1)">← 昨天</button></div><div><button class="btn sm" style="width:100%" onclick="planDay=today();render()">今天</button></div><div><button class="btn sec sm" style="width:100%" onclick="shiftDay(1)">明天 →</button></div></div><div class="sub" style="text-align:center;margin-top:8px">'+(d===today()?'今天・':'')+esc(d)+'（週'+wk(d)+'）</div></div>'+dayCard(d,list,true,false)}
+    if(!planDay||(ti.n&&ti.ds.indexOf(planDay)<0))planDay=(ti.ds.indexOf(today())>=0)?today():(ti.first||today());
+    return h+pdView(planDay,ti)}
   return h+'<div class="row pday-tools" style="margin-bottom:12px"><div><button class="btn sec sm" style="width:100%" onclick="allDays(1)">⌄ 全部展開</button></div><div><button class="btn sec sm" style="width:100%" onclick="allDays(0)">⌃ 全部收合</button></div></div>'
    +ti.ds.map(function(d){return dayCard(d,S.plan.filter(function(p){return p.date===d}),isOpen(d),true)}).join("")
    +'<button class="btn sec" style="border-color:var(--bad);color:var(--bad)" onclick="confirmBox(\'這會刪除目前旅程的全部行程，確定嗎？\',\'清空\',clrPlan)">清空所有行程</button>'}

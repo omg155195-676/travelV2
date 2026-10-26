@@ -505,3 +505,17 @@ html[data-ac=croc] [data-ctab=book] .tpl{background:var(--card);border-color:var
 html[data-ac=croc] [data-ctab=book] .tpl.on{background:var(--leaf-soft);border-color:var(--leaf-2)}
 html[data-ac=croc] [data-ctab=book] .chip{background:var(--card);border-color:var(--bd)}
 html[data-ac=croc] [data-ctab=book] input[type=radio],html[data-ac=croc] [data-ctab=book] input[type=checkbox]{accent-color:var(--leaf)}
+
+/* 行程一天一頁（鱷魚主題外觀） */
+html[data-ac=croc] .pd-d{background:var(--card);border-color:var(--bd)}
+html[data-ac=croc] .pd-d.on{background:var(--leaf);border-color:var(--leaf);color:#fff}
+html[data-ac=croc] .pd-d.is-today:not(.on){border-color:var(--pink)}
+html[data-ac=croc] .pd-hero{background:var(--cream);border-radius:var(--r-xl);box-shadow:var(--sh-2)}
+html[data-ac=croc] .pd-hero:before{background:var(--leaf-2)}
+html[data-ac=croc] .pd-hero.is-today:before{background:var(--pink)}
+html[data-ac=croc] .pd-no{color:var(--leaf)}
+html[data-ac=croc] .pd-art.pday-char{width:76px;height:72px;border-radius:50%;background:var(--leaf-soft)}
+html[data-ac=croc] .pd-art.pday-char>.thc{width:64px;height:58px}
+html[data-ac=croc] #v>.pd-hint,html[data-ac=croc] .pd-hint{display:block;width:max-content;margin:-4px auto 12px;padding:2px 10px;border-radius:var(--r-pill);background:color-mix(in srgb,var(--card) 85%,transparent)}
+@media (hover:hover) and (pointer:fine){html[data-ac=croc] .pd-hint{display:none}}
+@media (max-width:359px){html[data-ac=croc] .pd-art.pday-char{width:56px;height:56px}html[data-ac=croc] .pd-art.pday-char>.thc{width:46px;height:42px}}

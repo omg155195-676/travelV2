@@ -2,7 +2,7 @@
  * App 本身：先用快取打開（離線也能開），同時在背景抓新版，下次打開就是新版。
  * 天氣、匯率等即時資料：一律走網路，不快取。
  * 改版時把 VERSION 加 1。 */
-var VERSION = "v16";
+var VERSION = "v17";
 var CACHE = "travel-app-" + VERSION;
 var SHELL = [
   "./",

@@ -177,7 +177,8 @@
     var heroes = Array.prototype.filter.call(root.children, function (e) {
       return e.matches('div[style*="var(--g1),var(--g2)"]') || (e.classList.contains("card") && e.querySelector(':scope > img[onclick^="zoom"]'));
     });
-    if (!heroes.length) return;
+    var seg0 = root.querySelector(":scope > .seg");
+    if (!heroes.length && !seg0) return;
     var ti = tripInfo(), done = realPlans().filter(function (p) { return p.done; }).length, all = realPlans().length;
     var c = h("div", "card ds-main ds-paper cp-head");
     c.innerHTML = '<div class="cp-head-txt"><div class="cp-title">🗺️ 旅行時間軸</div>'
@@ -185,13 +186,13 @@
       + (ti.n ? '<div class="cp-meta"><span class="ds-chip">' + ti.n + ' 天</span><span class="ds-chip pink">' + done + ' / ' + all + ' 完成</span></div>' : '')
       + '</div>' + coverMenu();
     c.insertBefore(img("map", "cp-head-img"), c.querySelector(".ch-menu"));
-    root.insertBefore(c, heroes[0]);
+    root.insertBefore(c, heroes[0] || seg0);
     heroes.forEach(function (e) { e.remove(); });
   }
   /* 展開的那天：時間軸結尾放一隻小鱷魚陪伴（只是顯示，不影響任何操作） */
   function planTrailEnd(root) {
     root.querySelectorAll(".pday.is-open").forEach(function (card) {
-      var body = card.querySelector(".pday-body"), slot = card.querySelector(".pday-char[data-date]");
+      var body = card.querySelector(".pday-body"), slot = card.querySelector(".pday-char[data-date]") || (card.hasAttribute("data-date") ? card : null);
       if (!body || !slot || body.querySelector(".cp-end")) return;
       var d = slot.getAttribute("data-date"), its = realPlans().filter(function (p) { return p.date === d && !p.skip; });
       if (!its.length) return;
