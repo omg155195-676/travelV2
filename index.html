@@ -170,6 +170,17 @@ a{color:var(--ac)}
 @media (hover:hover) and (pointer:fine){.pd-hint{display:none}}
 
 .pvt{margin-top:12px;padding:12px;border:1px dashed var(--bd);border-radius:12px;background:var(--soft)}
+
+/* 每晚收尾＋待補區 */
+.wrapcard{border-color:var(--ac);border-width:1.5px}
+.wr-row{padding:10px 0;border-top:1px dashed var(--bd)}
+.wr-row.lim .wr-name{font-weight:700}
+.wr-name{font-size:15px;overflow-wrap:anywhere}
+.wr-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.wr-chip{border:1px solid var(--bd);background:var(--soft);color:var(--tx);border-radius:999px;padding:6px 10px;min-height:36px;font:inherit;font-size:13px;cursor:pointer}
+.wr-chip span{color:var(--sub);font-size:11px;margin-left:4px}
+.wr-sel{width:auto;min-height:36px;height:36px;padding:4px 8px;font-size:13px;border-radius:999px}
+.wr-acts2{display:flex;flex-wrap:wrap;align-items:center;gap:2px 4px;margin-top:6px}
 </style></head><body>
 <header class="top"><span id="net"></span><h1 id="ttl" role="button" onclick="tripPicker()">旅行控制中心</h1><button class="tdy" onclick="goToday()">📍 今天</button></header>
 <main id="v"></main>
@@ -1530,11 +1541,59 @@ function quickBar(){
   var d=focusDate||today();
   return '<div class="qgrid"><button class="q pri" onclick="qAdd()"><span>＋</span>快速記帳</button><button class="q" onclick="goToday()"><span>📍</span>今天</button><button class="q" onclick="tixMode=\'today\';go(\'tix\')"><span>🎫</span>票券中心</button>'
    +'<button class="q" onclick="phMode=\'date\';phDay=\''+d+'\';go(\'photo\')"><span>📷</span>今日照片</button><button class="q" onclick="focusDate=\''+d+'\';scrollFocus=true;go(\'trans\')"><span>🚆</span>今日交通</button><button class="q" onclick="planMode=\'day\';planDay=\''+d+'\';go(\'plan\')"><span>🗓️</span>行程</button></div>'}
+/* ===== 每晚收尾＋待補區 =====
+   晚上 18:00 後（或隔天早上）問一次：今天沒做到的，要補到哪天？或先放進「待補區」。
+   只改行程原本的 date／skip 欄位，不新增資料結構；每個動作都可以復原。 */
+var WRAP_LIM=/限定|季節|期間|祭|點燈|公演|朱印|最後/;
+function wrapLim(p){return WRAP_LIM.test((p.name||"")+" "+(p.note||""))}
+function wrapDay(){var ti=tripInfo(),t=today(),h=new Date().getHours();if(!ti.n)return "";
+  if(t>=ti.first&&t<=ti.last&&h>=18)return t;var y=addDays(t,-1);return (y>=ti.first&&y<=ti.last)?y:""}
+function wrapLeft(d){return S.plan.filter(function(p){return p.date===d&&p.time!=="23:59"&&!p.done&&!p.skip}).sort(byTime)}
+function wrapLater(from){var ti=tripInfo();return ti.ds.filter(function(d){return d>from})}
+function wrapReg(p){for(var i=0;i<RG.length;i++)if(RG[i][0].test((p.name||"")+" "+(p.place||"")))return RG[i][1];return ""}
+function wrapSuggest(from,p){
+  /* 優先：之後還待在同一個地區的日子（在尾道沒做到的，就建議尾道的日子）；其次：之後最空的日子。不建議回國那天。 */
+  var ti=tripInfo(),days=wrapLater(from).filter(function(d){return d!==ti.last});
+  var info=days.map(function(d){var L=S.plan.filter(function(x){return x.date===d});return{d:d,n:L.filter(function(x){return x.time!=="23:59"&&!x.done&&!x.skip}).length,r:regionOf(L).n}});
+  var reg=p?wrapReg(p):"",same=reg?info.filter(function(x){return x.r===reg}):[];
+  var pick=same.slice(0,2);
+  info.slice().sort(function(a,b){return a.n-b.n||(a.d<b.d?-1:1)}).forEach(function(x){if(pick.length<3&&pick.indexOf(x)<0)pick.push(x)});
+  pick.forEach(function(x){x.same=reg&&x.r===reg});
+  return pick.sort(function(a,b){return a.d<b.d?-1:1})}
+function wrapHid(d){try{return localStorage.getItem("wrap-hide")===d}catch(e){return false}}
+function wrapHide(d){try{localStorage.setItem("wrap-hide",d)}catch(e){}render()}
+function wrapMoveBtns(p,from){
+  var sg=wrapSuggest(from,p),all=wrapLater(from);
+  if(!all.length)return '';
+  return '<div class="wr-acts">'+sg.map(function(x){return '<button class="wr-chip" onclick="wrapMove('+p.id+',\''+x.d+'\')">→ '+esc(md(x.d))+'（'+wk(x.d)+'）<span>'+(x.same?'📍'+esc(x.r)+'・':'')+x.n+' 項</span></button>'}).join("")
+   +'</div>'}
+function wrapSel(p,from){var all=wrapLater(from);if(!all.length)return '';return '<select class="wr-sel" aria-label="移到其他日期" onchange="if(this.value)wrapMove('+p.id+',this.value)"><option value="">其他日期…</option>'+all.map(function(d){return '<option value="'+d+'">'+esc(md(d))+'（'+wk(d)+'）</option>'}).join("")+'</select>'}
+function wrapRow(p,from,kind){
+  return '<div class="wr-row'+(wrapLim(p)?' lim':'')+'"><div class="wr-name">'+(planTime(p)&&kind==="today"?'<span class="sub">'+esc(planTime(p))+'</span> ':'')+esc(p.name)
+   +(kind==="back"?' <span class="sub">（原訂 '+esc(md(p.date))+'）</span>':'')+(wrapLim(p)?' <span class="tag r">⏳ 錯過難補</span>':'')+'</div>'
+   +wrapMoveBtns(p,from)
+   +'<div class="wr-acts2">'+wrapSel(p,from)+(kind==="today"?'<button class="bt" onclick="tgl('+p.id+')">✓ 其實做了</button><button class="bt" onclick="wrapPark('+p.id+')">⏭ 放進待補區</button>'
+      :'<button class="bt" onclick="wrapMove('+p.id+',\''+p.date+'\')">↩ 放回原日</button>')+'</div></div>'}
+function wrapCard(){
+  var d=wrapDay();if(!d||wrapHid(d))return "";var L=wrapLeft(d);if(!L.length)return "";
+  var isT=d===today();
+  return '<div class="card wrapcard"><div class="l"><b>🌙 '+(isT?'今天':'昨天（'+esc(md(d))+'）')+'的收尾</b><button class="bt" onclick="wrapHide(\''+d+'\')">先不處理</button></div>'
+   +'<div class="sub" style="margin:2px 0 6px">還有 '+L.length+' 項沒做到。挑一天補上，或先放進待補區，之後再排。</div>'
+   +L.map(function(p){return wrapRow(p,d,"today")}).join("")+'</div>'}
+function backlogCard(){
+  var t=today(),L=S.plan.filter(function(p){return p.skip&&!p.done&&p.time!=="23:59"}).sort(function(a,b){return (wrapLim(b)-wrapLim(a))||(a.date<b.date?-1:1)});
+  if(!L.length)return "";var from=t;var ti=tripInfo();if(ti.n&&t<ti.first)from=addDays(ti.first,-1);
+  return '<div class="card backlog"><b>📥 待補區</b> <span class="sub">'+L.length+' 項</span>'+L.map(function(p){return wrapRow(p,from,"back")}).join("")+'</div>'}
+function wrapMove(id,d){var p=S.plan.filter(function(x){return x.id===id})[0];if(!p||!d)return;var od=p.date,os=p.skip;p.date=d;p.skip=false;save();render();
+  toast("已移到 "+md(d)+"：「"+p.name+"」","復原",function(){p.date=od;p.skip=os;save();render()})}
+function wrapPark(id){var p=S.plan.filter(function(x){return x.id===id})[0];if(!p)return;p.skip=true;save();render();
+  toast("已放進待補區：「"+p.name+"」","復原",function(){p.skip=false;save();render()})}
 function vHome(){
   var ti=tripInfo(),t=today();
-  if(!ti.n||t<ti.first||t>ti.last)return quickBar()+vHomeBase();
+  var wr=wrapCard(),bl=backlogCard();
+  if(!ti.n||t<ti.first||t>ti.last)return quickBar()+wr+vHomeBase()+bl;
   var x=dayData(t);x.fc=true;
-  return quickBar()+dayHead(t,x,"📍 今天")+secPlan(t,x)+secTix(t,x)+secTrans(t,x)+secExp(t,x)+secPhoto(t,x)+secGosh(t,x)+secResv(t,x)
+  return quickBar()+wr+dayHead(t,x,"📍 今天")+secPlan(t,x)+bl+secTix(t,x)+secTrans(t,x)+secExp(t,x)+secPhoto(t,x)+secGosh(t,x)+secResv(t,x)
    +(x.note?'<div class="card"><b>📝 今日備註</b><div style="margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere">'+esc(x.note)+'</div></div>':'')
    +fxCard()+budgetCard(budgetInfo())+'<div class="sub" style="text-align:center;margin:8px 0">'+esc(S.trip)+'</div>'}
 /* --- 每日旅行總覽 / 當天詳情 --- */

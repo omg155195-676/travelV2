@@ -300,6 +300,9 @@ window.makeWorld = function (ID, cfg) {
     if (np) { var nc = nextCard(np); root.insertBefore(nc, after.nextSibling); after = nc; }
 
     /* 其餘原有卡片（天氣、出發前、預算、旅行中的今日區塊…）順序不變，前面加一個區塊標題 */
+    /* 每晚收尾放在旅行主卡前（晚上最需要它）；待補區接在下一個行程後 */
+    var wc = root.querySelector(":scope > .wrapcard"); if (wc) root.insertBefore(wc, trip);
+    var bl = root.querySelector(":scope > .backlog"); if (bl) { root.insertBefore(bl, after.nextSibling); after = bl; }
     var phase = !ti.n ? "📝 開始規劃" : inTrip ? "📋 今天的細節" : (d > ti.last ? "🌸 旅程回顧" : "🧳 旅行準備");
     if (after.nextSibling) root.insertBefore(h("div", "ds-sec", phase), after.nextSibling);
   }
