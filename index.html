@@ -168,6 +168,8 @@ a{color:var(--ac)}
 .pd-hero .pd-hero-txt{padding-right:64px}
 .pd-hint{text-align:center;font-size:12px;opacity:.7;margin:-4px 0 12px}
 @media (hover:hover) and (pointer:fine){.pd-hint{display:none}}
+
+.pvt{margin-top:12px;padding:12px;border:1px dashed var(--bd);border-radius:12px;background:var(--soft)}
 </style></head><body>
 <header class="top"><span id="net"></span><h1 id="ttl" role="button" onclick="tripPicker()">旅行控制中心</h1><button class="tdy" onclick="goToday()">📍 今天</button></header>
 <main id="v"></main>
@@ -182,9 +184,11 @@ function themeChar(){var p=themePack();return (p&&p.char)||""}</script>
 <link rel="stylesheet" href="themes/world/world.css">
 <link rel="stylesheet" href="themes/croc/theme.css">
 <link rel="stylesheet" href="themes/world/themes.css">
+<link rel="stylesheet" href="themes/private/private.css">
 <script src="themes/world/engine.js"></script>
 <script src="themes/croc/theme.js"></script>
 <script src="themes/world/themes.js"></script>
+<script src="themes/private/private.js"></script>
 <input type="file" id="imp" accept=".json,application/json" style="display:none" onchange="importJson(this)">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -314,7 +318,7 @@ function migrate(o){
   d.rates=normRates(d.rates);
   d.trip=sStr(d.trip,"我的旅行")||"我的旅行";d.budget=Math.max(0,sNum(d.budget,30000));
   d.defPeople=Math.min(99,Math.max(1,Math.floor(sNum(d.defPeople,1))));
-  d.ac=(["sakura","maple","sea","classic"].indexOf(d.ac)>=0||(typeof THEME_PACKS!=="undefined"&&THEME_PACKS[d.ac]))?d.ac:"sakura";
+  d.ac=(["sakura","maple","sea","classic","PRIVATE_THEME_XIAOMALEI"].indexOf(d.ac)>=0||(typeof THEME_PACKS!=="undefined"&&THEME_PACKS[d.ac]))?d.ac:"sakura";
   d.tid=sStr(d.tid,"t1")||"t1";
   if(d.cover!==undefined)d.cover=sStr(d.cover);
   normBlock(d,old);
@@ -1319,6 +1323,16 @@ function saveSettings(){
   var fm=fxMeta();Object.keys(nr).forEach(function(k){if(k!=="TWD"&&Math.abs(nr[k]-S.rates[k])>1e-12){fm.manualOverride[k]=nr[k]}});
   S.trip=n;S.budget=b;S.defPeople=p;S.rates=nr;save();render();toast("✅ 已儲存設定")}
 function setTheme(a){S.ac=a;save();render()}
+/* 私人主題：隱藏的解鎖區（主題色標題連點 5 下）。不顯示任何主題名稱，解鎖後才會出現在主題清單。 */
+var pvtN=0,pvtT=0,pvtOpen=false;
+function pvtTap(){var n=Date.now();pvtN=(n-pvtT<700)?pvtN+1:1;pvtT=n;if(pvtN>=5){pvtN=0;pvtOpen=!pvtOpen;render()}}
+function pvtBox(){
+  if(!pvtOpen)return"";
+  if(typeof pvtUnlocked==="function"&&pvtUnlocked())return '<div class="pvt"><div class="sub">🔓 私人主題已在這台裝置解鎖。</div><button class="btn sec sm" style="margin-top:8px" onclick="pvtLock()">重新上鎖</button></div>';
+  return '<div class="pvt"><label for="pvt_pw">🔒 私人密碼</label><div class="row"><div><input id="pvt_pw" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" style="height:44px" onkeydown="if(event.key===\'Enter\')pvtGo()"></div><div style="flex:none"><button class="btn sm" style="height:44px;margin:0" onclick="pvtGo()">解鎖</button></div></div><div class="sub" id="pvt_m" style="margin-top:6px"></div></div>'}
+function pvtGo(){var i=$("pvt_pw"),m=$("pvt_m");if(!i||!i.value)return;if(m)m.textContent="驗證中…";
+  if(typeof pvtUnlock!=="function"||!window.crypto||!crypto.subtle){if(m)m.textContent="這個瀏覽器不支援。";return}
+  pvtUnlock(i.value).then(function(ok){i.value="";if(!ok){if(m)m.textContent="密碼不正確。";return}pvtOpen=false;S.ac="PRIVATE_THEME_XIAOMALEI";save();render();toast("🔓 已解鎖")})}
 var AUTOPACK=true;
 function stashTrip(){var d=tripInfo();S.trips=S.trips||[];
   S.trips.push({id:S.tid,cover:S.cover,name:S.trip,budget:S.budget,defPeople:S.defPeople,rates:Object.assign({},S.rates),items:S.items,plan:S.plan,gosh:S.gosh,trans:S.trans,resv:S.resv,pack:S.pack,dayNotes:S.dayNotes,start:d.first,end:d.last})}
@@ -1364,7 +1378,7 @@ function vSet(){
    +'<label>匯率（1 外幣 = ? 台幣）</label><div class="sub" style="margin-bottom:4px">只影響「之後新增」的記帳；既有每筆記帳已固定當時匯率，不會被改動。在這裡改過的幣別會變成「手動匯率」，不會被自動更新覆蓋。</div><div class="row" style="flex-wrap:wrap">'
    +Object.keys(S.rates).filter(function(k){return k!=="TWD"}).map(function(k){return '<div style="min-width:44%"><label>'+esc(k)+'</label><input id="s_r_'+esc(k)+'" type="number" inputmode="decimal" step="any" min="0" value="'+esc(S.rates[k])+'"></div>'}).join("")+'</div>'
    +'<button class="btn" onclick="saveSettings()">儲存設定</button></div>'
-   +'<div class="card"><b>主題色</b><div class="seg" style="margin-top:8px;flex-wrap:wrap">'+th.map(function(t){return '<button class="'+(S.ac===t[0]?'on':'')+'" onclick="setTheme(\''+t[0]+'\')">'+t[1]+'</button>'}).join("")+'</div></div>'
+   +'<div class="card"><b onclick="pvtTap()" style="-webkit-user-select:none;user-select:none">主題色</b><div class="seg" style="margin-top:8px;flex-wrap:wrap">'+th.map(function(t){return '<button class="'+(S.ac===t[0]?'on':'')+'" onclick="setTheme(\''+t[0]+'\')">'+t[1]+'</button>'}).join("")+'</div>'+pvtBox()+'</div>'
    +'<div class="card"><b>備份與還原</b><div class="sub" style="margin:4px 0 8px">資料只存在這個瀏覽器。換手機或清除瀏覽資料前，請先匯出完整備份。</div><div class="row"><div><button class="btn" onclick="exportJson()">⬇️ 匯出完整備份</button></div><div><button class="btn sec" onclick="pickImport()">⬆️ 匯入備份</button></div></div>'
    +(lb.length?'<label>本機自動備份</label>'+lb.map(function(k,i){return '<div class="item" style="align-items:center"><div class="sub">'+esc(bkLabel(k))+'</div><div class="amt"><button class="bt" onclick="restoreLocal('+i+')">還原</button><button class="bt d" onclick="delLocal('+i+')">刪除</button></div></div>'}).join(""):'')+'</div>'
    +'<div class="card"><b>開始新旅程</b><div class="sub" style="margin:4px 0">目前這趟會收起來，可從頂端旅程名稱切換回來；也會出現在「回顧」。</div><label>新旅程名稱</label><input id="nt" placeholder="例如：2027 京都" maxlength="40"><button class="btn sec" onclick="archiveTrip()">開始新旅程</button></div>'
@@ -1710,5 +1724,6 @@ VIEWS.set=function(){var h=_crocSet(),c='<div class="card"><div class="l"><b>�
 
 for(var _tk in THEME_PACKS){try{if(THEME_PACKS[_tk].init)THEME_PACKS[_tk].init()}catch(e){}}
 boot();
+if(window.pvtReady)pvtReady.then(function(ok){if(S.ac==="PRIVATE_THEME_XIAOMALEI"){if(!ok){S.ac="sakura";save()}render()}});
 </script><script>if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
 </body></html>

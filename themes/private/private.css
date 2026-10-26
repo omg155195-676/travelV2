@@ -1,0 +1,46 @@
+/* ===== 私人主題外觀（PRIVATE_THEME_XIAOMALEI）：淡粉 × 奶油白 × 柔和粉紅 × 淺棕 × 暖灰，像她自己的旅行手帳 =====
+   這裡只有配色與排版，不含角色圖（角色圖加密在 pack.json）。 */
+html[data-ac=PRIVATE_THEME_XIAOMALEI]{
+  --ac:#d77a8f;--acd:#f0a8b8;--acx:#fff;--g1:#fde7ea;--g2:#f6e6da;--tx:#4a3a3c;--sub:#8e7a78;--bg:#fbf1ee;--card:#fffaf7;--bd:#f0d9d6;--soft:#fdecef;
+  --leaf:#c46b80;--leaf-soft:#fbe7eb;--leaf-2:#e8a3b2;--pink:#e07f95;--pink-soft:#fde6ea;--cream:#fff8f2;--paper-2:#f5e8e0;--sky:#fdf0f2;--sun:#f3c66b;--ok:#6fa27a;--bad:#d9605c;
+  --w1:#e8a3b2;--w2:#b48f7c;--w3:#f3c66b;--w4:#fff6f2;--wk:#5b4544;
+  --r-xl:22px;--r-lg:18px;--r-md:14px;--r-sm:10px;
+  --sh-1:0 1px 2px rgba(150,90,90,.06),0 4px 12px rgba(150,90,90,.07);--sh-2:0 2px 4px rgba(150,90,90,.07),0 10px 24px rgba(150,90,90,.10)}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] body{background:#fbf1ee}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cg transform='translate%2820,26%29 rotate%28-12%29 scale%280.28%29' opacity='0.35'%3E%3Cpath d='M32 54 C10 38 6 26 12 18 C18 10 28 12 32 20 C36 12 46 10 52 18 C58 26 54 38 32 54 Z' fill='%23f2a7b5'/%3E%3C/g%3E%3Cg transform='translate%28150,40%29 rotate%2810%29 scale%280.32%29' opacity='0.3'%3E%3Cpath transform='rotate%280 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f6c3cc'/%3E%3Cpath transform='rotate%2872 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f6c3cc'/%3E%3Cpath transform='rotate%28144 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f6c3cc'/%3E%3Cpath transform='rotate%28216 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f6c3cc'/%3E%3Cpath transform='rotate%28288 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f6c3cc'/%3E%3C/g%3E%3Cg transform='translate%2880,120%29 rotate%280%29 scale%280.22%29' opacity='0.3'%3E%3Cpath d='M32 54 C10 38 6 26 12 18 C18 10 28 12 32 20 C36 12 46 10 52 18 C58 26 54 38 32 54 Z' fill='%23e9b9a6'/%3E%3C/g%3E%3Cg transform='translate%28178,160%29 rotate%28-20%29 scale%280.26%29' opacity='0.32'%3E%3Cpath transform='rotate%280 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f2a7b5'/%3E%3Cpath transform='rotate%2872 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f2a7b5'/%3E%3Cpath transform='rotate%28144 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f2a7b5'/%3E%3Cpath transform='rotate%28216 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f2a7b5'/%3E%3Cpath transform='rotate%28288 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f2a7b5'/%3E%3C/g%3E%3Cg transform='translate%2830,170%29 rotate%2815%29 scale%280.2%29' opacity='0.26'%3E%3Cpath d='M32 54 C10 38 6 26 12 18 C18 10 28 12 32 20 C36 12 46 10 52 18 C58 26 54 38 32 54 Z' fill='%23f6c3cc'/%3E%3C/g%3E%3C/svg%3E"),linear-gradient(rgba(201,140,140,.07) 1px,transparent 1px) 0 0/100% 26px,linear-gradient(180deg,#fdf3f1,#f9ebe6)}
+/* 角色圖：在自己的位置裡，維持比例 */
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .xm-art{display:flex;align-items:flex-end;justify-content:center}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .xm-art img{display:block;max-width:100%;max-height:100%;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(120,70,70,.12))}
+/* 卡片：手帳紙＋小貼紙 */
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .ds-main{position:relative}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .ds-main:after{content:"";position:absolute;right:16px;top:-7px;width:44px;height:14px;border-radius:2px;background:repeating-linear-gradient(45deg,rgba(232,163,178,.55) 0 5px,rgba(255,255,255,.55) 5px 10px);transform:rotate(3deg);pointer-events:none}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .ch-trip{background:var(--cream) linear-gradient(rgba(201,140,140,.08) 1px,transparent 1px) 0 0/100% 24px;border-color:#efd3cf}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .ch-year{background:#fde3e8;color:#b5607a}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .ch-count-n,html[data-ac=PRIVATE_THEME_XIAOMALEI] .ch-count-txt .big{color:#d77a8f}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .ch-count-side .thc{width:96px;height:96px}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .ch-trip-deco .thc{width:84px;height:84px}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .ch-big .ch-q-img{width:66px;height:66px}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .ct-ticket,html[data-ac=PRIVATE_THEME_XIAOMALEI] [data-ctab=resv] .card .item{background:#fff5f4 repeating-linear-gradient(135deg,transparent 0 6px,rgba(232,163,178,.10) 6px 7px);border-color:#f0d3d2}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .ct-ticket:before{background:var(--w1)}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .cx-head-img,html[data-ac=PRIVATE_THEME_XIAOMALEI] .cp-head-img,html[data-ac=PRIVATE_THEME_XIAOMALEI] .cph-head-img,html[data-ac=PRIVATE_THEME_XIAOMALEI] .ct-head-img,html[data-ac=PRIVATE_THEME_XIAOMALEI] .cs-head-img{width:72px;height:72px}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .cw-img{width:84px;height:84px}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .pd-art.pday-char{width:80px;height:80px;border-radius:50%;background:var(--soft);overflow:hidden}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .pd-art.pday-char>.thc{width:74px;height:74px}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .thc-pv>.thc{width:64px;height:72px}
+/* 日期列：目前日期上方的角色頭像，切換時輕輕跳一下 */
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .pd-strip{padding-top:30px}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .pd-d.on{background:#e8a3b2;border-color:#e8a3b2;color:#fff}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .pd-d.is-today:not(.on){border-color:#e07f95}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .xm-dot{position:absolute;left:50%;top:-28px;width:32px;height:32px;margin-left:-16px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(150,80,90,.25);overflow:hidden;animation:xmHop .45s ease-out}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] .xm-dot img{width:100%;height:100%;object-fit:cover;object-position:50% 18%}
+@keyframes xmHop{0%{transform:translateY(6px) scale(.85);opacity:0}60%{transform:translateY(-3px) scale(1.04);opacity:1}100%{transform:none}}
+@media (prefers-reduced-motion:reduce){html[data-ac=PRIVATE_THEME_XIAOMALEI] .xm-dot{animation:none}}
+/* 導航小圖示 */
+html[data-ac=PRIVATE_THEME_XIAOMALEI] #nav .thc-nav img{width:28px;height:24px;object-fit:contain}
+html[data-ac=PRIVATE_THEME_XIAOMALEI] #nav button.on{background:var(--soft);color:var(--ac)}
+@media (max-width:359px){html[data-ac=PRIVATE_THEME_XIAOMALEI] .cx-head-img,html[data-ac=PRIVATE_THEME_XIAOMALEI] .cw-img,html[data-ac=PRIVATE_THEME_XIAOMALEI] .cp-head-img{width:56px;height:56px}html[data-ac=PRIVATE_THEME_XIAOMALEI] .pd-art.pday-char{width:60px;height:60px}html[data-ac=PRIVATE_THEME_XIAOMALEI] .pd-art.pday-char>.thc{width:56px;height:56px}}
+@media (prefers-color-scheme:dark){
+  html[data-ac=PRIVATE_THEME_XIAOMALEI]:not([data-theme="light"]) body:before{filter:brightness(.38) saturate(.85)}
+  html[data-ac=PRIVATE_THEME_XIAOMALEI]:not([data-theme="light"]) .ch-trip,html[data-ac=PRIVATE_THEME_XIAOMALEI]:not([data-theme="light"]) .ct-ticket{background:var(--card)}
+}
