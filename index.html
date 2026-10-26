@@ -105,6 +105,12 @@ a{color:var(--ac)}
 <div id="md" class="hide"></div>
 <div id="ts" class="hide"></div>
 <div id="zm" class="hide"><img alt=""></div>
+<script>/* 主題包註冊表：角色主題放在 themes/<名稱>/，用 registerTheme() 加進來 */
+var THEME_PACKS={};function registerTheme(id,pack){THEME_PACKS[id]=pack}
+function themePack(){return (typeof S!=="undefined"&&S&&THEME_PACKS[S.ac])||null}
+function themeChar(){var p=themePack();return (p&&p.char)||""}</script>
+<link rel="stylesheet" href="themes/croc/theme.css">
+<script src="themes/croc/theme.js"></script>
 <input type="file" id="imp" accept=".json,application/json" style="display:none" onchange="importJson(this)">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -234,7 +240,7 @@ function migrate(o){
   d.rates=normRates(d.rates);
   d.trip=sStr(d.trip,"我的旅行")||"我的旅行";d.budget=Math.max(0,sNum(d.budget,30000));
   d.defPeople=Math.min(99,Math.max(1,Math.floor(sNum(d.defPeople,1))));
-  d.ac=["sakura","maple","sea","classic"].indexOf(d.ac)>=0?d.ac:"sakura";
+  d.ac=(["sakura","maple","sea","classic"].indexOf(d.ac)>=0||(typeof THEME_PACKS!=="undefined"&&THEME_PACKS[d.ac]))?d.ac:"sakura";
   d.tid=sStr(d.tid,"t1")||"t1";
   if(d.cover!==undefined)d.cover=sStr(d.cover);
   normBlock(d,old);
@@ -329,6 +335,7 @@ function render(){
     try{html=(VIEWS[tab]||VIEWS.home)()}catch(e){showErr(e);html='<div class="card"><b>⚠️ 發生錯誤</b><div class="sub" style="margin:6px 0">資料仍然保留，請稍後再試。</div><button class="btn sec" onclick="go(\'home\')">回首頁</button><button class="btn sec" onclick="exportJson()">先匯出完整備份</button></div>'}
     $("v").innerHTML=(LOADERR?'<div class="card warn"><b>⚠️ 資料提醒</b><div class="sub" style="margin-top:4px">'+esc(LOADERR)+'</div></div>':'')+html;
     if(VIEWS["after_"+tab])VIEWS["after_"+tab]();
+    try{var tp=themePack();if(tp&&tp.decorate)tp.decorate(tab,$("v"))}catch(e){}
     netRefresh();
     if(scrollFocus){scrollFocus=false;var fc=$("focus-card");if(fc){try{fc.scrollIntoView({block:"start"});window.scrollBy(0,-70)}catch(e){}}}
   }catch(e){showErr(e)}
@@ -1212,7 +1219,7 @@ function tripPicker(){
    +'<div class="card" style="margin-top:12px"><b>＋ 新增旅程</b><div class="sub" style="margin:4px 0">目前這趟會保留，隨時可以切換回來。</div><input id="tp_n" placeholder="例如：2027 京都" maxlength="40"><button class="btn" style="margin-top:8px" onclick="newTripFromPicker()">建立並切換</button></div>',null,null)}
 function clearExp(){confirmBox("刪除目前旅程的全部記帳？（可立即復原）","刪除全部",function(){var old=S.items;S.items=[];save();render();toast("已刪除全部記帳","復原",function(){S.items=old;save();render()})})}
 function vSet(){
-  var th=[["sakura","🌸 櫻花"],["maple","🍁 楓紅"],["sea","🌊 海藍"],["classic","🍵 抹茶"]],lb=localBackups();
+  var th=[["sakura","🌸 櫻花"],["maple","🍁 楓紅"],["sea","🌊 海藍"],["classic","🍵 抹茶"]].concat(Object.keys(THEME_PACKS).map(function(k){return [k,THEME_PACKS[k].label]})),lb=localBackups();
   return fxCard()+'<div class="card"><b>旅程設定</b><label>旅程名稱</label><input id="s_n" value="'+esc(S.trip)+'" maxlength="40">'
    +'<div class="row"><div><label>總預算（NT$）</label><input id="s_b" type="number" inputmode="decimal" min="0" value="'+esc(S.budget)+'"></div><div><label>預設人數</label><input id="s_p" type="number" inputmode="numeric" min="1" max="99" value="'+esc(S.defPeople)+'"></div></div>'
    +'<label>匯率（1 外幣 = ? 台幣）</label><div class="sub" style="margin-bottom:4px">只影響「之後新增」的記帳；既有每筆記帳已固定當時匯率，不會被改動。在這裡改過的幣別會變成「手動匯率」，不會被自動更新覆蓋。</div><div class="row" style="flex-wrap:wrap">'
@@ -1487,7 +1494,7 @@ try{CROC_OFF=localStorage.getItem("croc-off")==="1"}catch(e){}
  +'.ctip .csub{font-size:12px;color:#8a6f7b;margin-top:2px}'
  +'.ctip .cx{flex:none;border:0;background:none;color:#8a6f7b;font-size:16px;min-width:32px;min-height:32px;cursor:pointer;padding:0;margin:0}';
  document.head.appendChild(st)})();
-function crocOn(){return !CROC_OFF&&!crocHid}
+function crocOn(){return themeChar()==="croc"&&!CROC_OFF&&!crocHid}
 function crocBox(k,msg,sub,cls){
   return '<div class="ctip '+(cls||"")+'"><img class="cimg" alt="" src="'+(CROC_IMG[k]||"")+'"><div class="cbub"><div>'+esc(msg)+'</div>'+(sub?'<div class="csub">'+esc(sub)+'</div>':'')+'</div>'
    +(cls&&cls.indexOf("nox")>=0?'':'<button class="cx" aria-label="先隱藏小鱷魚提示" onclick="crocHide()">✕</button>')+'</div>'}
@@ -1540,7 +1547,7 @@ VIEWS.pack=function(){var h="";
 /* 完成當天最後一項行程時，給一句小鼓勵（只是 toast，不動資料） */
 var _crocTgl=tgl;
 tgl=function(id){var p=S.plan.filter(function(x){return x.id===id})[0];_crocTgl(id);
-  try{if(CROC_OFF||!p||!p.done)return;var its=S.plan.filter(function(x){return x.date===p.date&&x.time!=="23:59"&&!x.skip});
+  try{if(CROC_OFF||themeChar()!=="croc"||!p||!p.done)return;var its=S.plan.filter(function(x){return x.date===p.date&&x.time!=="23:59"&&!x.skip});
     if(its.length>=2&&its.every(function(x){return x.done}))toast("🐊 今天的行程都完成囉，辛苦了～")}catch(e){}};
 /* 交通表單：跨日提醒（只是提示，不改欄位） */
 function crocTransUpd(){
@@ -1548,7 +1555,7 @@ function crocTransUpd(){
   var d=$("t_d")&&$("t_d").value,a=$("t_a")&&$("t_a").value,tt=$("t_t")&&$("t_t").value,te=$("t_e")&&$("t_e").value,h="";
   if(d&&a&&a>d)h=crocBox("train","這趟交通是跨日的，抵達日期記得看清楚喔！",md(d)+" "+(tt||"--:--")+" 出發 → "+md(a)+" "+(te||"--:--")+" 抵達","sm nox");
   else if(d&&a&&a===d&&tt&&te&&te<tt)h=crocBox("train","抵達時間比出發早，是不是要按「隔天抵達」呢？","","sm nox");
-  el.innerHTML=CROC_OFF?"":h}
+  el.innerHTML=(CROC_OFF||themeChar()!=="croc")?"":h}
 var _crocEdit=editTrans;
 editTrans=function(){_crocEdit.apply(this,arguments);
   try{var bt=document.querySelector('#md button[onclick="tfNext()"]');if(bt&&!$("ctipt")){bt.insertAdjacentHTML("afterend",'<div id="ctipt" style="margin-top:6px"></div>');crocTransUpd()}}catch(e){}};
@@ -1557,11 +1564,12 @@ tfNext=function(){_crocNext();crocTransUpd()};
 ["input","change"].forEach(function(ev){document.addEventListener(ev,function(e){var id=e.target&&e.target.id;if(id==="t_d"||id==="t_t"||id==="t_a"||id==="t_e")crocTransUpd()})});
 /* 設定頁：開關 */
 var _crocSet=VIEWS.set;
-VIEWS.set=function(){var h=_crocSet(),c='<div class="card"><div class="l"><b>🐊 小鱷魚提示</b><button class="btn sec sm" onclick="crocToggle()">'+(CROC_OFF?'開啟':'關閉')+'</button></div><div class="sub" style="margin-top:4px">'
+VIEWS.set=function(){var h=_crocSet();if(themeChar()!=="croc")return h;var c='<div class="card"><div class="l"><b>🐊 小鱷魚提示</b><button class="btn sec sm" onclick="crocToggle()">'+(CROC_OFF?'開啟':'關閉')+'</button></div><div class="sub" style="margin-top:4px">'
   +(CROC_OFF?'目前已關閉，不會出現小鱷魚。':'首頁、行李頁和交通表單會出現簡短提示；只是提醒，不會改動任何資料。')+'（只記在這台裝置）</div></div>';
   var k='<div class="card"><b>備份與還原</b>';return h.indexOf(k)>=0?h.replace(k,c+k):h+c};
 
 
+for(var _tk in THEME_PACKS){try{if(THEME_PACKS[_tk].init)THEME_PACKS[_tk].init()}catch(e){}}
 boot();
 </script><script>if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
 </body></html>
