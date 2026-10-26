@@ -27,9 +27,15 @@
     if (loaded) return loaded; loaded = d;
     var I = d.img, T = d.text;
     function pic(k) { var e = document.createElement("img"); e.src = I[k] || I.smile; e.alt = ""; e.decoding = "async"; return e; }
-    var POSE = { map: "map", front: "full", walk: "travel", happy: "happy", depart: "depart", camera: "camera", train: "travel", ticket: "ico-ticket",
-      eat: "eat", rest: "relax", sleep: "sleep", tired: "tired", rain: "pout", cold: "shy", hot: "tired", cloudy: "think", error: "surprised",
-      "budget-ok": "smile", "budget-near": "puzzled", "budget-over": "pout", idea: "think", budgetOk: "smile", budgetNear: "puzzled", budgetOver: "pout" };
+    /* 情境 → 角色圖（全部來自角色設定圖，只縮放、裁切、去背） */
+    var POSE = { map: "map", front: "full", walk: "pull", happy: "happy", depart: "depart", camera: "camera", train: "train", ticket: "plane",
+      eat: "eat", rest: "rest", sleep: "sleep", tired: "tired", rain: "troubled", cold: "blush", hot: "huff", cloudy: "ponder", error: "panic",
+      idea: "idea", "budget-ok": "content", "budget-near": "troubled", "budget-over": "panic", budgetOk: "content", budgetNear: "troubled", budgetOver: "panic" };
+    /* 各頁頁首用最貼切的動作 */
+    var HEAD = { pack: "pack", trans: "train", resv: "plane", gosh: "idea", list: "work", days: "map", stat: "work", map: "map", rev: "scenery", book: "work",
+      plan: "map", photo: "camera", tix: "plane", set: "pull" };
+    /* 日期列頭像：依日期輪流換表情 */
+    var DOT = ["wave", "happy", "hope", "smile", "excited", "wink", "sweet", "laugh"];
     makeWorld(ID, {
       label: d.label,
       art: function (k) { var s = document.createElement("span"); s.className = "xm-art xm-" + k; s.appendChild(pic(POSE[k] || k)); return s; },
@@ -37,19 +43,25 @@
       after: function (tab, root) {
         try { xmNav(); } catch (e) {}
         if (tab === "set") root.querySelectorAll(".card>.l>b").forEach(function (b) { if (/小鱷魚提示/.test(b.textContent)) b.textContent = "💬 " + (d.name || "旅伴") + "提示"; });
-        /* 記帳：預算控制得很好（花不到一半）時，換成開心的表情 */
+        /* 記帳：預算控制得很好（花不到一半）時，開心比讚 */
         if (tab === "add") {
           var w = root.querySelector(".cw-wallet .xm-art img");
-          try { if (w && S.budget > 0 && sumTwd(S.items) / S.budget < 0.5 && S.items.length) w.src = I.heart; } catch (e) {}
+          try { if (w && S.budget > 0 && sumTwd(S.items) / S.budget < 0.5 && S.items.length) w.src = I.thumb; } catch (e) {}
+        }
+        /* 頁首：每頁用最貼切的動作 */
+        if (HEAD[tab]) {
+          var hi = root.querySelector(".cx-head .xm-art img, .cp-head .xm-art img, .cph-head .xm-art img, .ct-head .xm-art img, .cs-head .xm-art img");
+          if (hi && I[HEAD[tab]]) hi.src = I[HEAD[tab]];
         }
         /* 行程：目前日期上方的角色頭像（切換日期時輕輕跳一下） */
         if (tab === "plan") {
           var on = root.querySelector(".pd-d.on");
-          if (on && !on.querySelector(".xm-dot")) { var a = document.createElement("span"); a.className = "xm-dot"; a.appendChild(pic(["smile", "happy", "wink", "sweet"][(+(on.querySelector(".pd-dn") || {}).textContent.replace(/\D/g, "") || 0) % 4])); on.appendChild(a); }
+          if (on && !on.querySelector(".xm-dot")) { var a = document.createElement("span"); a.className = "xm-dot"; a.appendChild(pic(on.classList.contains("is-today") ? "wave" : DOT[(+(on.querySelector(".pd-dn") || {}).textContent.replace(/\D/g, "") || 0) % DOT.length])); on.appendChild(a); }
         }
         /* 首頁：旅行主卡旁陪伴的角色（拿相機、拉行李箱） */
         if (tab === "home") {
-          var deco = root.querySelector(".ch-trip-deco .xm-art img"); if (deco) deco.src = I.travel;
+          var deco = root.querySelector(".ch-trip-deco .xm-art img"); if (deco) deco.src = I.pull;
+          var big = root.querySelector(".ch-big .xm-art img"); if (big) big.src = I.work;
         }
       },
       nav: null
