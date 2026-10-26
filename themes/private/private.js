@@ -38,6 +38,7 @@
     var DOT = ["wave", "happy", "hope", "smile", "excited", "wink", "sweet", "laugh"];
     makeWorld(ID, {
       label: d.label,
+      forceLight: true,
       art: function (k) { var s = document.createElement("span"); s.className = "xm-art xm-" + k; s.appendChild(pic(POSE[k] || k)); return s; },
       text: T,
       after: function (tab, root) {

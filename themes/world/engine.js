@@ -741,6 +741,7 @@ window.makeWorld = function (ID, cfg) {
     label: cfg.label,
     char: cfg.char || "",
     world: true,
+    forceLight: !!cfg.forceLight,
     decorate: function (tab, root) { decorate(tab, root); if (cfg.after && on()) try { cfg.after(tab, root, { img: img, h: h }); } catch (e) {} },
     init: init
   });

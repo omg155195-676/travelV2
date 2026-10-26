@@ -418,7 +418,7 @@ function render(){
     if(scrollFocus){scrollFocus=false;var fc=$("focus-card");if(fc){try{fc.scrollIntoView({block:"start"});window.scrollBy(0,-70)}catch(e){}}}
   }catch(e){showErr(e)}
 }
-function applyTheme(){var r=document.documentElement,p=THEME_PACKS[S.ac||"sakura"];r.setAttribute("data-ac",S.ac||"sakura");if(p&&p.world)r.setAttribute("data-world","");else r.removeAttribute("data-world")}
+function applyTheme(){var r=document.documentElement,p=THEME_PACKS[S.ac||"sakura"];r.setAttribute("data-ac",S.ac||"sakura");if(p&&p.world)r.setAttribute("data-world","");else r.removeAttribute("data-world");/* 有些主題固定淺色（設計稿就是淺色），不跟系統深色模式切換 */if((p&&p.forceLight)||S.ac==="PRIVATE_THEME_XIAOMALEI"){r.setAttribute("data-theme","light");r.setAttribute("data-tf","")}else if(r.hasAttribute("data-tf")){r.removeAttribute("data-theme");r.removeAttribute("data-tf")}}
 function zoom(a){if(!a)return;var z=$("zm");z.querySelector("img").src=imgUrl(a);z.classList.remove("hide")}
 function imgUrl(a){if(!a)return "";if(/\.(jpe?g|png|webp)$/i.test(a))return a;if(a.charAt(0)==="L")return (typeof LURL!=="undefined"&&LURL[a])||"";if(typeof claude==="undefined"||!claude||typeof claude.use!=="function")return "";return "/_blob/"+encodeURIComponent(a)}
 function mapLink(q){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q)}

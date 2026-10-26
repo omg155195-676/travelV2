@@ -3,7 +3,7 @@
 html[data-ac=PRIVATE_THEME_XIAOMALEI]{
   --ac:#d77a8f;--acd:#f0a8b8;--acx:#fff;--g1:#fde7ea;--g2:#f6e6da;--tx:#4a3a3c;--sub:#8e7a78;--bg:#fbf1ee;--card:#fffaf7;--bd:#f0d9d6;--soft:#fdecef;
   --leaf:#c46b80;--leaf-soft:#fbe7eb;--leaf-2:#e8a3b2;--pink:#e07f95;--pink-soft:#fde6ea;--cream:#fff8f2;--paper-2:#f5e8e0;--sky:#fdf0f2;--sun:#f3c66b;--ok:#6fa27a;--bad:#d9605c;
-  --w1:#e8a3b2;--w2:#b48f7c;--w3:#f3c66b;--w4:#fff6f2;--wk:#5b4544;
+  --w1:#e8a3b2;--w2:#b48f7c;--w3:#f3c66b;--w4:#fff6f2;--wk:#5b4544;color-scheme:light;
   --r-xl:22px;--r-lg:18px;--r-md:14px;--r-sm:10px;
   --sh-1:0 1px 2px rgba(150,90,90,.06),0 4px 12px rgba(150,90,90,.07);--sh-2:0 2px 4px rgba(150,90,90,.07),0 10px 24px rgba(150,90,90,.10)}
 html[data-ac=PRIVATE_THEME_XIAOMALEI] body{background:#fbf1ee}
@@ -40,7 +40,4 @@ html[data-ac=PRIVATE_THEME_XIAOMALEI] .xm-dot img{width:100%;height:100%;object-
 html[data-ac=PRIVATE_THEME_XIAOMALEI] #nav .thc-nav img{width:28px;height:24px;object-fit:contain}
 html[data-ac=PRIVATE_THEME_XIAOMALEI] #nav button.on{background:var(--soft);color:var(--ac)}
 @media (max-width:359px){html[data-ac=PRIVATE_THEME_XIAOMALEI] .cx-head-img,html[data-ac=PRIVATE_THEME_XIAOMALEI] .cw-img,html[data-ac=PRIVATE_THEME_XIAOMALEI] .cp-head-img{width:56px;height:56px}html[data-ac=PRIVATE_THEME_XIAOMALEI] .pd-art.pday-char{width:60px;height:60px}html[data-ac=PRIVATE_THEME_XIAOMALEI] .pd-art.pday-char>.thc{width:56px;height:56px}}
-@media (prefers-color-scheme:dark){
-  html[data-ac=PRIVATE_THEME_XIAOMALEI]:not([data-theme="light"]) body:before{filter:brightness(.38) saturate(.85)}
-  html[data-ac=PRIVATE_THEME_XIAOMALEI]:not([data-theme="light"]) .ch-trip,html[data-ac=PRIVATE_THEME_XIAOMALEI]:not([data-theme="light"]) .ct-ticket{background:var(--card)}
-}
+/* 這個主題固定淺色（applyTheme 會設定 data-theme="light"），不需要深色版本 */
