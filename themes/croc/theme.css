@@ -1,78 +1,90 @@
 /* ===== 🐊 鱷魚旅行主題 =====
-   所有規則都限定在 html[data-ac=croc] 底下：
-   沒選這個主題時，這個檔案對畫面完全沒有影響。 */
+   所有規則都限定在 html[data-ac=croc] 底下：沒選這個主題時，對畫面完全沒有影響。
+   排版原則：鱷魚一律放在「自己的位置」（版面中的一欄，或事先留好的空白區），
+   不浮在文字、金額、按鈕上面；空間不夠時依序 縮小 → 移動 → 隱藏。 */
 
-/* --- 配色：玫瑰粉主色、鱷魚炭灰文字、行李箱暖黃點綴 --- */
+/* --- 配色：原本的粉紅為主，加上鱷魚灰、米白、少量自然綠與提醒黃 --- */
 html[data-ac=croc]{
-  --ac:#d9466f; --acd:#ff8fae;
-  --g1:#ff9ab5; --g2:#ffc46b;
-  --tx:#36323a; --sub:#7d7480;
-  --bg:#fff6f4;
-  --bd:#f3d3dc;
-  --soft:#ffe8ee;
-  --croc:#5b5b61; --cream:#fff3d6;
+  --ac:#d6457a; --acd:#ff8fb3;
+  --g1:#ff8fb3; --g2:#ffb79e;
+  --tx:#38333a; --sub:#7f7480;
+  --bg:#fff7f6;
+  --bd:#f3d4dd;
+  --soft:#ffe9ef;
+  --croc:#5c5c62; --cream:#fff8ec; --leaf:#7fb069; --sun:#ffc94d;
 }
 
 /* --- 角色共用 --- */
 html[data-ac=croc] .thc{display:block;object-fit:contain;pointer-events:none;-webkit-user-select:none;user-select:none}
 
-/* 卡片右側的小鱷魚（記帳總額、匯率） */
-html[data-ac=croc] .thc-side{position:relative}
-html[data-ac=croc] .thc-side>.thc{position:absolute;right:10px;top:34px;width:76px;height:62px}
-html[data-ac=croc] .thc-side .big{padding-right:84px}
-html[data-ac=croc] .thc-fx>.thc{top:10px;width:62px;height:54px}
+/* ---------- 記帳總支出卡：兩欄，鱷魚有自己的欄位 ---------- */
+html[data-ac=croc] .thc-top{display:flex;align-items:flex-start;gap:8px}
+html[data-ac=croc] .thc-main{flex:1;min-width:0}
+html[data-ac=croc] .thc-main .big{overflow-wrap:anywhere}
+html[data-ac=croc] .thc-aside{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+html[data-ac=croc] .thc-aside>button{float:none!important;margin:0!important}
+html[data-ac=croc] .thc-aside>.thc{width:58px;height:50px}
+/* 窄螢幕：先縮小，再不夠就隱藏（內容優先） */
+@media (max-width:359px){html[data-ac=croc] .thc-aside>.thc{width:44px;height:38px}}
+@media (max-width:319px){html[data-ac=croc] .thc-aside>.thc{display:none}}
 
-/* 首頁／行程頂部的漸層卡：右下角的小鱷魚 */
-html[data-ac=croc] .thc-hero{position:relative;overflow:hidden}
-html[data-ac=croc] .thc-hero>.thc{position:absolute;right:4px;bottom:2px;width:88px;height:72px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.18))}
+/* ---------- 頂部漸層卡：鱷魚只待在卡片上方留白（48px）裡，不碰標題 ---------- */
+html[data-ac=croc] .thc-hero{position:relative}
+html[data-ac=croc] .thc-hero>.thc{position:absolute;right:12px;top:4px;width:50px;height:42px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.15))}
 html[data-ac=croc] .thc-hero>div{position:relative;z-index:1}
 
-/* 空狀態：鱷魚在左、原本文字在右 */
+/* ---------- 空狀態：鱷魚在左、原本文字在右 ---------- */
 html[data-ac=croc] .thc-empty{display:flex;align-items:center;gap:10px}
-html[data-ac=croc] .thc-empty>.thc{flex:none;width:72px;height:64px}
+html[data-ac=croc] .thc-empty>.thc{flex:none;width:60px;height:54px}
 html[data-ac=croc] .thc-empty>.thc-txt{flex:1;min-width:0}
+@media (max-width:339px){html[data-ac=croc] .thc-empty>.thc{width:46px;height:42px}}
 
-/* 行程每天標題列前的小鱷魚頭 */
-html[data-ac=croc] .daybar.thc-day{position:relative;padding-left:40px}
-html[data-ac=croc] .daybar>.thc{position:absolute;left:6px;top:50%;margin-top:-13px;width:28px;height:26px;background:rgba(255,255,255,.9);border-radius:50%;padding:2px}
+/* ---------- 行程：每天標題列左側留好位置給小鱷魚頭 ---------- */
+html[data-ac=croc] .daybar.thc-day{position:relative;padding-left:44px}
+html[data-ac=croc] .daybar>.thc{position:absolute;left:7px;top:50%;margin-top:-15px;width:30px;height:30px;background:rgba(255,255,255,.92);border-radius:50%;padding:2px}
 
-/* 天氣卡：依天氣換表情 */
-html[data-ac=croc] .thc-wx{position:relative;padding-right:78px;min-height:84px}
-html[data-ac=croc] .thc-wx>.thc{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:62px;height:66px}
+/* ---------- 天氣卡：右側留好位置 ---------- */
+html[data-ac=croc] .thc-wx{position:relative;padding-right:74px;min-height:78px}
+html[data-ac=croc] .thc-wx>.thc{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:54px;height:58px}
+@media (max-width:339px){html[data-ac=croc] .thc-wx{padding-right:58px}html[data-ac=croc] .thc-wx>.thc{width:42px;height:46px;right:8px}}
 
-/* 錯誤卡 */
-html[data-ac=croc] .thc-err{position:relative;padding-right:80px}
-html[data-ac=croc] .thc-err>.thc{position:absolute;right:8px;top:10px;width:62px;height:60px}
+/* ---------- 錯誤卡：右側留好位置 ---------- */
+html[data-ac=croc] .thc-err{position:relative;padding-right:76px}
+html[data-ac=croc] .thc-err>.thc{position:absolute;right:10px;top:12px;width:56px;height:54px}
 
-/* 「更多」選單標題旁 */
-html[data-ac=croc] .sh-h .thc{width:46px;height:40px;margin-left:auto;margin-right:4px}
+/* ---------- 底部導航：只換小圖示，尺寸與原本 emoji 相同 ---------- */
+html[data-ac=croc] #nav .thc-nav{height:24px;display:flex;justify-content:center;align-items:center}
+html[data-ac=croc] #nav .thc-nav img{width:28px;height:24px;object-fit:contain;display:block}
+html[data-ac=croc] #nav button:not(.on) .thc-nav img{opacity:.78}
 
-/* 通知列（toast）：左邊放開心的小鱷魚 */
-html[data-ac=croc] #ts{padding-left:52px;background:#3b383f}
-html[data-ac=croc] #ts:before{content:"";position:absolute;left:8px;top:50%;width:38px;height:34px;margin-top:-17px;background:url(img/happy.webp) center/contain no-repeat}
-html[data-ac=croc] #ts button{color:#ffc46b}
+/* 「更多」選單標題旁（標題列本身是一列，鱷魚在列內） */
+html[data-ac=croc] .sh-h .thc{width:40px;height:34px;margin-left:auto;margin-right:4px}
+
+/* 通知列：左邊留好位置給開心的小鱷魚 */
+html[data-ac=croc] #ts{padding-left:50px;background:#3b383f}
+html[data-ac=croc] #ts:before{content:"";position:absolute;left:9px;top:50%;width:34px;height:30px;margin-top:-15px;background:url(img/happy.webp) center/contain no-repeat}
+html[data-ac=croc] #ts button{color:var(--sun)}
 
 /* 設定頁的主題預覽 */
 html[data-ac=croc] .thc-pv{display:flex;align-items:center;gap:12px;margin-top:10px;padding:10px;border-radius:14px;background:var(--soft)}
-html[data-ac=croc] .thc-pv>.thc{flex:none;width:52px;height:78px}
+html[data-ac=croc] .thc-pv>.thc{flex:none;width:48px;height:72px}
 
-/* 小提示框（既有小鱷魚提示）在這個主題下用奶油色底 */
-html[data-ac=croc] .ctip{background:var(--cream);border-color:#f1dca8}
-html[data-ac=croc] .ctip .cbub{border-color:#f1dca8}
-html[data-ac=croc] .ctip .cbub:before{border-right-color:#f1dca8}
-
-/* 導航：選中的分頁用炭灰圓角底，像角色的身體色 */
-html[data-ac=croc] #nav button.on{background:var(--soft);color:var(--ac)}
+/* 既有小鱷魚提示：米白底、新版素材 */
+html[data-ac=croc] .ctip{background:var(--cream);border-color:#f2dfc4}
+html[data-ac=croc] .ctip .cbub{border-color:#f2dfc4}
+html[data-ac=croc] .ctip .cbub:before{border-right-color:#f2dfc4}
+html[data-ac=croc] .ctip .cimg{width:64px;height:56px}
+html[data-ac=croc] .ctip.sm .cimg{width:50px;height:44px}
 
 /* --- 深色模式：只調整角色相關的底色，其餘沿用原本深色規則 --- */
 @media (prefers-color-scheme:dark){
   html[data-ac=croc]:not([data-theme="light"]) .ctip{background:#2d272a;border-color:#4a3d42;color:#f6e9ee}
   html[data-ac=croc]:not([data-theme="light"]) .ctip .cbub{background:#211a1d;border-color:#4a3d42;color:#f6e9ee}
-  html[data-ac=croc]:not([data-theme="light"]) .ctip .cbub:after{border-right-color:#211a1d}
   html[data-ac=croc]:not([data-theme="light"]) .ctip .cbub:before{border-right-color:#4a3d42}
-  html[data-ac=croc]:not([data-theme="light"]) .daybar>.thc{background:rgba(255,255,255,.75)}
+  html[data-ac=croc]:not([data-theme="light"]) .ctip .cbub:after{border-right-color:#211a1d}
+  html[data-ac=croc]:not([data-theme="light"]) .daybar>.thc{background:rgba(255,255,255,.8)}
 }
 html[data-ac=croc][data-theme="dark"] .ctip{background:#2d272a;border-color:#4a3d42;color:#f6e9ee}
 html[data-ac=croc][data-theme="dark"] .ctip .cbub{background:#211a1d;border-color:#4a3d42;color:#f6e9ee}
-html[data-ac=croc][data-theme="dark"] .ctip .cbub:after{border-right-color:#211a1d}
 html[data-ac=croc][data-theme="dark"] .ctip .cbub:before{border-right-color:#4a3d42}
+html[data-ac=croc][data-theme="dark"] .ctip .cbub:after{border-right-color:#211a1d}

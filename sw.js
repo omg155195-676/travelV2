@@ -2,7 +2,7 @@
  * App 本身：先用快取打開（離線也能開），同時在背景抓新版，下次打開就是新版。
  * 天氣、匯率等即時資料：一律走網路，不快取。
  * 改版時把 VERSION 加 1。 */
-var VERSION = "v4";
+var VERSION = "v5";
 var CACHE = "travel-app-" + VERSION;
 var SHELL = [
   "./",
@@ -14,22 +14,32 @@ var SHELL = [
   "./apple-touch-icon.png",
   "./themes/croc/theme.css",
   "./themes/croc/theme.js",
+  "./themes/croc/img/budget-near.webp",
+  "./themes/croc/img/budget-ok.webp",
+  "./themes/croc/img/budget-over.webp",
+  "./themes/croc/img/camera.webp",
   "./themes/croc/img/cloudy.webp",
   "./themes/croc/img/cold.webp",
-  "./themes/croc/img/done.webp",
-  "./themes/croc/img/empty-list.webp",
-  "./themes/croc/img/empty-photo.webp",
-  "./themes/croc/img/empty-plan.webp",
+  "./themes/croc/img/depart.webp",
+  "./themes/croc/img/eat.webp",
   "./themes/croc/img/error.webp",
   "./themes/croc/img/front.webp",
   "./themes/croc/img/happy.webp",
   "./themes/croc/img/hot.webp",
-  "./themes/croc/img/loading.webp",
-  "./themes/croc/img/love.webp",
-  "./themes/croc/img/proud.webp",
+  "./themes/croc/img/idea.webp",
+  "./themes/croc/img/map.webp",
+  "./themes/croc/img/nav-home.webp",
+  "./themes/croc/img/nav-list.webp",
+  "./themes/croc/img/nav-more.webp",
+  "./themes/croc/img/nav-photo.webp",
+  "./themes/croc/img/nav-plan.webp",
   "./themes/croc/img/rain.webp",
-  "./themes/croc/img/sunny.webp",
-  "./themes/croc/img/think.webp",
+  "./themes/croc/img/rest.webp",
+  "./themes/croc/img/sleep.webp",
+  "./themes/croc/img/ticket.webp",
+  "./themes/croc/img/tired.webp",
+  "./themes/croc/img/train.webp",
+  "./themes/croc/img/walk.webp",
   "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js",
   "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
   "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"

@@ -1496,7 +1496,7 @@ try{CROC_OFF=localStorage.getItem("croc-off")==="1"}catch(e){}
  document.head.appendChild(st)})();
 function crocOn(){return !CROC_OFF&&!crocHid}
 function crocBox(k,msg,sub,cls){
-  return '<div class="ctip '+(cls||"")+'"><img class="cimg" alt="" src="'+(CROC_IMG[k]||"")+'"><div class="cbub"><div>'+esc(msg)+'</div>'+(sub?'<div class="csub">'+esc(sub)+'</div>':'')+'</div>'
+  return '<div class="ctip '+(cls||"")+'"><img class="cimg" alt="" data-k="'+k+'" src="'+(CROC_IMG[k]||"")+'"><div class="cbub"><div>'+esc(msg)+'</div>'+(sub?'<div class="csub">'+esc(sub)+'</div>':'')+'</div>'
    +(cls&&cls.indexOf("nox")>=0?'':'<button class="cx" aria-label="先隱藏小鱷魚提示" onclick="crocHide()">✕</button>')+'</div>'}
 function crocHide(){crocHid=true;render()}
 function crocToggle(){CROC_OFF=!CROC_OFF;try{localStorage.setItem("croc-off",CROC_OFF?"1":"0")}catch(e){}crocHid=false;render()}
