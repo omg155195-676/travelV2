@@ -1,0 +1,109 @@
+/* ===== 主題世界：各世界的配色、背景、卡片與裝飾（由產生器輸出，可直接修改） =====
+   版面在 world.css 共用；這裡只改「長相」。淺色世界跟著系統深色模式，🌙 星空夜旅固定為夜色。 */
+
+/* 🍁 秋日日本：紅葉 × 和紙 × 日本車票 */
+html[data-ac=maple]{--w1:#d2552b;--w2:#7a3b2a;--w3:#e6b03a;--w4:#fbf3e3;--wk:#4a3226;
+  --ac:#b8441f;--acd:#ff9a6b;--g1:#f7d9b4;--g2:#f1b98d;--tx:#3d2a20;--sub:#8a6e5c;--bg:#f6ecdc;--card:#fffaf1;--bd:#ead8bf;--soft:#fbe9d8;
+  --leaf:#b8441f;--leaf-soft:#fbe6d6;--leaf-2:#d2552b;--pink:#c9482a;--pink-soft:#fde3d6;--cream:#fdf5e6;--paper-2:#f2e4cc;--sky:#f8e9d4;--sun:#e6b03a;--ok:#5f8a3c}
+html[data-ac=maple] body{background:#f6ecdc}
+html[data-ac=maple] body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cg transform='translate%2818,30%29 rotate%28-20%29 scale%280.55%29' opacity='0.16'%3E%3Cpath d='M32 5 L36 19 L48 12 L44 27 L58 29 L46 37 L52 50 L38 44 L34 57 H30 L26 44 L12 50 L18 37 L6 29 L20 27 L16 12 L28 19 Z' fill='%23d2552b'/%3E%3C/g%3E%3Cg transform='translate%28130,70%29 rotate%2825%29 scale%280.4%29' opacity='0.14'%3E%3Cpath d='M32 38 C14 36 6 20 13 10 C21 16 26 14 32 20 C38 14 43 16 51 10 C58 20 50 36 32 38 Z' fill='%23e0a92f'/%3E%3C/g%3E%3Cg transform='translate%2860,140%29 rotate%2840%29 scale%280.45%29' opacity='0.12'%3E%3Cpath d='M32 5 L36 19 L48 12 L44 27 L58 29 L46 37 L52 50 L38 44 L34 57 H30 L26 44 L12 50 L18 37 L6 29 L20 27 L16 12 L28 19 Z' fill='%23b8441f'/%3E%3C/g%3E%3Cg transform='translate%28170,170%29 rotate%28-10%29 scale%280.35%29' opacity='0.13'%3E%3Cpath d='M32 5 L36 19 L48 12 L44 27 L58 29 L46 37 L52 50 L38 44 L34 57 H30 L26 44 L12 50 L18 37 L6 29 L20 27 L16 12 L28 19 Z' fill='%23e6b03a'/%3E%3C/g%3E%3C/svg%3E"),linear-gradient(180deg,#fbf2e2,#f3e3c9)}
+html[data-ac=maple] .cx-title,html[data-ac=maple] .cp-title,html[data-ac=maple] .cph-title,html[data-ac=maple] .ct-title,html[data-ac=maple] .cs-title,html[data-ac=maple] .ch-trip-title,html[data-ac=maple] .pd-title{color:var(--w2)}
+html[data-ac=maple] .ch-year{background:linear-gradient(#c79764,#a8774a);color:#fff8ec;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+html[data-ac=maple] .ch-trip{background:var(--cream) repeating-linear-gradient(0deg,transparent 0 23px,rgba(184,68,31,.06) 23px 24px);border-color:#e3c9a4}
+html[data-ac=maple] .ch-count-n,html[data-ac=maple] .ch-count-txt .big{color:var(--w1)}
+html[data-ac=maple] .ct-ticket,html[data-ac=maple] [data-ctab=resv] .card .item{background:#eef3e4 repeating-linear-gradient(135deg,transparent 0 6px,rgba(95,138,60,.06) 6px 7px);border-color:#cfdcbf}
+html[data-ac=maple] .ct-ticket:before{background:var(--w1)}
+html[data-ac=maple] .pd-hero{background:var(--cream) repeating-linear-gradient(0deg,transparent 0 23px,rgba(184,68,31,.05) 23px 24px)}
+html[data-ac=maple] .pd-d.on:after{background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 5 L36 19 L48 12 L44 27 L58 29 L46 37 L52 50 L38 44 L34 57 H30 L26 44 L12 50 L18 37 L6 29 L20 27 L16 12 L28 19 Z' fill='%23e6b03a'/%3E%3C/svg%3E")}
+
+/* 🌊 海洋旅行：海浪 × 船票 × 航海圖 */
+html[data-ac=sea]{--w1:#2f7fc1;--w2:#7cc3e6;--w3:#f28c6b;--w4:#fff9ec;--wk:#1f3b57;
+  --ac:#1f6fb0;--acd:#7cc3e6;--g1:#d9f0fa;--g2:#bfe3f3;--tx:#1d3346;--sub:#5d7487;--bg:#eaf6fb;--card:#ffffff;--bd:#cfe5f1;--soft:#e2f2fa;
+  --leaf:#1f6fb0;--leaf-soft:#e2f1fa;--leaf-2:#4ea3d8;--pink:#ee7d5b;--pink-soft:#fde9e1;--cream:#fffaf0;--paper-2:#e6f1f6;--sky:#d9f0fa;--sun:#f6c445;--ok:#2e9b7a;--r-lg:20px;--r-md:16px}
+html[data-ac=sea] body{background:#dff1f9}
+html[data-ac=sea] body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='60'%3E%3Cpath d='M0 30 Q30 10 60 30 T120 30 T180 30 T240 30 V60 H0 Z' fill='%237cc3e6' opacity='.55'/%3E%3Cpath d='M0 40 Q30 22 60 40 T120 40 T180 40 T240 40 V60 H0 Z' fill='%234ea3d8' opacity='.5'/%3E%3C/svg%3E") bottom/240px 60px repeat-x,url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cg transform='translate%2820,30%29 rotate%280%29 scale%280.25%29' opacity='0.12'%3E%3Cpath d='M8 40 H56 L48 52 H16 Z' fill='%232f7fc1'/%3E%3Cpath d='M32 8 V40' stroke='%232f7fc1' stroke-width='3'/%3E%3Cpath d='M34 10 L34 37 L54 37 Z' fill='%23ffffff'/%3E%3C/g%3E%3Cg transform='translate%28110,100%29 rotate%280%29 scale%280.18%29' opacity='0.1'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23ffffff'/%3E%3C/g%3E%3C/svg%3E"),linear-gradient(180deg,#e8f6fd 0,#d3edf8 55%,#bfe3f3 100%)}
+html[data-ac=sea] .card{border-width:1.5px}
+html[data-ac=sea] .ch-trip{background:#fffdf7 linear-gradient(rgba(47,127,193,.07) 1px,transparent 1px) 0 0/22px 22px,linear-gradient(90deg,rgba(47,127,193,.07) 1px,transparent 1px) 0 0/22px 22px;border:2px dashed #b9d9ea}
+html[data-ac=sea] .ch-year{background:var(--w1);color:#fff;transform:none;border-radius:999px}
+html[data-ac=sea] .ch-count-n,html[data-ac=sea] .ch-count-txt .big{color:var(--w1)}
+html[data-ac=sea] .ct-ticket,html[data-ac=sea] [data-ctab=resv] .card .item{background:#fff;border:1.5px solid #cfe5f1;border-left:10px solid var(--w1)}
+html[data-ac=sea] .ct-ticket:before{display:none}
+html[data-ac=sea] .ct-stub{border-top-style:dotted;border-top-color:#9fc9e2}
+html[data-ac=sea] .pd-hero{background:#fffdf7 linear-gradient(rgba(47,127,193,.06) 1px,transparent 1px) 0 0/20px 20px}
+html[data-ac=sea] .pd-d.on:after{background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M8 40 H56 L48 52 H16 Z' fill='%23ffffff'/%3E%3Cpath d='M32 8 V40' stroke='%23ffffff' stroke-width='3'/%3E%3Cpath d='M34 10 L34 37 L54 37 Z' fill='%23f28c6b'/%3E%3C/svg%3E")}
+
+/* 🌙 星空夜旅：深藍夜空 × 金色星星 × 夜行列車（固定夜色，不是純黑科技風） */
+:root[data-ac=night]{--w1:#5b6bc8;--w2:#9aa6f2;--w3:#f2c94c;--w4:#2f3670;--wk:#f3ecd6;
+  --ac:#f2c94c;--acd:#f2c94c;--acx:#1b1f45;--g1:#2a3170;--g2:#3a2f6b;--tx:#f3eedf;--sub:#b8bbdd;--bg:#1b2048;--card:#252b5c;--bd:#3c4482;--soft:#2f3670;
+  --leaf:#f2c94c;--leaf-soft:#353d7a;--leaf-2:#9aa6f2;--pink:#f2c94c;--pink-soft:#3b3a6b;--cream:#2a3064;--paper-2:#323a74;--sky:#20265a;--sun:#f2c94c;--ok:#86e3a8;--bad:#ff8f86;
+  --sh-1:0 1px 2px rgba(0,0,0,.25),0 4px 14px rgba(8,10,40,.35);--sh-2:0 2px 6px rgba(0,0,0,.3),0 10px 26px rgba(8,10,40,.45);color-scheme:dark}
+:root[data-ac=night] body{background:#1b2048;color:var(--tx)}
+:root[data-ac=night] body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cg transform='translate%2830,40%29 rotate%280%29 scale%280.06%29' opacity='1'%3E%3Ccircle cx='32' cy='32' r='22' fill='%23fff6d8'/%3E%3C/g%3E%3Cg transform='translate%28120,20%29 rotate%280%29 scale%280.05%29' opacity='0.9'%3E%3Ccircle cx='32' cy='32' r='22' fill='%23fff'/%3E%3C/g%3E%3Cg transform='translate%28160,120%29 rotate%280%29 scale%280.07%29' opacity='1'%3E%3Ccircle cx='32' cy='32' r='22' fill='%23f2c94c'/%3E%3C/g%3E%3Cg transform='translate%2870,150%29 rotate%280%29 scale%280.045%29' opacity='0.8'%3E%3Ccircle cx='32' cy='32' r='22' fill='%23fff'/%3E%3C/g%3E%3Cg transform='translate%28100,90%29 rotate%280%29 scale%280.035%29' opacity='0.7'%3E%3Ccircle cx='32' cy='32' r='22' fill='%23fff'/%3E%3C/g%3E%3Cg transform='translate%28185,60%29 rotate%280%29 scale%280.04%29' opacity='0.8'%3E%3Ccircle cx='32' cy='32' r='22' fill='%23fff'/%3E%3C/g%3E%3Cg transform='translate%2810,110%29 rotate%280%29 scale%280.05%29' opacity='0.7'%3E%3Ccircle cx='32' cy='32' r='22' fill='%23cfd6ff'/%3E%3C/g%3E%3C/svg%3E"),radial-gradient(circle at 85% 8%,rgba(242,201,76,.20) 0 42px,transparent 43px),linear-gradient(180deg,#141a3e 0,#1f2556 50%,#2b2b62 100%)}
+:root[data-ac=night] .btn{color:#1b1f45}
+:root[data-ac=night] .btn.sec{background:transparent;color:var(--w3);border-color:#5d66a8}
+:root[data-ac=night] .seg button.on{color:#1b1f45}
+:root[data-ac=night] input,:root[data-ac=night] select,:root[data-ac=night] textarea{background:#1f2452;color:var(--tx);border-color:#454e90}
+:root[data-ac=night] .cq-cat,:root[data-ac=night] .ch-bubble,:root[data-ac=night] .ch-polaroid,:root[data-ac=night] .cx-stamp,:root[data-ac=night] [data-ctab=photo] .tile{background:#2a3064;color:var(--tx)}
+:root[data-ac=night] .cq-cat.on{color:#1b1f45}
+:root[data-ac=night] .ds-main{background:linear-gradient(160deg,#2d3577,#252b5c)}
+:root[data-ac=night] .ch-count-n,:root[data-ac=night] .ch-count-txt .big{color:var(--w3);text-shadow:0 0 18px rgba(242,201,76,.45)}
+:root[data-ac=night] .ch-count-n:before{content:"✦ ";font-size:24px;vertical-align:18px;color:#fff3c4}
+:root[data-ac=night] .ct-ticket,:root[data-ac=night] [data-ctab=resv] .card .item{background:#1f2452;border-color:#4a4f8f}
+:root[data-ac=night] .ct-ticket:before{background:var(--w3)}
+:root[data-ac=night] .ct-stub{border-top-color:#c9a94a}
+:root[data-ac=night] .ct-stub:before,:root[data-ac=night] .ct-stub:after{background:#1b2048;border-color:#4a4f8f}
+:root[data-ac=night] .top{background:rgba(27,32,72,.88)}
+:root[data-ac=night] #nav{background:rgba(27,32,72,.94)}
+:root[data-ac=night] .daybar.cx-daybar>b{color:var(--tx)}
+:root[data-ac=night] .pd-d.on:after{background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M30 8 A24 24 0 1 0 56 40 A19 19 0 1 1 30 8 Z' fill='%23fff3c4'/%3E%3C/svg%3E")}
+:root[data-ac=night] .pd-d.on{color:#1b1f45}
+:root[data-ac=night] .bar{background:#3a4282}
+:root[data-ac=night] .ctip{background:#262c5f;border-color:#454e90;color:var(--tx)}
+:root[data-ac=night] .ctip .cbub{background:#1f2452;border-color:#454e90;color:var(--tx)}
+:root[data-ac=night] .ctip .cbub:before{border-right-color:#454e90}
+:root[data-ac=night] .ctip .cbub:after{border-right-color:#1f2452}
+:root[data-ac=night] .tag{background:#353d7a;color:#dfe3ff}
+
+/* 🌸 櫻花日和：淡櫻粉 × 白雲 × 新芽（不使用鮮豔粉紅） */
+html[data-ac=sakura]{--w1:#f2a7b8;--w2:#8b6a55;--w3:#e86f6f;--w4:#fff5f3;--wk:#5a3f3f;
+  --ac:#c9667f;--acd:#f4a7b9;--g1:#fde6ea;--g2:#e8f3e1;--tx:#4a3539;--sub:#8f7479;--bg:#fff6f5;--card:#ffffff;--bd:#f3dcdc;--soft:#fdeef0;
+  --leaf:#c9667f;--leaf-soft:#fdecef;--leaf-2:#9cc38f;--pink:#e0787f;--pink-soft:#fde6e4;--cream:#fffaf7;--paper-2:#f6ece4;--sky:#eef6fb;--sun:#f6c445;--ok:#5f9a58}
+html[data-ac=sakura] body{background:#fff6f5}
+html[data-ac=sakura] body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cg transform='translate%2820,20%29 rotate%2815%29 scale%280.9%29' opacity='0.22'%3E%3Cpath d='M10 2 C4 6 3 14 10 18 C17 14 16 6 10 2 Z' fill='%23f4b6c2'/%3E%3C/g%3E%3Cg transform='translate%28120,60%29 rotate%28-30%29 scale%280.8%29' opacity='0.18'%3E%3Cpath d='M10 2 C4 6 3 14 10 18 C17 14 16 6 10 2 Z' fill='%23f7c9d2'/%3E%3C/g%3E%3Cg transform='translate%2860,130%29 rotate%2860%29 scale%281%29' opacity='0.2'%3E%3Cpath d='M10 2 C4 6 3 14 10 18 C17 14 16 6 10 2 Z' fill='%23f4b6c2'/%3E%3C/g%3E%3Cg transform='translate%28160,150%29 rotate%28-10%29 scale%280.7%29' opacity='0.16'%3E%3Cpath d='M10 2 C4 6 3 14 10 18 C17 14 16 6 10 2 Z' fill='%23f2a7b8'/%3E%3C/g%3E%3Cg transform='translate%28150,10%29 rotate%280%29 scale%280.25%29' opacity='0.14'%3E%3Cpath transform='rotate%280 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f4b6c2'/%3E%3Cpath transform='rotate%2872 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f4b6c2'/%3E%3Cpath transform='rotate%28144 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f4b6c2'/%3E%3Cpath transform='rotate%28216 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f4b6c2'/%3E%3Cpath transform='rotate%28288 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f4b6c2'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%23e86f6f'/%3E%3C/g%3E%3C/svg%3E"),linear-gradient(180deg,#eef6fb 0,#fff6f5 260px,#fdf1f1 100%)}
+html[data-ac=sakura] .ds-main{position:relative}
+html[data-ac=sakura] .ds-main:after{content:"";position:absolute;left:-7px;top:-9px;width:26px;height:26px;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath transform='rotate%280 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f2a7b8'/%3E%3Cpath transform='rotate%2872 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f2a7b8'/%3E%3Cpath transform='rotate%28144 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f2a7b8'/%3E%3Cpath transform='rotate%28216 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f2a7b8'/%3E%3Cpath transform='rotate%28288 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23f2a7b8'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%23e86f6f'/%3E%3C/svg%3E") center/contain no-repeat;pointer-events:none}
+html[data-ac=sakura] .ch-year{background:#fde6ea;color:#b35a72}
+html[data-ac=sakura] .ch-count-n,html[data-ac=sakura] .ch-count-txt .big{color:#c9667f}
+html[data-ac=sakura] .ct-ticket,html[data-ac=sakura] [data-ctab=resv] .card .item{background:#fff3f4 repeating-linear-gradient(135deg,transparent 0 6px,rgba(242,167,184,.10) 6px 7px);border-color:#f3d2d8}
+html[data-ac=sakura] .ct-ticket:before{background:var(--leaf-2)}
+html[data-ac=sakura] .pd-d.on:after{background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath transform='rotate%280 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23ffffff'/%3E%3Cpath transform='rotate%2872 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23ffffff'/%3E%3Cpath transform='rotate%28144 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23ffffff'/%3E%3Cpath transform='rotate%28216 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23ffffff'/%3E%3Cpath transform='rotate%28288 32 32%29' d='M32 30 C22 22 24 8 32 10 C34 7 38 7 37 12 C42 12 40 24 32 30 Z' fill='%23ffffff'/%3E%3Ccircle cx='32' cy='32' r='5' fill='%23e86f6f'/%3E%3C/svg%3E")}
+
+/* 🧳 復古旅行手帳：牛皮紙 × 老地圖 × 郵票 × 印章 */
+html[data-ac=retro]{--w1:#9b3b2f;--w2:#4f6b4a;--w3:#c99a3e;--w4:#f3e7cf;--wk:#3b2a1e;
+  --ac:#8b3a2e;--acd:#d9886f;--g1:#efe2c6;--g2:#e3d3b2;--tx:#3b2a1e;--sub:#7d6650;--bg:#e8dbc0;--card:#f8f0de;--bd:#cdb790;--soft:#efe2c6;
+  --leaf:#4f6b4a;--leaf-soft:#e3e6d2;--leaf-2:#7b8f5f;--pink:#9b3b2f;--pink-soft:#f1dcd2;--cream:#fbf4e3;--paper-2:#e9dcc0;--sky:#efe6d2;--sun:#c99a3e;--ok:#4f6b4a;
+  --r-xl:10px;--r-lg:8px;--r-md:7px;--r-sm:5px;--sh-1:0 1px 0 rgba(90,60,30,.12),0 2px 6px rgba(90,60,30,.10);--sh-2:0 1px 0 rgba(90,60,30,.15),0 6px 16px rgba(90,60,30,.16)}
+html[data-ac=retro] body{background:#e8dbc0}
+html[data-ac=retro] body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cg fill='none' stroke='%238b6b45' stroke-opacity='.16' stroke-width='1.2'%3E%3Cpath d='M0 60 Q60 30 120 70 T240 50'/%3E%3Cpath d='M0 150 Q80 120 140 170 T240 140'/%3E%3Cpath d='M40 0 Q70 80 30 160 T60 240'/%3E%3Cpath d='M180 0 Q150 90 200 170 T170 240'/%3E%3C/g%3E%3Cpath d='M20 210 Q90 180 130 200 T230 150' fill='none' stroke='%239b3b2f' stroke-opacity='.22' stroke-width='1.6' stroke-dasharray='5 5'/%3E%3Cg transform='translate%28190,30%29' fill='none' stroke='%238b6b45' stroke-opacity='.25'%3E%3Ccircle r='14'/%3E%3Cpath d='M0 -18 L4 0 L0 18 L-4 0 Z'/%3E%3C/g%3E%3C/svg%3E"),radial-gradient(circle at 30% 20%,rgba(255,250,235,.5),transparent 60%),#e6d7b8}
+html[data-ac=retro] .cx-title,html[data-ac=retro] .cp-title,html[data-ac=retro] .cph-title,html[data-ac=retro] .ct-title,html[data-ac=retro] .cs-title,html[data-ac=retro] .ch-trip-title,html[data-ac=retro] .pd-title,html[data-ac=retro] .ch-count-n,html[data-ac=retro] .cw-amt,html[data-ac=retro] .top h1{font-family:"Songti TC","Noto Serif TC","PMingLiU",Georgia,serif;letter-spacing:.02em}
+html[data-ac=retro] .ds-main,html[data-ac=retro] .pd-hero{box-shadow:var(--sh-2),inset 0 0 0 4px var(--card),inset 0 0 0 5px var(--bd)}
+html[data-ac=retro] .ds-chip{background:transparent;border:1.5px solid currentColor;border-radius:4px}
+html[data-ac=retro] .ch-year{background:transparent;border:2px solid var(--w1);color:var(--w1);border-radius:4px;box-shadow:none}
+html[data-ac=retro] .ch-count-n,html[data-ac=retro] .ch-count-txt .big{color:var(--w1)}
+html[data-ac=retro] .ct-ticket,html[data-ac=retro] [data-ctab=resv] .card .item{background:#fbf4e3;border:1px solid #cdb790;box-shadow:inset 0 3px 0 #fbf4e3,inset 0 4px 0 var(--w1),inset 0 -3px 0 #fbf4e3,inset 0 -4px 0 var(--w1)}
+html[data-ac=retro] .ct-ticket:before{background:var(--w2)}
+html[data-ac=retro] .pd-d.on:after{background-image:url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='12' y='8' width='40' height='48' fill='%23fbf4e3'/%3E%3Crect x='18' y='14' width='28' height='30' fill='%239b3b2f'/%3E%3C/svg%3E")}
+html[data-ac=retro] .btn{box-shadow:0 2px 0 rgba(60,30,20,.25)}
+
+/* 日期列：目前日期右上角的主題小標記 */
+html[data-world] .pd-strip{padding-top:10px}
+html[data-world] .pd-d.on:after{content:"";position:absolute;right:-6px;top:-8px;width:20px;height:20px;background-repeat:no-repeat;background-position:center;background-size:contain;pointer-events:none}
+html[data-ac=croc] .pd-d.on:after{display:none}
+/* 淺色世界在系統深色模式下：背景調暗，文字仍在不透明卡片上 */
+@media (prefers-color-scheme:dark){
+  html[data-world]:not([data-ac=night]):not([data-ac=croc]):not([data-theme="light"]) body:before{filter:brightness(.38) saturate(.8)}
+  html[data-world]:not([data-ac=night]):not([data-ac=croc]):not([data-theme="light"]) .ct-ticket,
+  html[data-world]:not([data-ac=night]):not([data-ac=croc]):not([data-theme="light"]) [data-ctab=resv] .card .item,
+  html[data-world]:not([data-ac=night]):not([data-ac=croc]):not([data-theme="light"]) .ch-trip,
+  html[data-world]:not([data-ac=night]):not([data-ac=croc]):not([data-theme="light"]) .pd-hero{background:var(--card)}
+}

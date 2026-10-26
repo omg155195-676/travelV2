@@ -179,8 +179,12 @@ a{color:var(--ac)}
 var THEME_PACKS={};function registerTheme(id,pack){THEME_PACKS[id]=pack}
 function themePack(){return (typeof S!=="undefined"&&S&&THEME_PACKS[S.ac])||null}
 function themeChar(){var p=themePack();return (p&&p.char)||""}</script>
+<link rel="stylesheet" href="themes/world/world.css">
 <link rel="stylesheet" href="themes/croc/theme.css">
+<link rel="stylesheet" href="themes/world/themes.css">
+<script src="themes/world/engine.js"></script>
 <script src="themes/croc/theme.js"></script>
+<script src="themes/world/themes.js"></script>
 <input type="file" id="imp" accept=".json,application/json" style="display:none" onchange="importJson(this)">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -410,7 +414,7 @@ function render(){
     if(scrollFocus){scrollFocus=false;var fc=$("focus-card");if(fc){try{fc.scrollIntoView({block:"start"});window.scrollBy(0,-70)}catch(e){}}}
   }catch(e){showErr(e)}
 }
-function applyTheme(){document.documentElement.setAttribute("data-ac",S.ac||"sakura")}
+function applyTheme(){var r=document.documentElement,p=THEME_PACKS[S.ac||"sakura"];r.setAttribute("data-ac",S.ac||"sakura");if(p&&p.world)r.setAttribute("data-world","");else r.removeAttribute("data-world")}
 function zoom(a){if(!a)return;var z=$("zm");z.querySelector("img").src=imgUrl(a);z.classList.remove("hide")}
 function imgUrl(a){if(!a)return "";if(/\.(jpe?g|png|webp)$/i.test(a))return a;if(a.charAt(0)==="L")return (typeof LURL!=="undefined"&&LURL[a])||"";if(typeof claude==="undefined"||!claude||typeof claude.use!=="function")return "";return "/_blob/"+encodeURIComponent(a)}
 function mapLink(q){return "https://www.google.com/maps/search/?api=1&query="+encodeURIComponent(q)}
@@ -1353,7 +1357,8 @@ function tripPicker(){
    +'<div class="card" style="margin-top:12px"><b>＋ 新增旅程</b><div class="sub" style="margin:4px 0">目前這趟會保留，隨時可以切換回來。</div><input id="tp_n" placeholder="例如：2027 京都" maxlength="40"><button class="btn" style="margin-top:8px" onclick="newTripFromPicker()">建立並切換</button></div>',null,null)}
 function clearExp(){confirmBox("刪除目前旅程的全部記帳？（可立即復原）","刪除全部",function(){var old=S.items;S.items=[];save();render();toast("已刪除全部記帳","復原",function(){S.items=old;save();render()})})}
 function vSet(){
-  var th=[["sakura","🌸 櫻花"],["maple","🍁 楓紅"],["sea","🌊 海藍"],["classic","🍵 抹茶"]].concat(Object.keys(THEME_PACKS).map(function(k){return [k,THEME_PACKS[k].label]})),lb=localBackups();
+  var th=(function(){var base={sakura:"🌸 櫻花",maple:"🍁 楓紅",sea:"🌊 海藍",classic:"🍵 抹茶（原版）"},order=["croc","maple","sea","night","sakura","retro","classic"],out=[],seen={};
+      order.concat(Object.keys(THEME_PACKS)).forEach(function(k){if(seen[k])return;var lb=THEME_PACKS[k]?THEME_PACKS[k].label:base[k];if(!lb)return;seen[k]=1;out.push([k,lb])});return out})(),lb=localBackups();
   return fxCard()+'<div class="card"><b>旅程設定</b><label>旅程名稱</label><input id="s_n" value="'+esc(S.trip)+'" maxlength="40">'
    +'<div class="row"><div><label>總預算（NT$）</label><input id="s_b" type="number" inputmode="decimal" min="0" value="'+esc(S.budget)+'"></div><div><label>預設人數</label><input id="s_p" type="number" inputmode="numeric" min="1" max="99" value="'+esc(S.defPeople)+'"></div></div>'
    +'<label>匯率（1 外幣 = ? 台幣）</label><div class="sub" style="margin-bottom:4px">只影響「之後新增」的記帳；既有每筆記帳已固定當時匯率，不會被改動。在這裡改過的幣別會變成「手動匯率」，不會被自動更新覆蓋。</div><div class="row" style="flex-wrap:wrap">'

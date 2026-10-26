@@ -1,0 +1,494 @@
+/* ===== 主題世界：共用版面樣式（所有世界主題共用；各主題在自己的檔案定義配色與美術） =====
+   所有規則都限定在 html[data-world] 底下：沒選這個主題時，對畫面完全沒有影響。
+   排版原則：鱷魚一律放在「自己的位置」（版面中的一欄，或事先留好的空白區），
+   不浮在文字、金額、按鈕上面；空間不夠時依序 縮小 → 移動 → 隱藏。 */
+/* 共用的結構 token（各主題可覆寫） */
+html[data-world]{--r-xl:22px;--r-lg:18px;--r-md:14px;--r-sm:10px;--r-xs:7px;--r-pill:999px;--sh-1:0 1px 2px rgba(92,72,32,.06),0 3px 10px rgba(92,72,32,.06);--sh-2:0 2px 4px rgba(92,72,32,.07),0 8px 22px rgba(92,72,32,.09);--fs-page:20px;--fs-sec:16px;--fs-card:15px;--fs-body:15px;--fs-sub:12.5px;--fs-num:30px;--fs-hero:40px;--gut:14px;--gap:12px;--gap-sec:20px;--pad:14px}
+
+/* =====================================================================
+   🐊 鱷魚旅行 Design System（只在鱷魚主題生效）
+   方向：奶油手帳紙 × 草綠 × 粉紅點綴；鱷魚灰作為角色色。
+   各頁面的 Layout 不同，但都只用下面這些 token，所以看起來是同一個 App。
+   ===================================================================== */
+
+/* --- 共用元件：卡片 --- */
+html[data-world] .card{background:var(--card);border-color:var(--bd);border-radius:var(--r-lg);box-shadow:var(--sh-1);padding:var(--pad);margin-bottom:var(--gap)}
+html[data-world] .ds-main{border-radius:var(--r-xl);box-shadow:var(--sh-2)}            /* 主卡 */
+html[data-world] .ds-paper{background:var(--cream)}                                     /* 手帳紙卡 */
+html[data-world] .ds-info{border-radius:var(--r-md)}                                    /* 資訊卡 */
+html[data-world] .ds-sec{display:flex;align-items:center;gap:8px;font-size:var(--fs-sec);font-weight:800;color:var(--tx);margin:var(--gap-sec) 2px 8px}
+html[data-world] .ds-sec .ds-more{margin-left:auto;font-size:13px;font-weight:700;color:var(--leaf);background:none;border:0;padding:6px 2px;min-height:32px;cursor:pointer}
+html[data-world] .ds-num{font-size:var(--fs-num);font-weight:800;color:var(--leaf);line-height:1.1;font-variant-numeric:tabular-nums}
+html[data-world] .ds-chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;padding:2px 9px;border-radius:var(--r-pill);background:var(--leaf-soft);color:var(--leaf);white-space:nowrap}
+html[data-world] .ds-chip.pink{background:var(--pink-soft);color:var(--pink)}
+
+/* --- 共用元件：按鈕 --- */
+html[data-world] .btn{border-radius:var(--r-md);background:var(--pink);color:#fff;box-shadow:0 2px 0 rgba(150,40,70,.18)}
+html[data-world] .btn.sec{background:var(--card);color:var(--leaf);border:1.5px solid var(--leaf-2);box-shadow:none}
+html[data-world] .btn.dg{background:var(--bad)}
+html[data-world] .ds-icon-btn{width:36px;height:36px;border-radius:var(--r-pill);border:1px solid var(--bd);background:var(--card);color:var(--sub);font-size:18px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+html[data-world] .seg button{border-radius:var(--r-md);background:var(--card);border-color:var(--bd)}
+html[data-world] .seg button.on{background:var(--leaf);border-color:var(--leaf);color:#fff}
+html[data-world] .tdy{background:var(--pink)}
+html[data-world] input,html[data-world] select,html[data-world] textarea{border-radius:var(--r-sm);background:#fff;border-color:var(--bd)}
+
+/* --- 頂部與底部導覽 --- */
+html[data-world] .top{background:color-mix(in srgb,var(--card) 92%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom-color:var(--bd)}
+html[data-world] .top h1{color:var(--leaf)}
+html[data-world] #nav{background:color-mix(in srgb,var(--card) 95%,transparent);border-top-color:var(--bd);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+html[data-world] #nav button.on{background:var(--leaf-soft);color:var(--leaf)}
+
+/* --- 角色共用 --- */
+html[data-world] .thc{display:block;object-fit:contain;pointer-events:none;-webkit-user-select:none;user-select:none}
+
+/* ---------- 記帳總支出卡：兩欄，鱷魚有自己的欄位 ---------- */
+html[data-world] .thc-top{display:flex;align-items:flex-start;gap:8px}
+html[data-world] .thc-main{flex:1;min-width:0}
+html[data-world] .thc-main .big{overflow-wrap:anywhere}
+html[data-world] .thc-aside{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+html[data-world] .thc-aside>button{float:none!important;margin:0!important}
+html[data-world] .thc-aside>.thc{width:58px;height:50px}
+/* 窄螢幕：先縮小，再不夠就隱藏（內容優先） */
+@media (max-width:359px){html[data-world] .thc-aside>.thc{width:44px;height:38px}}
+@media (max-width:319px){html[data-world] .thc-aside>.thc{display:none}}
+
+/* ---------- 頂部漸層卡：鱷魚只待在卡片上方留白（48px）裡，不碰標題 ---------- */
+html[data-world] .thc-hero{position:relative}
+html[data-world] .thc-hero>.thc{position:absolute;right:12px;top:4px;width:50px;height:42px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.15))}
+html[data-world] .thc-hero>div{position:relative;z-index:1}
+
+/* ---------- 空狀態：鱷魚在左、原本文字在右 ---------- */
+html[data-world] .thc-empty{display:flex;align-items:center;gap:10px}
+html[data-world] .thc-empty>.thc{flex:none;width:60px;height:54px}
+html[data-world] .thc-empty>.thc-txt{flex:1;min-width:0}
+@media (max-width:339px){html[data-world] .thc-empty>.thc{width:46px;height:42px}}
+
+/* ---------- 行程 Day 卡片：角色插槽（在版面裡佔自己的位置，不蓋任何資訊） ---------- */
+html[data-world] .pday-char{flex:none;width:40px;height:40px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center}
+html[data-world] .pday-char>.thc{width:34px;height:32px}
+@media (max-width:359px){html[data-world] .pday-char{width:34px;height:34px}html[data-world] .pday-char>.thc{width:28px;height:27px}}
+@media (max-width:339px){html[data-world] .pday-char{display:none}}
+
+/* ---------- 天氣卡：右側留好位置 ---------- */
+html[data-world] .thc-wx{position:relative;padding-right:74px;min-height:78px}
+html[data-world] .thc-wx>.thc{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:54px;height:58px}
+@media (max-width:339px){html[data-world] .thc-wx{padding-right:58px}html[data-world] .thc-wx>.thc{width:42px;height:46px;right:8px}}
+
+/* ---------- 錯誤卡：右側留好位置 ---------- */
+html[data-world] .thc-err{position:relative;padding-right:76px}
+html[data-world] .thc-err>.thc{position:absolute;right:10px;top:12px;width:56px;height:54px}
+
+/* ---------- 底部導航：只換小圖示，尺寸與原本 emoji 相同 ---------- */
+html[data-world] #nav .thc-nav{height:24px;display:flex;justify-content:center;align-items:center}
+html[data-world] #nav .thc-nav img{width:28px;height:24px;object-fit:contain;display:block}
+html[data-world] #nav button:not(.on) .thc-nav img{opacity:.78}
+
+/* 「更多」選單標題旁（標題列本身是一列，鱷魚在列內） */
+html[data-world] .sh-h .thc{width:40px;height:34px;margin-left:auto;margin-right:4px}
+
+/* 通知列：左邊留好位置給開心的小鱷魚 */
+html[data-world] #ts{padding-left:50px;background:#3b383f}
+html[data-world] #ts:before{content:"";position:absolute;left:9px;top:50%;width:34px;height:30px;margin-top:-15px;background:var(--toast-art,none) center/contain no-repeat}
+html[data-world] #ts button{color:var(--sun)}
+
+/* 設定頁的主題預覽 */
+html[data-world] .thc-pv{display:flex;align-items:center;gap:12px;margin-top:10px;padding:10px;border-radius:14px;background:var(--soft)}
+html[data-world] .thc-pv>.thc{flex:none;width:48px;height:72px}
+
+/* 既有小鱷魚提示：米白底、新版素材 */
+html[data-world] .ctip{background:var(--cream);border-color:#f2dfc4}
+html[data-world] .ctip .cbub{border-color:#f2dfc4}
+html[data-world] .ctip .cbub:before{border-right-color:#f2dfc4}
+html[data-world] .ctip .cimg{width:64px;height:56px}
+html[data-world] .ctip.sm .cimg{width:50px;height:44px}
+
+/* --- 深色模式：只調整角色相關的底色，其餘沿用原本深色規則 --- */
+@media (prefers-color-scheme:dark){
+  html[data-world]:not([data-theme="light"]) .ctip{background:#2d272a;border-color:#4a3d42;color:#f6e9ee}
+  html[data-world]:not([data-theme="light"]) .ctip .cbub{background:#211a1d;border-color:#4a3d42;color:#f6e9ee}
+  html[data-world]:not([data-theme="light"]) .ctip .cbub:before{border-right-color:#4a3d42}
+  html[data-world]:not([data-theme="light"]) .ctip .cbub:after{border-right-color:#211a1d}
+}
+html[data-world][data-theme="dark"] .ctip{background:#2d272a;border-color:#4a3d42;color:#f6e9ee}
+html[data-world][data-theme="dark"] .ctip .cbub{background:#211a1d;border-color:#4a3d42;color:#f6e9ee}
+html[data-world][data-theme="dark"] .ctip .cbub:before{border-right-color:#4a3d42}
+html[data-world][data-theme="dark"] .ctip .cbub:after{border-right-color:#211a1d}
+
+/* =====================================================================
+   🏠 首頁 Layout（鱷魚主題）
+   ===================================================================== */
+/* ① 主要功能：左邊大卡（快速記帳），右邊兩張小卡 */
+html[data-world] .ch-main{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);grid-template-rows:1fr 1fr;gap:10px;margin-bottom:10px}
+html[data-world] .ch-q{position:relative;display:flex;align-items:center;gap:6px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:var(--r-lg);box-shadow:var(--sh-1);font:inherit;text-align:left;cursor:pointer;padding:10px 12px;min-width:0;-webkit-tap-highlight-color:transparent}
+html[data-world] .ch-q:active{transform:translateY(1px)}
+/* 這些卡片是原本的快捷按鈕（.q）搬過來的：覆蓋舊的置中直排與大 emoji 字級 */
+html[data-world] .ch-q.q{flex-direction:row;justify-content:flex-start;min-height:0;font-size:inherit;font-weight:400;background:var(--card);color:var(--tx);border-color:var(--bd)}
+html[data-world] .ch-q span{font-size:inherit;line-height:inherit;display:inline}
+html[data-world] .ch-q .ch-q-txt{display:flex}
+html[data-world] .ch-q .ch-q-sub{display:block;font-size:12px;line-height:1.35;color:var(--sub)}
+html[data-world] .ch-q-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+html[data-world] .ch-q-txt>b{font-size:var(--fs-card);font-weight:800;white-space:nowrap}
+html[data-world] .ch-q-sub{font-size:12px;color:var(--sub);line-height:1.35}
+html[data-world] .ch-q-img{flex:none;width:46px;height:42px}
+/* 大卡 */
+html[data-world] .ch-big.ch-q{grid-row:1 / 3;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:14px;background:var(--cream);border-radius:var(--r-xl);box-shadow:var(--sh-2);min-height:136px}
+html[data-world] .ch-big .ch-q-txt>b{font-size:19px}
+html[data-world] .ch-big .ch-q-img{width:72px;height:62px;align-self:flex-start}
+html[data-world] .ch-q .ch-plus{display:block;position:absolute;right:12px;bottom:12px;width:44px;height:44px;border-radius:50%;background:var(--pink);color:#fff;font-size:26px;font-weight:700;line-height:44px;text-align:center;box-shadow:0 3px 0 rgba(150,40,70,.2)}
+/* 小卡 */
+html[data-world] .ch-sm{min-height:62px}
+/* ② 今日資訊卡（3 張） */
+html[data-world] .ch-info{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:var(--gap)}
+html[data-world] .ch-stat.ch-q{flex-direction:column;align-items:flex-start;gap:2px;padding:10px 10px 10px;border-radius:var(--r-md);min-height:112px}
+html[data-world] .ch-stat .ch-q-img{order:-1;width:44px;height:38px;margin-bottom:2px}
+html[data-world] .ch-stat .ch-q-txt>b{font-size:14px}
+html[data-world] .ch-stat .ch-q-sub{font-size:12px;color:var(--sub);white-space:nowrap}
+html[data-world] .ch-stat .ds-num{font-size:22px;font-weight:800}
+html[data-world] .ch-empty{color:var(--sub)}
+html[data-world] .ch-q .ch-chev{display:block;font-size:18px;position:absolute;right:8px;top:10px;color:var(--sub);font-size:18px;line-height:1}
+
+/* ③ 旅行主卡：手帳紙 */
+html[data-world] .ch-trip{position:relative;padding:14px 14px 10px;border:1.5px dashed #dccb9f;background:linear-gradient(var(--cream),var(--cream)) padding-box}
+html[data-world] .ch-trip-head{display:flex;align-items:center;justify-content:space-between;min-height:32px}
+html[data-world] .ch-year{display:inline-block;transform:rotate(-4deg);background:#f4e6bf;color:#7a6236;font-weight:800;font-size:14px;letter-spacing:.06em;padding:3px 12px;border-radius:var(--r-xs);box-shadow:0 1px 0 rgba(0,0,0,.06)}
+html[data-world] .ch-menu{position:relative;margin-left:auto}
+html[data-world] .ch-pop{display:none;position:absolute;right:0;top:40px;z-index:5;min-width:150px;background:var(--card);border:1px solid var(--bd);border-radius:var(--r-md);box-shadow:var(--sh-2);padding:6px}
+html[data-world] .ch-menu.open .ch-pop{display:block}
+html[data-world] .ch-pop-i{display:block;width:100%;margin:0;text-align:left;background:none;border:0;border-radius:var(--r-sm);padding:10px 10px;font:inherit;font-size:14px;color:var(--tx);cursor:pointer;min-height:40px}
+html[data-world] .ch-pop-i:active{background:var(--leaf-soft)}
+html[data-world] .ch-trip-body{display:flex;gap:12px;align-items:stretch;margin-top:6px}
+html[data-world] .ch-trip-txt{flex:1;min-width:0}
+html[data-world] .ch-trip-title{font-size:22px;font-weight:900;line-height:1.25;color:var(--tx);overflow-wrap:anywhere}
+html[data-world] .ch-trip-date{margin-top:6px;font-size:13px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html[data-world] .ch-trip-days{margin-top:2px;font-size:17px;font-weight:800;color:var(--leaf)}
+html[data-world] .ch-trip-deco{display:flex;align-items:flex-end;gap:8px;margin-top:6px}
+html[data-world] .ch-trip-deco .thc{width:76px;height:68px}
+html[data-world] .ch-plane{flex:1;min-width:0;height:26px;border-bottom:2px dashed #cdbb8f;color:#6aa7d6;font-size:18px;text-align:right;margin-bottom:22px;line-height:1}
+html[data-world] .ch-polaroid{flex:none;width:40%;max-width:170px;align-self:center;padding:6px 6px 18px;background:#fff;border:0;border-radius:4px;box-shadow:var(--sh-2);transform:rotate(3deg);cursor:pointer}
+html[data-world] .ch-polaroid img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:2px}
+
+/* ④ 倒數卡：數字是視覺中心，鱷魚在自己的右欄 */
+html[data-world] .ch-count{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:14px 14px 12px;text-align:left}
+html[data-world] .ch-count-txt .big{font-size:22px;font-weight:800;color:var(--leaf);line-height:1.1;margin:2px 0 4px}
+html[data-world] .ch-count-n{font-size:58px;font-weight:900;letter-spacing:-.02em;color:var(--leaf);vertical-align:-4px}
+html[data-world] .ch-count-txt>.sub:first-child{font-size:14px;font-weight:700;color:var(--tx)}
+html[data-world] .ch-count-side{display:flex;flex-direction:column;align-items:center;gap:4px}
+html[data-world] .ch-count-side .thc{width:92px;height:84px}
+html[data-world] .ch-bubble{font-size:11.5px;line-height:1.35;color:var(--tx);background:#fff;border:1px solid var(--bd);border-radius:12px;padding:5px 8px;text-align:center;white-space:nowrap}
+
+/* ⑤ 下一個行程 */
+html[data-world] .ch-next-head{display:flex;align-items:center;gap:8px}
+html[data-world] .ch-next-head>b{font-size:var(--fs-sec)}
+html[data-world] .ch-next-head .ds-more{margin-left:auto;font-size:13px;font-weight:700;color:var(--leaf);background:none;border:0;padding:6px 0;min-height:36px;cursor:pointer;white-space:nowrap}
+html[data-world] .ch-next-body{display:flex;gap:10px;align-items:flex-start;margin-top:6px}
+html[data-world] .ch-date{flex:none;width:58px;text-align:center;background:var(--pink-soft);color:var(--pink);border-radius:var(--r-sm);padding:8px 2px;line-height:1.2}
+html[data-world] .ch-date b{display:block;font-size:16px}
+html[data-world] .ch-date span{font-size:12px}
+html[data-world] .ch-next-main{flex:1;min-width:0}
+html[data-world] .ch-next-name{font-weight:800;font-size:15px;margin-top:4px;overflow-wrap:anywhere}
+html[data-world] .ch-time{font-weight:600;color:var(--leaf);font-variant-numeric:tabular-nums}
+html[data-world] .ch-next-place{font-size:13px;color:var(--sub);margin-top:2px;overflow-wrap:anywhere}
+html[data-world] .ch-next-more{font-size:13px;color:var(--tx);margin-top:6px;padding-top:6px;border-top:1px dashed var(--bd);overflow-wrap:anywhere}
+html[data-world] .ch-next-img{flex:none;width:58px;height:54px;align-self:flex-end}
+
+/* 區塊標題放在背景上：給一層半透明底，確保看得清楚 */
+html[data-world] #v>.ds-sec{display:inline-flex;background:color-mix(in srgb,var(--card) 88%,transparent);border-radius:var(--r-pill);padding:4px 12px;box-shadow:var(--sh-1)}
+/* 直接放在背景上的輔助文字，同樣加底 */
+html[data-world] #v>.sub{display:inline-block;background:color-mix(in srgb,var(--card) 88%,transparent);border-radius:var(--r-pill);padding:3px 10px}
+
+/* 窄螢幕：先縮小角色，再隱藏，資訊優先 */
+@media (max-width:359px){
+  html[data-world] .ch-big .ch-q-img{width:58px;height:50px}
+  html[data-world] .ch-q-img{width:38px;height:34px}
+  html[data-world] .ch-sm .ch-q-sub{display:none}
+  html[data-world] .ch-stat .ch-q-img{width:36px;height:32px}
+  html[data-world] .ch-count-n{font-size:48px}
+  html[data-world] .ch-count-side .thc{width:72px;height:66px}
+  html[data-world] .ch-trip-title{font-size:20px}
+  html[data-world] .ch-next-img{display:none}
+}
+@media (max-width:339px){
+  html[data-world] .ch-bubble{display:none}
+  html[data-world] .ch-stat .ds-num{font-size:19px}
+}
+
+/* 深色模式：背景圖調暗，卡片用深色紙 */
+@media (prefers-color-scheme:dark){
+  html[data-world]:not([data-theme="light"]) .ds-paper,html[data-world]:not([data-theme="light"]) .ch-big,html[data-world]:not([data-theme="light"]) .ch-trip{background:var(--card)}
+  html[data-world]:not([data-theme="light"]) .ch-bubble,html[data-world]:not([data-theme="light"]) .ch-polaroid{background:var(--card)}
+  html[data-world]:not([data-theme="light"]) .ch-year{background:#4a3f2a;color:#f1dfae}
+}
+
+/* =====================================================================
+   🗺️ 行程頁：鱷魚旅行時間軸（鱷魚主題）
+   ===================================================================== */
+/* 頁首：精簡，鱷魚在自己的欄位 */
+html[data-world] .cp-head{display:flex;align-items:center;gap:10px;padding:12px 12px 12px 16px}
+html[data-world] .cp-head-txt{flex:1;min-width:0}
+html[data-world] .cp-title{font-size:var(--fs-page);font-weight:900;color:var(--tx)}
+html[data-world] .cp-sub{font-size:13px;color:var(--sub);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html[data-world] .cp-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+html[data-world] .cp-head-img{flex:none;width:64px;height:58px}
+html[data-world] .cp-head .ch-menu{align-self:flex-start;margin-left:0}
+
+/* 日期卡：草綠路線條、DAY 膠囊、大日期 */
+html[data-world] .pday{border-radius:var(--r-lg);box-shadow:var(--sh-1)}
+html[data-world] .pday:before{width:5px;background:var(--leaf-2);opacity:1}
+html[data-world] .pday-no{background:var(--leaf-soft);color:var(--leaf);padding:2px 8px;border-radius:var(--r-pill);font-size:11px;letter-spacing:.06em}
+html[data-world] .pday-top{align-items:center}
+html[data-world] .pday-date{font-size:18px;font-weight:800}
+html[data-world] .pday-pill.st-part{background:var(--pink-soft);color:var(--pink)}
+html[data-world] .pday-pill.st-ok{background:var(--leaf-soft);color:var(--leaf)}
+html[data-world] .pday.is-open .pday-chev{color:var(--leaf)}
+/* 今天：粉紅點綴 */
+html[data-world] .pday.is-today{background:var(--card);border-color:#f2b8c9}
+html[data-world] .pday.is-today:before{background:var(--pink)}
+html[data-world] .pday-today{background:var(--pink);color:#fff}
+html[data-world] .pday.is-today .pday-no{background:var(--pink-soft);color:var(--pink)}
+
+/* 時間軸：草綠虛線＋小圓點，完成的圓點變實心 */
+html[data-world] .pday-body{border-top:1px dashed var(--bd);background:linear-gradient(var(--card),var(--card))}
+html[data-world] .pday-body>.item:before{border-color:var(--leaf-2);width:10px;height:10px;left:1px;top:15px}
+html[data-world] .pday-body>.item:after{background:none;border-left:2px dashed #cfe2bd;left:5px;width:0}
+html[data-world] .pday-body>.item:has(input:checked):before{background:var(--leaf-2)}
+html[data-world] .pday-body>.item.evt:before{border-color:#7fb4d8;background:#e3f2fa}
+html[data-world] .pday-body .chk input{accent-color:var(--leaf)}
+/* 時間軸結尾的小鱷魚 */
+html[data-world] .cp-end{display:flex;align-items:center;gap:8px;margin:4px 0 2px;padding:8px 10px;border-radius:var(--r-md);background:var(--leaf-soft)}
+html[data-world] .cp-end .thc{flex:none;width:46px;height:40px}
+html[data-world] .cp-end-txt{font-size:13px;font-weight:700;color:var(--leaf);min-width:0}
+
+/* 單日模式的切換列與工具列 */
+html[data-world] .pday-tools .btn{background:var(--card);border-color:var(--bd);color:var(--leaf)}
+
+@media (max-width:359px){html[data-world] .cp-head-img{width:48px;height:44px}}
+@media (max-width:339px){html[data-world] .cp-head-img{display:none}}
+/* 窄螢幕：日期永遠完整，「今天」標籤空間不夠時換到下一行 */
+html[data-world] .pday-top{flex-wrap:wrap;row-gap:3px}
+html[data-world] .pday-date{flex:none}
+
+/* =====================================================================
+   💰 記帳頁：旅行錢包（鱷魚主題）
+   ===================================================================== */
+html[data-world] .cw-wallet{padding:14px 14px 12px}
+html[data-world] .cw-head{display:flex;align-items:center;gap:8px;min-height:30px}
+html[data-world] .cw-head>b{font-size:var(--fs-sec)}
+html[data-world] .cw-head .cw-pill{float:none!important;margin:0 0 0 auto!important}
+html[data-world] .cw-top{display:flex;align-items:center;gap:8px;margin:6px 0 4px}
+html[data-world] .cw-main{flex:1;min-width:0}
+html[data-world] .cw-label{font-size:13px;color:var(--sub);font-weight:700}
+html[data-world] .cw-amt{font-size:38px;font-weight:900;color:var(--leaf);line-height:1.15;letter-spacing:-.01em;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+html[data-world] .cw-approx{font-size:13px;color:var(--sub)}
+html[data-world] .cw-state{margin-top:6px}
+html[data-world] .cw-hint{display:block;font-size:11px;color:var(--sub);margin-top:3px}
+html[data-world] .cw-img{flex:none;width:84px;height:76px}
+html[data-world] .cw-wallet .bar{margin:10px 0 8px}
+html[data-world] .cw-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+html[data-world] .cw-stats>div{background:var(--card);border:1px solid var(--bd);border-radius:var(--r-sm);padding:6px 8px;min-width:0}
+html[data-world] .cw-stats span{display:block;font-size:11px;color:var(--sub)}
+html[data-world] .cw-stats b{display:block;font-size:14px;font-weight:800;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+/* 分類格 */
+html[data-world] .cw-cats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:var(--gap)}
+html[data-world] .cw-cat{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:10px 10px 9px;border:1px solid var(--bd);border-radius:var(--r-md);background:var(--card);box-shadow:var(--sh-1);color:var(--tx);font:inherit;text-align:left;cursor:pointer;min-width:0;min-height:76px}
+html[data-world] .cw-cat:active{transform:translateY(1px)}
+html[data-world] .cw-cat-ic{font-size:20px;line-height:1.2}
+html[data-world] .cw-cat-n{font-size:13px;font-weight:800}
+html[data-world] .cw-cat-v{font-size:13px;font-weight:700;color:var(--leaf);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums}
+html[data-world] .cw-cat.is-zero .cw-cat-v{color:var(--sub);font-weight:400}
+/* 明細 */
+html[data-world] .cw-list{padding-top:4px;padding-bottom:4px}
+html[data-world] .cw-date{font-size:11px;font-weight:700;color:var(--leaf);margin-top:8px}
+html[data-world] .cw-list .item:last-child{border-bottom:0}
+html[data-world] .ds-sec .ds-more{margin-left:auto}
+
+@media (max-width:359px){html[data-world] .cw-img{width:62px;height:56px}html[data-world] .cw-amt{font-size:32px}}
+@media (max-width:339px){html[data-world] .cw-img{display:none}html[data-world] .cw-stats b{font-size:12.5px}}
+
+/* =====================================================================
+   📷 照片頁：旅行照片手帳（鱷魚主題）
+   ===================================================================== */
+html[data-world] .cph-head{display:flex;align-items:center;gap:10px;padding:12px 12px 12px 16px}
+html[data-world] .cph-head-txt{flex:1;min-width:0}
+html[data-world] .cph-title{font-size:var(--fs-page);font-weight:900;color:var(--tx)}
+html[data-world] .cph-meta{margin-top:6px}
+html[data-world] .cph-note{margin-top:6px;font-size:12px;line-height:1.45;color:var(--sub)}
+html[data-world] .cph-note .btn{margin-top:6px}
+html[data-world] .cph-head-img{flex:none;width:70px;height:64px}
+html[data-world] .cph-date{font-weight:800}
+html[data-world] .cph-group>b{font-size:var(--fs-card)}
+/* 照片牆：拍立得（只在照片頁；其他頁的小縮圖不受影響） */
+html[data-world] [data-ctab=photo] .grid{gap:10px 8px;padding:4px 2px 2px}
+html[data-world] [data-ctab=photo] .tile{background:#fff;padding:5px 5px 6px;border-radius:4px;box-shadow:0 1px 2px rgba(80,60,20,.12),0 4px 10px rgba(80,60,20,.10);transform:rotate(-1.2deg)}
+html[data-world] [data-ctab=photo] .tile:nth-child(3n+2){transform:rotate(1deg)}
+html[data-world] [data-ctab=photo] .tile:nth-child(3n){transform:rotate(-.4deg)}
+html[data-world] [data-ctab=photo] .tile img,html[data-world] [data-ctab=photo] .tile .tph{border-radius:2px}
+html[data-world] [data-ctab=photo] .tile>.sub{font-size:11px;margin-top:4px;line-height:1.35}
+html[data-world] [data-ctab=photo] .tile>.bt{font-size:12px;padding:6px 4px;min-height:32px}
+html[data-world] [data-ctab=photo] .swp-in .grid{margin-top:8px}
+/* 加照片區：拍照為主要按鈕、相簿為次要 */
+html[data-world] [data-ctab=photo] label.btn{border-radius:var(--r-md)}
+@media (max-width:359px){html[data-world] .cph-head-img{width:52px;height:48px}}
+@media (max-width:339px){html[data-world] .cph-head-img{display:none}}
+@media (prefers-color-scheme:dark){html[data-world]:not([data-theme="light"]) [data-ctab=photo] .tile{background:#2a2326}}
+/* 可滑動刪除的日期卡：卡片貼齊底下的刪除鈕，不露出紅色 */
+html[data-world] .swp{border-radius:var(--r-lg);margin-bottom:var(--gap)}
+html[data-world] .swp>.card{margin-bottom:0;border-radius:var(--r-lg)}
+html[data-world] .swp-act button{border-radius:var(--r-lg) 0 0 var(--r-lg)}
+html[data-world] [data-ctab=photo] .tile>.cph-local{display:none}
+
+/* =====================================================================
+   🎫 票券中心：旅行票夾（鱷魚主題）
+   ===================================================================== */
+html[data-world] .ct-head{display:flex;align-items:center;gap:10px;padding:12px 12px 12px 16px}
+html[data-world] .ct-head-txt{flex:1;min-width:0}
+html[data-world] .ct-title{font-size:var(--fs-page);font-weight:900}
+html[data-world] .ct-sub{font-size:12px;color:var(--sub);margin-top:3px;line-height:1.45}
+html[data-world] .ct-meta{margin-top:7px}
+html[data-world] .ct-head-img{flex:none;width:68px;height:66px}
+html[data-world] .ct-date{margin-top:14px}
+html[data-world] .ct-count{font-size:12px;font-weight:700;color:var(--sub);margin-left:6px}
+/* 票根卡：上半部票券資訊、撕線（兩側半圓缺口）、下半部 QR／圖片 */
+html[data-world] .ct-ticket{position:relative;padding:0;overflow:visible;border-radius:var(--r-md);border:1px solid var(--bd);background:var(--card)}
+html[data-world] .ct-ticket:before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:5px;border-radius:0 4px 4px 0;background:var(--leaf-2)}
+html[data-world] .ct-top{padding:6px 14px 4px 18px}
+html[data-world] .ct-top>.item{border-bottom:0}
+html[data-world] .ct-top>.item b{font-size:var(--fs-card)}
+html[data-world] .ct-stub{position:relative;padding:10px 14px 8px 18px;border-top:2px dashed var(--bd)}
+html[data-world] .ct-stub:before,html[data-world] .ct-stub:after{content:"";position:absolute;top:-10px;width:18px;height:18px;border-radius:50%;background:var(--bg);border:1px solid var(--bd)}
+html[data-world] .ct-stub:before{left:-10px;clip-path:inset(0 0 0 50%)}
+html[data-world] .ct-stub:after{right:-10px;clip-path:inset(0 50% 0 0)}
+html[data-world] .ct-stub>div{padding:0!important}
+html[data-world] .ct-stub .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+html[data-world] .ct-stub .tile img{border-radius:6px;border:1px solid var(--bd)}
+@media (max-width:359px){html[data-world] .ct-head-img{width:52px;height:50px}}
+@media (max-width:339px){html[data-world] .ct-head-img{display:none}}
+@media (prefers-color-scheme:dark){html[data-world]:not([data-theme="light"]) .ct-stub:before,html[data-world]:not([data-theme="light"]) .ct-stub:after{background:#171214}}
+
+/* =====================================================================
+   ➕ 快速記帳（鱷魚主題）：金額為焦點
+   ===================================================================== */
+html[data-world] .cq{background:var(--card)}
+html[data-world] .cq-amt{display:flex;align-items:baseline;justify-content:center;gap:6px;margin:4px 0 6px;padding:14px 12px 10px;border-radius:var(--r-lg);background:var(--cream);border:1px solid var(--bd)}
+html[data-world] .cq-sym{font-size:28px;font-weight:800;color:var(--leaf);flex:none}
+html[data-world] .cq-amt #q_a{flex:1;min-width:0;max-width:240px;height:auto!important;font-size:44px!important;font-weight:900;text-align:center;color:var(--tx);background:transparent;border:0;border-bottom:2px dashed var(--leaf-2);border-radius:0;padding:2px 4px;font-variant-numeric:tabular-nums}
+html[data-world] .cq-amt #q_a:focus{outline:none;border-bottom-color:var(--pink)}
+html[data-world] .cq-cats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:4px 0 2px}
+html[data-world] .cq-cat{min-height:44px;padding:4px 2px;border:1px solid var(--bd);border-radius:var(--r-md);background:#fff;color:var(--tx);font:inherit;font-size:12.5px;font-weight:700;line-height:1.25;cursor:pointer;overflow-wrap:anywhere}
+html[data-world] .cq-cat.on{background:var(--leaf);border-color:var(--leaf);color:#fff}
+html[data-world] .cq-hidden{display:none!important}
+html[data-world] .cq .sh-f .btn:last-child{font-size:17px;min-height:52px}
+@media (max-width:359px){html[data-world] .cq-cats{grid-template-columns:repeat(4,minmax(0,1fr))}html[data-world] .cq-amt #q_a{font-size:38px!important}}
+@media (prefers-color-scheme:dark){html[data-world]:not([data-theme="light"]) .cq-cat{background:var(--card)}html[data-world]:not([data-theme="light"]) .cq-amt{background:var(--soft)}}
+html[data-world] .cq-amt #q_a::-webkit-inner-spin-button,html[data-world] .cq-amt #q_a::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+html[data-world] .cq-amt #q_a{-moz-appearance:textfield;appearance:textfield}
+
+/* =====================================================================
+   🎒 更多：旅行背包（鱷魚主題）
+   ===================================================================== */
+/* 更多選單：分組 */
+html[data-world] .cm-groups{padding-bottom:6px}
+html[data-world] .cm-group{margin-bottom:12px}
+html[data-world] .cm-title{font-size:13px;font-weight:800;color:var(--leaf);margin:2px 2px 6px}
+html[data-world] .cm-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding-bottom:0}
+html[data-world] .cm-grid button{min-height:70px;border-radius:var(--r-md);background:var(--card);border-color:var(--bd);font-size:12.5px;font-weight:700;padding:6px 2px}
+html[data-world] .cm-grid button span{font-size:24px}
+html[data-world] #md .sheet{background:var(--bg)}
+html[data-world] #md .sh-h .thc{width:44px;height:40px}
+@media (max-width:359px){html[data-world] .cm-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+/* 設定頁：頁首與分區 */
+html[data-world] .cs-head{display:flex;align-items:center;gap:10px;padding:12px 12px 12px 16px}
+html[data-world] .cs-head-txt{flex:1;min-width:0}
+html[data-world] .cs-title{font-size:var(--fs-page);font-weight:900}
+html[data-world] .cs-sub{font-size:12px;color:var(--sub);margin-top:3px;line-height:1.45}
+html[data-world] .cs-head-img{flex:none;width:64px;height:62px}
+html[data-world] [data-ctab=set] .card>b:first-child{font-size:var(--fs-card)}
+@media (max-width:339px){html[data-world] .cs-head-img{display:none}}
+
+/* =====================================================================
+   共用頁首（各頁專屬頁面）
+   ===================================================================== */
+html[data-world] .cx-head{display:flex;align-items:center;gap:10px;padding:12px 12px 12px 16px}
+html[data-world] .cx-head-txt{flex:1;min-width:0}
+html[data-world] .cx-title{font-size:var(--fs-page);font-weight:900;color:var(--tx)}
+html[data-world] .cx-sub{font-size:12px;color:var(--sub);margin-top:3px;line-height:1.45}
+html[data-world] .cx-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+html[data-world] .cx-meta .tag{margin:0;font-size:12px;font-weight:700;padding:2px 9px}
+html[data-world] .cx-head-img{flex:none;width:66px;height:62px;align-self:center}
+@media (max-width:359px){html[data-world] .cx-head-img{width:50px;height:48px}}
+@media (max-width:339px){html[data-world] .cx-head-img{display:none}}
+
+/* 🎒 行李：勾選格像背包裡的小口袋 */
+html[data-world] .cx-pack .pk{border-bottom:1px dashed var(--bd);min-height:52px}
+html[data-world] .cx-pack .pkb{border-color:var(--leaf-2);border-radius:var(--r-sm);color:#fff}
+html[data-world] .cx-pack .pk.dn .pkb{background:var(--leaf-2)}
+html[data-world] .cx-pack .pkt{font-size:16px}
+html[data-world] .cx-pack>.l>b{font-size:var(--fs-sec);color:var(--leaf)}
+
+/* 🚆 交通：卡片左邊一條路線 */
+html[data-world] [data-ctab=trans] .catbar{background:var(--leaf-soft);color:var(--leaf)}
+html[data-world] [data-ctab=trans] .cx-route{position:relative;padding-left:16px;border-bottom:1px dashed var(--bd)}
+html[data-world] [data-ctab=trans] .cx-route:before{content:"";position:absolute;left:3px;top:14px;bottom:14px;width:3px;border-radius:3px;background:linear-gradient(var(--leaf-2),#7fb4d8)}
+html[data-world] [data-ctab=trans] .cx-route:last-child{border-bottom:0}
+
+/* 📌 預約：每筆像一張小票 */
+html[data-world] [data-ctab=resv] .card .item{background:var(--cream);border:1px solid var(--bd);border-radius:var(--r-md);padding:10px 12px;margin:8px 0}
+
+/* ⛩️ 御朱印：印章格 */
+html[data-world] .cx-stamps{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;margin-top:10px;max-width:280px}
+html[data-world] .cx-stamp{aspect-ratio:1;border-radius:50%;border:1.5px dashed #e3b9b9;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:#c23b3b;background:#fff}
+html[data-world] .cx-stamp.on{border:2px solid #c23b3b;background:#fff3f1;transform:rotate(-10deg)}
+html[data-world] .cx-gosh-list .item{padding:12px 0;border-bottom:1px dashed var(--bd)}
+html[data-world] .cx-gosh-list .stamp{border-color:#c23b3b;color:#c23b3b}
+html[data-world] .cx-gosh-list .chk input{accent-color:#c23b3b}
+
+/* 🧾 明細：帳本合計 */
+html[data-world] [data-ctab=list] .catbar{background:var(--leaf-soft);color:var(--leaf)}
+html[data-world] .cx-daytot{border-top:2px dashed var(--leaf-2)!important;color:var(--leaf)}
+/* 頁首內容較多（例如集章格）時：上面標題＋角色一列，下面整寬 */
+html[data-world] .cx-head.cx-wrap{flex-wrap:wrap}
+html[data-world] .cx-head.cx-wrap>.cx-stamps{flex-basis:100%;max-width:none;grid-template-columns:repeat(auto-fill,minmax(30px,1fr))}
+/* 交通／預約的日期列（可展開）與分類列 */
+html[data-world] [data-ctab=trans] .catbar,html[data-world] [data-ctab=list] .catbar{font-size:13px}
+
+/* =====================================================================
+   第二批：每日總覽、統計、地圖、回顧、旅行手冊
+   ===================================================================== */
+/* 地區色日期列：淡綠底＋左側地區色細條（取代大面積紫／紅色塊） */
+html[data-world] .daybar.cx-daybar{background:var(--leaf-soft)!important;color:var(--tx);border-left:5px solid var(--rg,var(--leaf-2));text-shadow:none}
+html[data-world] .daybar.cx-daybar>b{color:var(--tx)}
+html[data-world] .daybar.cx-daybar>span{color:var(--leaf);font-weight:700;font-size:13px;white-space:nowrap}
+/* 每日總覽：計數膠囊 */
+html[data-world] [data-ctab=days] .ov{gap:6px}
+html[data-world] [data-ctab=days] .ov>span{font-size:12px;padding:2px 8px;border-radius:var(--r-pill);background:var(--cream);border:1px solid var(--bd)}
+html[data-world] [data-ctab=days] .ov>span.cx-zero{opacity:.45}
+/* 統計：長條圖用主題色 */
+html[data-world] [data-ctab=stat] .bar{height:10px;background:var(--paper-2)}
+html[data-world] [data-ctab=stat] .card>b:first-child{font-size:var(--fs-sec)}
+/* 地圖：地點連結像小路標 */
+html[data-world] [data-ctab=map] .card a{color:var(--leaf);font-weight:700}
+html[data-world] [data-ctab=map] .btn.sec{border-style:dashed}
+/* 回顧：旅程卡像手帳頁 */
+html[data-world] [data-ctab=rev] .card{background:var(--cream)}
+/* 旅行手冊：範本選項 */
+html[data-world] [data-ctab=book] .tpl{background:var(--card);border-color:var(--bd);border-radius:var(--r-md)}
+html[data-world] [data-ctab=book] .tpl.on{background:var(--leaf-soft);border-color:var(--leaf-2)}
+html[data-world] [data-ctab=book] .chip{background:var(--card);border-color:var(--bd)}
+html[data-world] [data-ctab=book] input[type=radio],html[data-world] [data-ctab=book] input[type=checkbox]{accent-color:var(--leaf)}
+
+/* 行程一天一頁（鱷魚主題外觀） */
+html[data-world] .pd-d{background:var(--card);border-color:var(--bd)}
+html[data-world] .pd-d.on{background:var(--leaf);border-color:var(--leaf);color:#fff}
+html[data-world] .pd-d.is-today:not(.on){border-color:var(--pink)}
+html[data-world] .pd-hero{background:var(--cream);border-radius:var(--r-xl);box-shadow:var(--sh-2)}
+html[data-world] .pd-hero:before{background:var(--leaf-2)}
+html[data-world] .pd-hero.is-today:before{background:var(--pink)}
+html[data-world] .pd-no{color:var(--leaf)}
+html[data-world] .pd-art.pday-char{width:76px;height:72px;border-radius:50%;background:var(--leaf-soft)}
+html[data-world] .pd-art.pday-char>.thc{width:64px;height:58px}
+html[data-world] #v>.pd-hint,html[data-world] .pd-hint{display:block;width:max-content;margin:-4px auto 12px;padding:2px 10px;border-radius:var(--r-pill);background:color-mix(in srgb,var(--card) 85%,transparent)}
+@media (hover:hover) and (pointer:fine){html[data-world] .pd-hint{display:none}}
+@media (max-width:359px){html[data-world] .pd-art.pday-char{width:56px;height:56px}html[data-world] .pd-art.pday-char>.thc{width:46px;height:42px}}
+
+/* 插圖主題（SVG）的美術元素 */
+html[data-world] .thc>svg{display:block;width:100%;height:100%;overflow:visible}
+html[data-world] span.thc{display:block}
