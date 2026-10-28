@@ -181,6 +181,7 @@ a{color:var(--ac)}
 .wr-chip span{color:var(--sub);font-size:11px;margin-left:4px}
 .wr-sel{width:auto;min-height:36px;height:36px;padding:4px 8px;font-size:13px;border-radius:999px}
 .wr-acts2{display:flex;flex-wrap:wrap;align-items:center;gap:2px 4px;margin-top:6px}
+.dg-p{border-top:1px solid var(--bd);padding:8px 0}.dg-p:first-of-type{border-top:0}.dg-p.is-done{opacity:.65}.dg-p .l>span:last-child{flex-shrink:0;margin-left:8px}
 </style></head><body>
 <header class="top"><span id="net"></span><h1 id="ttl" role="button" onclick="tripPicker()">旅行控制中心</h1><button class="tdy" onclick="goToday()">📍 今天</button></header>
 <main id="v"></main>
@@ -280,7 +281,7 @@ function normItem(i,rates){
   if(!(rate>0)){rate=(rates&&+rates[cur]>0)?+rates[cur]:(cur==="TWD"?1:0)}
   var pp=Math.floor(sNum(i.people,1));if(!(pp>=1))pp=1;if(pp>99)pp=99;
   return Object.assign({},i,{id:sNum(i.id,mkId()),date:sStr(i.date),cat:sStr(i.cat,"其他"),name:sStr(i.name,"（未命名）"),
-    amount:Math.max(0,sNum(i.amount,0)),cur:cur,rate:rate,pay:sStr(i.pay,"現金"),people:pp,peopleNames:(pp>1?cleanNames(i.peopleNames):[]),note:sStr(i.note)})}
+    amount:Math.max(0,sNum(i.amount,0)),cur:cur,rate:rate,pay:sStr(i.pay,"現金"),people:pp,peopleNames:(pp>1?cleanNames(i.peopleNames):[]),note:sStr(i.note),forWho:sStr(i.forWho).trim().slice(0,20),dgPaid:!!i.dgPaid})}
 function normPlan(p,old){
   p=(p&&typeof p==="object")?p:{};var o=Object.assign({},p);
   o.id=sNum(p.id,mkId());o.date=sStr(p.date);o.time=sStr(p.time);o.lab=sStr(p.lab);o.name=sStr(p.name,"（未命名）");
@@ -445,16 +446,41 @@ function bars(map,total,iconMap){
   var ks=Object.keys(map).sort(function(a,b){return map[b]-map[a]}),mx=ks.length?map[ks[0]]:1;
   if(!ks.length)return '<div class="sub">尚無資料</div>';
   return ks.map(function(k){return '<div class="l"><span>'+(CC[k]&&iconMap!==false?'<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:'+CC[k]+';margin-right:6px"></span>'+(CAT_ICON[k]||"")+' ':'')+esc(k)+'</span><span>'+dm(map[k])+(total>0?' <span class="sub">'+Math.round(map[k]/total*100)+'%</span>':'')+'</span></div><div class="bar"><i style="width:'+(mx>0?map[k]/mx*100:0)+'%;background:'+((iconMap!==false&&CC[k])||"var(--ac)")+'"></i></div>'}).join("")}
+/* ===== 代購：每筆可記「幫誰買」，依人彙總應收金額（原幣＋台幣），可標記已收款 ===== */
+function dgItems(){return S.items.filter(function(i){return i.forWho})}
+function dgNames(){var m={},o=[];S.items.forEach(function(i){if(i.forWho&&!m[i.forWho]){m[i.forWho]=1;o.push(i.forWho)}});return o}
+function dgField(x,v){
+  return '<label>🛍️ 幫誰買（代購，選填）</label><input id="'+x+'fw" list="'+x+'fwl" value="'+esc(v||"")+'" placeholder="自己的就留空；例如：媽媽、小美" maxlength="20" autocomplete="off">'
+   +'<datalist id="'+x+'fwl">'+dgNames().map(function(n){return '<option value="'+esc(n)+'">'}).join("")+'</datalist>'}
+function dgCurs(L){var m={};L.forEach(function(i){m[i.cur]=(m[i.cur]||0)+i.amount});return Object.keys(m).map(function(c){return money(m[c],c)}).join(" ＋ ")}
+var DgOpen={};
+function dgCard(){
+  var L=dgItems();if(!L.length)return "";
+  var g={},o=[];L.forEach(function(i){if(!g[i.forWho]){g[i.forWho]=[];o.push(i.forWho)}g[i.forWho].push(i)});
+  var owe=L.filter(function(i){return !i.dgPaid});
+  return '<div class="card dg-card"><div class="l"><b>🛍️ 代購應收</b><span class="sub">'+o.length+' 人・'+L.length+' 筆</span></div>'
+   +'<div class="sub" style="margin:2px 0 6px">'+(owe.length?'還沒收：<b>'+esc(dgCurs(owe))+'</b>（≈ NT$ '+fmt(sumTwd(owe))+'）':'✅ 全部收齊了')+'</div>'
+   +o.map(function(n,k){
+      var A=g[n],U=A.filter(function(i){return !i.dgPaid}),done=!U.length,op=!!DgOpen[n];
+      return '<div class="dg-p'+(done?' is-done':'')+'"><div class="l" onclick="dgTog('+k+')" style="cursor:pointer"><span><b>'+(op?'▾ ':'▸ ')+esc(n)+'</b> <span class="sub">'+A.length+' 筆</span></span>'
+       +'<span style="text-align:right">'+(done?'<span class="tag">✅ 已收款</span>':'<b>'+esc(dgCurs(U))+'</b><br><span class="sub">≈ NT$ '+fmt(sumTwd(U))+'</span>')+'</span></div>'
+       +(op?A.map(function(i){return '<div class="l sub" style="padding:2px 0 2px 14px"><span>'+(i.dgPaid?'✅ ':'')+esc(md(i.date))+' '+esc(i.name)+'</span><span>'+esc(money(i.amount,i.cur))+'</span></div>'}).join("")
+         +'<button class="btn sec sm" style="margin:6px 0 4px" onclick="dgPay('+k+','+(done?0:1)+')">'+(done?'改回未收款':'💰 '+esc(n)+' 已付清')+'</button>':'')+'</div>'}).join("")
+   +'<div class="sub" style="margin-top:6px">台幣用每筆記帳時的匯率換算。代購的錢也算在總支出裡。</div></div>'}
+function dgPerson(k){var o=dgNames();return o[k]}
+function dgTog(k){var n=dgPerson(k);if(n==null)return;DgOpen[n]=!DgOpen[n];render()}
+function dgPay(k,v){var n=dgPerson(k);if(n==null)return;S.items.forEach(function(i){if(i.forWho===n)i.dgPaid=!!v});save();render();toast(v?"💰 "+n+" 已付清":"已改回未收款")}
+function dgSumLine(){var L=dgItems();if(!L.length)return "";var t=sumTwd(L);return '<div class="l sub" style="margin-top:4px"><span>其中代購（會收回）</span><span>'+dm(t)+'</span></div><div class="l sub"><span>扣掉代購，自己花</span><span>'+dm(sumTwd(S.items)-t)+'</span></div>'}
 function summary(){
   var t=sumTwd(S.items),left=S.budget-t,p=S.budget>0?Math.min(100,t/S.budget*100):0,shared=S.items.some(function(i){return i.people>1}),st=spentOn(today());
   return '<div class="card">'+curPill()+'<div class="sub">總支出（'+curName(lc())+'）</div><div class="big">'+dm(t)+'</div>'+(lc()!=="TWD"?'<div class="sub">≈ NT$ '+fmt(t)+'</div>':'')
    +'<div class="bar'+(left<0?' over':'')+'"><i style="width:'+p+'%"></i></div>'
    +'<div class="l"><span class="sub">預算 '+dm(S.budget)+'</span><span class="'+(left<0?'warn':'')+'">'+(left<0?'超支 ':'剩餘 ')+''+dm(Math.abs(left))+'</span></div>'
    +(shared?'<div class="l sub" style="margin-top:4px"><span>每人分攤合計</span><span>'+dm(sumPer(S.items))+'</span></div>':'')
-   +(st?'<div class="l sub" style="margin-top:4px"><span>今日支出</span><span>'+dm(st)+'</span></div>':'')+rateNote()+'</div>'}
+   +(st?'<div class="l sub" style="margin-top:4px"><span>今日支出</span><span>'+dm(st)+'</span></div>':'')+dgSumLine()+rateNote()+'</div>'}
 function expFields(x,it){
   return '<div class="row"><div><label>日期</label><input type="date" id="'+x+'d" value="'+esc(it.date)+'"></div><div><label>類別</label><select id="'+x+'c">'+opts(CATS,it.cat)+'</select></div></div>'
-   +'<label>項目</label><input id="'+x+'n" value="'+esc(it.name)+'" placeholder="例如：拉麵" maxlength="80">'
+   +'<label>項目</label><input id="'+x+'n" value="'+esc(it.name)+'" placeholder="例如：拉麵" maxlength="80">'+dgField(x,it.forWho)
    +'<div class="row"><div><label>金額</label><input id="'+x+'a" type="number" inputmode="decimal" min="0" step="any" value="'+esc(it.amount||"")+'" placeholder="0" oninput="expPv(\''+x+'\')"></div>'
    +'<div><label>幣別</label><select id="'+x+'u" onchange="curChg(\''+x+'\')">'+opts(Object.keys(S.rates),it.cur)+'</select></div></div>'
    +'<div class="row"><div><label>匯率（1 單位 → 台幣）</label><input id="'+x+'r" type="number" inputmode="decimal" min="0" step="any" value="'+esc(it.rate)+'" oninput="expPv(\''+x+'\')"></div>'
@@ -477,11 +503,11 @@ function readExp(x){
   if(!(r>0))return{err:"匯率必須是大於 0 的數字"};
   if(!(pp>=1)||pp>99||Math.floor(pp)!==pp)return{err:"分攤人數請輸入 1～99 的整數"};
   if(!d)return{err:"請選擇日期"};
-  return{v:{date:d,cat:$(x+"c").value,name:$(x+"n").value.trim()||"（未命名）",amount:a,cur:$(x+"u").value,rate:r,pay:$(x+"p").value,people:pp,peopleNames:(pp>1&&$(x+"pn")?parseNames($(x+"pn").value):[]),note:$(x+"m").value.trim()}}}
+  return{v:{date:d,cat:$(x+"c").value,name:$(x+"n").value.trim()||"（未命名）",amount:a,cur:$(x+"u").value,rate:r,pay:$(x+"p").value,people:pp,peopleNames:(pp>1&&$(x+"pn")?parseNames($(x+"pn").value):[]),note:$(x+"m").value.trim(),forWho:($(x+"fw")?$(x+"fw").value.trim().slice(0,20):"")}}}
 function vAdd(){
   var cur=lastCur;if(!(cur in S.rates))cur="TWD";
   var it={date:today(),cat:CATS[0],name:"",amount:"",cur:cur,rate:S.rates[cur]>0?S.rates[cur]:1,pay:lastPay,people:S.defPeople||1,note:""};
-  return summary()+'<button class="btn" style="margin:0 0 12px;font-size:18px;padding:16px" onclick="qAdd()">＋ 快速記帳</button>'+fxCard()+'<div class="card"><b>＋ 記一筆（完整表單）</b>'+expFields("a_",it)
+  return summary()+'<button class="btn" style="margin:0 0 12px;font-size:18px;padding:16px" onclick="qAdd()">＋ 快速記帳</button>'+fxCard()+dgCard()+'<div class="card"><b>＋ 記一筆（完整表單）</b>'+expFields("a_",it)
    +(phOn()?'<label>照片（選填，例如收據、商品）</label><input type="file" id="a_f" accept="image/*" multiple>':'')
    +'<button class="btn" onclick="add()">新增一筆</button><div class="warn sub" id="er"></div><div class="sub" id="am"></div></div>'}
 function add(){
@@ -506,7 +532,7 @@ function splitHtml(i){
 var ExpOpen={},expInit=false;
 function expItemRow(i){
   return '<div class="item"><div><b>'+esc(i.name)+'</b><span class="sub">'+esc(i.pay)+(i.note?'・'+esc(i.note):'')+'</span>'
-   +splitHtml(i)+(i.cur!=="TWD"?'<span class="tag">匯率 '+esc(i.rate)+'</span>':'')
+   +splitHtml(i)+(i.forWho?'<span class="tag dg-tag">🛍️ 幫 '+esc(i.forWho)+' 買'+(i.dgPaid?'・已收款':'')+'</span>':'')+(i.cur!=="TWD"?'<span class="tag">匯率 '+esc(i.rate)+'</span>':'')
    +refPh("e:"+i.id)+'</div><div class="amt"><b style="display:inline">'+esc(money(i.amount,i.cur))+'</b>'+(i.cur!=="TWD"?'<br><span class="sub">NT$ '+fmt(twd(i))+'</span>':'')
    +'<br><button class="bt" onclick="editExp('+i.id+')">✏️ 編輯</button><button class="bt d" onclick="askDel(\'item\','+i.id+')">刪除</button></div></div>'}
 function togExp(d){ExpOpen[d]=!ExpOpen[d];render()}
@@ -517,7 +543,7 @@ function vList(){
   var g={};S.items.forEach(function(i){(g[i.date]=g[i.date]||[]).push(i)});
   var ds=Object.keys(g).sort().reverse();
   if(!expInit){expInit=true;var t=focusDate||today();ExpOpen[g[t]?t:ds[0]]=1}
-  return '<button class="btn" style="margin:0 0 12px" onclick="qAdd()">＋ 快速記帳</button><div class="row" style="margin-bottom:12px"><div><button class="btn sec sm" style="width:100%" onclick="allExp(1)">全部展開</button></div><div><button class="btn sec sm" style="width:100%" onclick="allExp(0)">全部收合</button></div></div>'
+  return '<button class="btn" style="margin:0 0 12px" onclick="qAdd()">＋ 快速記帳</button>'+dgCard()+'<div class="row" style="margin-bottom:12px"><div><button class="btn sec sm" style="width:100%" onclick="allExp(1)">全部展開</button></div><div><button class="btn sec sm" style="width:100%" onclick="allExp(0)">全部收合</button></div></div>'
   +ds.map(function(d){
     var L=g[d],sh=L.some(function(i){return i.people>1}),op=!!ExpOpen[d],cg={};
     L.forEach(function(i){(cg[i.cat]=cg[i.cat]||[]).push(i)});
@@ -1081,8 +1107,8 @@ function importJson(inp){
 /* --- CSV --- */
 function csvCell(v){v=String(v==null?"":v);if(/^[=+\-@]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"'}
 function exportCsv(){
-  var rows=[["日期","類別","項目","金額","幣別","匯率(固定)","台幣總額","人數","分攤人員","每人分攤(台幣)","付款方式","備註"]];
-  S.items.slice().sort(byDate).forEach(function(i){rows.push([i.date,i.cat,i.name,i.amount,i.cur,itRate(i),twd(i),i.people||1,cleanNames(i.peopleNames).join("、"),Math.round(twdPer(i)*10)/10,i.pay,i.note])});
+  var rows=[["日期","類別","項目","金額","幣別","匯率(固定)","台幣總額","人數","分攤人員","每人分攤(台幣)","付款方式","備註","代購對象","代購已收款"]];
+  S.items.slice().sort(byDate).forEach(function(i){rows.push([i.date,i.cat,i.name,i.amount,i.cur,itRate(i),twd(i),i.people||1,cleanNames(i.peopleNames).join("、"),Math.round(twdPer(i)*10)/10,i.pay,i.note,i.forWho||"",i.forWho?(i.dgPaid?"是":"否"):""])});
   rows.push([]);rows.push(["合計","","","","","",sumTwd(S.items),"","",Math.round(sumPer(S.items)),"",""]);
   return saveFile(fname(S.trip)+"_記帳_"+stamp()+".csv","﻿"+rows.map(function(r){return r.map(csvCell).join(",")}).join("\r\n"))}
 
@@ -1627,7 +1653,7 @@ function qAdd(d){
   var cur=("JPY" in S.rates)?"JPY":"TWD",rt=S.rates[cur]>0?S.rates[cur]:1,it={date:(typeof d==="string"&&d)||today(),cat:CATS[0],name:"",amount:"",cur:cur,rate:rt,pay:lastPay,people:S.defPeople||1,peopleNames:[],note:""};
   var body='<label>金額</label><input id="q_a" type="number" inputmode="decimal" min="0" step="any" placeholder="0" style="font-size:26px;height:56px" oninput="expPv(\'q_\')">'
    +'<label>類別</label><select id="q_c" style="height:48px">'+CATS.map(function(c){return '<option value="'+esc(c)+'">'+(CAT_ICON[c]||"")+' '+esc(c)+'</option>'}).join("")+'</select>'
-   +'<label>名稱</label><input id="q_n" placeholder="例如：晚餐" maxlength="80" style="height:48px">'
+   +'<label>名稱</label><input id="q_n" placeholder="例如：晚餐" maxlength="80" style="height:48px">'+dgField("q_","")
    +'<div class="sub" id="q_pv" style="margin-top:8px"></div><div class="sub">'+esc(SYM[cur]||cur)+'1 = NT$'+esc(rt)+'｜日期 '+esc(md(it.date))+'｜1 人（可在「顯示更多」改）</div>'
    +'<button type="button" class="btn sec sm" style="margin-top:10px" onclick="$(\'q_more\').classList.toggle(\'hide\')">顯示更多</button>'
    +'<div id="q_more" class="hide"><div class="row"><div><label>日期</label><input type="date" id="q_d" value="'+esc(it.date)+'"></div><div><label>幣別</label><select id="q_u" onchange="curChg(\'q_\')">'+opts(Object.keys(S.rates),cur)+'</select></div></div>'
