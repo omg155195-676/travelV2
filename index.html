@@ -201,7 +201,7 @@ function themeChar(){var p=themePack();return (p&&p.char)||""}</script>
 <script src="themes/croc/theme.js"></script>
 <script src="themes/world/themes.js"></script>
 <script src="themes/private/private.js"></script>
-<input type="file" id="imp" accept=".json,application/json" style="display:none" onchange="importJson(this)">
+<input type="file" id="imp" accept=".json,.zip,application/json,application/zip" style="display:none" onchange="importJson(this)">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -423,7 +423,7 @@ function render(){
     applyTheme();$("ttl").textContent=S.trip+" ▾";renderNav();
     var html;
     try{html=(VIEWS[tab]||VIEWS.home)()}catch(e){showErr(e);html='<div class="card"><b>⚠️ 發生錯誤</b><div class="sub" style="margin:6px 0">資料仍然保留，請稍後再試。</div><button class="btn sec" onclick="go(\'home\')">回首頁</button><button class="btn sec" onclick="exportJson()">先匯出完整備份</button></div>'}
-    $("v").innerHTML=(LOADERR?'<div class="card warn"><b>⚠️ 資料提醒</b><div class="sub" style="margin-top:4px">'+esc(LOADERR)+'</div></div>':'')+html;
+    $("v").innerHTML=(tab==="home"?bkNag():"")+(LOADERR?'<div class="card warn"><b>⚠️ 資料提醒</b><div class="sub" style="margin-top:4px">'+esc(LOADERR)+'</div></div>':'')+html;
     if(VIEWS["after_"+tab])VIEWS["after_"+tab]();
     try{var tp=themePack();if(tp&&tp.decorate)tp.decorate(tab,$("v"))}catch(e){}
     netRefresh();
@@ -913,7 +913,9 @@ async function loadLocalPhotos(){
 /* --- Cloud --- */
 function pdoc(){return CB.db.doc("data/users/"+uid+"/photos")}
 function withTimeout(pr,ms,msg){return Promise.race([pr,new Promise(function(_,rej){setTimeout(function(){rej(new Error(msg||"timeout"))},ms)})])}
+function hasCloud(){return typeof claude!=="undefined"&&!!claude&&typeof claude.use==="function"}
 async function initCloud(){
+  if(!hasCloud()){cl="na";cloudErr="";return}
   cl="load";cloudErr="";
   try{
     if(typeof claude==="undefined"||!claude||typeof claude.use!=="function")throw new Error("此環境沒有 Cloud");
@@ -1016,8 +1018,8 @@ function phUpload(d){
    +'<div class="sub" id="km" style="margin-top:6px">'+esc(kMsg)+'</div></div>'}
 function cloudBanner(){
   var pn=pendingPh();
-  var noEnv=(typeof claude==="undefined"||!claude||typeof claude.use!=="function");
-  return '<div class="card sub">'+(noEnv?'📱 照片存在這台裝置（這個瀏覽器）。換手機或清除瀏覽器資料前，記得先匯出備份。':cl==="ok"?'☁️ Cloud 已連線，照片會自動備份。':'📵 Cloud 未連線（'+esc(cloudErr||"連線中")+'）｜照片先存在這台裝置，之後連線會自動備份。<div style="margin-top:6px"><button class="btn sec sm" onclick="retryCloud()">重新連線 Cloud</button></div>')+(pn?'<div>等待備份：'+pn+' 張</div>':'')+(phLocal?'':'<div class="warn">⚠️ 這個瀏覽器無法使用本機照片儲存。</div>')+'</div>'}
+  var noEnv=!hasCloud();
+  return '<div class="card sub">'+(noEnv?'📱 照片存在這台裝置（這個瀏覽器）。設定 → 匯出完整備份，會連照片一起打包。':cl==="ok"?'☁️ Cloud 已連線，照片會自動備份。':'📵 Cloud 未連線（'+esc(cloudErr||"連線中")+'）｜照片先存在這台裝置，之後連線會自動備份。<div style="margin-top:6px"><button class="btn sec sm" onclick="retryCloud()">重新連線 Cloud</button></div>')+(pn?'<div>等待備份：'+pn+' 張</div>':'')+(phLocal?'':'<div class="warn">⚠️ 這個瀏覽器無法使用本機照片儲存。</div>')+'</div>'}
 function vPhoto(){
   if(!phOn())return cloudBanner();
   var CP=P.filter(albumP),h=cloudBanner();
@@ -1084,26 +1086,83 @@ function fname(s){return String(s||"trip").replace(/[\\\/:*?"<>|\s]+/g,"_").slic
 
 /* --- JSON 完整備份 / 還原 --- */
 function backupObj(){return{app:"travel-control-center",format:"trip-backup",version:VER,exportedAt:new Date().toISOString(),data:S,note:"照片索引在 data.photos；照片檔案本身存在這台裝置或 Cloud，備份不含照片檔。"}}
-function exportJson(){return saveFile(fname(S.trip)+"_備份_"+stamp()+".json",JSON.stringify(backupObj(),null,1))}
+function exportJson(){return saveFile(fname(S.trip)+"_備份_"+stamp()+".json",JSON.stringify(backupObj(),null,1)).then(function(ok){if(ok)bkDone();return ok})}
+/* --- ZIP 完整備份：backup.json ＋ photos/（照片原圖，檔名＝照片的 lid 或 aid） --- */
+function bkDone(){S.lastBk=Date.now();save();if(tab==="set"||tab==="home")render()}
+function bkDays(){return S.lastBk?Math.floor((Date.now()-S.lastBk)/864e5):null}
+function bkLast(){var d=bkDays();return '<div class="sub" style="margin-bottom:8px">上次完整備份：'+(d===null?'<b class="warn">從來沒有</b>':d===0?'今天':d+' 天前')+'</div>'}
+/* 有資料又超過 3 天沒備份，首頁提醒一次 */
+function bkNag(){
+  if(!(S.items.length||P.length||S.plan.some(function(p){return p.done})))return "";
+  var d=bkDays();if(d!==null&&d<3)return "";
+  return '<div class="card" style="border-left:6px solid var(--bad)"><b>💾 '+(d===null?'還沒備份過':d+' 天沒備份了')+'</b><div class="sub" style="margin:4px 0">資料和 '+P.length+' 張照片只存在這支手機。匯出一個 ZIP，存到「檔案」或雲端硬碟。</div><button class="btn" onclick="exportZip()">⬇️ 匯出完整備份</button></div>'}
+function phKeys(){
+  var L=[],seen={};function add(lid,aid){var k=lid||aid;if(k&&!seen[k]){seen[k]=1;L.push({lid:lid,aid:aid})}}
+  P.forEach(function(p){add(p.lid,p.aid)});
+  [S.cover].concat((S.trips||[]).map(function(t){return t&&t.cover})).forEach(function(c){if(c)c.charAt(0)==="L"?add(c,""):add("",c)});
+  return L}
+var ZBUSY=false;
+async function exportZip(){
+  if(ZBUSY)return;if(!window.JSZip){toast("⚠️ 打包元件還沒載入（可能沒有網路），先用「只匯出資料（JSON）」");return}
+  ZBUSY=true;
+  try{
+    var zip=new JSZip(),ks=phKeys(),got=0,miss=0;
+    for(var i=0;i<ks.length;i++){
+      toast("打包照片 "+(i+1)+" / "+ks.length+"…");
+      var b=ks[i].lid?await idbGet(ks[i].lid):null;
+      if(!b&&ks[i].aid){try{var r=await fetch(imgUrl(ks[i].aid));if(r.ok)b=await r.blob()}catch(e){}}
+      if(b){zip.file("photos/"+(ks[i].lid||ks[i].aid)+".jpg",b);got++}else miss++}
+    var o=backupObj();o.data=Object.assign({},S,{lastBk:Date.now()});o.note="照片原圖在 photos/ 資料夾，檔名對應 data.photos 的 lid（或 aid）。";o.photoFiles=got;
+    zip.file("backup.json",JSON.stringify(o,null,1));
+    toast("壓縮中…");
+    var blob=await zip.generateAsync({type:"blob",mimeType:"application/zip"});
+    if(await saveFile(fname(S.trip)+"_完整備份_"+stamp()+".zip",blob)){bkDone();toast("✅ 已匯出完整備份（"+got+" 張照片）"+(miss?"，"+miss+" 張找不到檔案":""))}
+  }catch(e){showErr(e);toast("⚠️ 備份失敗："+(e&&e.message||e))}
+  finally{ZBUSY=false}}
+/* --- 要求瀏覽器不要自動清除這個網站的資料 --- */
+var PERSIST=null;
+function askPersist(){
+  try{if(!navigator.storage||!navigator.storage.persisted)return;
+    navigator.storage.persisted().then(function(v){if(v){PERSIST=true;return}return navigator.storage.persist().then(function(g){PERSIST=!!g})}).then(function(){if(tab==="set")render()}).catch(function(){})}catch(e){}}
+function persistLabel(){
+  var home=false;try{home=(window.matchMedia&&matchMedia("(display-mode: standalone)").matches)||navigator.standalone===true}catch(e){}
+  if(PERSIST)return "儲存空間：已鎖定，瀏覽器不會自動清除";
+  return "儲存空間：瀏覽器可能在空間不足時清除"+(home?"":"；把這個網站「加入主畫面」再使用會比較安全");}
 function pickImport(){var i=$("imp");if(i){i.value="";i.click()}}
-function importJson(inp){
+async function importJson(inp){
   var f=inp.files&&inp.files[0];if(!f)return;
+  if(/\.zip$/i.test(f.name)||/zip/.test(f.type)){
+    if(!window.JSZip){toast("⚠️ 打包元件還沒載入（可能沒有網路），請稍後再試");return}
+    var zp,txt,ph={};
+    try{zp=await JSZip.loadAsync(f);var bj=zp.file("backup.json");if(!bj)throw 0;txt=await bj.async("string")}catch(e){toast("⚠️ 這不是旅行控制中心的備份 ZIP，現有資料沒有改動");return}
+    zp.folder("photos").forEach(function(path,fo){if(!fo.dir)ph[path.replace(/\.jpg$/i,"")]=fo});
+    return applyImport(txt,ph)}
   if(f.size>30*1024*1024){toast("⚠️ 檔案太大，不像是備份檔");return}
   var r=new FileReader();r.onerror=function(){toast("⚠️ 讀取檔案失敗")};
-  r.onload=function(){
-    var obj,m;
-    try{obj=JSON.parse(r.result)}catch(e){toast("⚠️ 這不是有效的 JSON 檔案，現有資料沒有改動");return}
+  r.onload=function(){applyImport(r.result,null)};
+  r.readAsText(f)}
+function applyImport(text,ph){
+    var obj,m,pn=ph?Object.keys(ph).length:0;
+    try{obj=JSON.parse(text)}catch(e){toast("⚠️ 這不是有效的備份檔案，現有資料沒有改動");return}
     try{var src=(obj&&obj.format==="trip-backup"&&obj.data)?obj.data:obj;
       if(!src||typeof src!=="object"||(!Array.isArray(src.items)&&!Array.isArray(src.plan)))throw new Error("找不到旅行資料（缺少 items / plan）");
       m=migrate(JSON.parse(JSON.stringify(src)))}
     catch(e){toast("⚠️ 匯入失敗："+(e.message||e)+"。現有資料沒有改動");return}
-    confirmBox("備份內容：行程 "+m.plan.length+" 筆、記帳 "+m.items.length+" 筆、御朱印 "+m.gosh.length+" 筆、預約 "+m.resv.length+" 筆、封存旅程 "+m.trips.length+" 趟。\n匯入會『取代』目前資料（目前資料會先自動另存一份本機備份，可在設定還原）。確定匯入？","匯入並取代",function(){
+    confirmBox("備份內容：行程 "+m.plan.length+" 筆、記帳 "+m.items.length+" 筆、御朱印 "+m.gosh.length+" 筆、預約 "+m.resv.length+" 筆、封存旅程 "+m.trips.length+" 趟"+(ph?"、照片 "+pn+" 張":"")+"。\n匯入會『取代』目前資料（目前資料會先自動另存一份本機備份，可在設定還原）。確定匯入？","匯入並取代",function(){
       try{var k=KEY+"-pre-import-"+Date.now();localStorage.setItem(k,JSON.stringify(S))}catch(e){}
       S=m;syncP();OP=null;save();applyTheme();
       if(CB)savePh().catch(function(){});
-      render();toast("✅ 匯入完成")},"匯入備份");
-  };
-  r.readAsText(f)}
+      render();
+      if(!ph){toast("✅ 匯入完成");return}
+      restorePhotos(ph).then(function(n){toast("✅ 匯入完成，還原 "+n+" 張照片")})},"匯入備份")}
+/* ZIP 裡的照片寫回本機；只有 aid 的照片改成本機照片 */
+async function restorePhotos(ph){
+  var n=0,ks=Object.keys(ph);
+  for(var i=0;i<ks.length;i++){var k=ks[i];try{
+    var b=await ph[k].async("blob");b=new Blob([b],{type:"image/jpeg"});var lid=k;
+    if(k.charAt(0)!=="L"){var p=P.filter(function(x){return x.aid===k&&!x.lid})[0];lid=p?"L"+p.id:"L"+mkId();if(p)p.lid=lid;if(S.cover===k)S.cover=lid}
+    if(await idbPut(lid,b)){try{if(LURL[lid])URL.revokeObjectURL(LURL[lid]);LURL[lid]=URL.createObjectURL(b)}catch(e){}n++}}catch(e){}}
+  save();render();return n}
 /* --- CSV --- */
 function csvCell(v){v=String(v==null?"":v);if(/^[=+\-@]/.test(v))v="'"+v;return '"'+v.replace(/"/g,'""')+'"'}
 function exportCsv(){
@@ -1411,9 +1470,9 @@ function vBook(){
   var o=BK.o,labels=[["itin","每日行程"],["photo","照片"],["exp","花費"],["gosh","御朱印"],["resv","預約"],["pack","行李"],["note","備註"]];
   return '<div class="card sub">先選範本與內容，再匯出 PDF 或 Word。總花費一律以「總額」顯示，另列「每人分攤」，不會把總額除以人數。</div>'
    +'<div class="card"><b>① 範本</b>'+Object.keys(TEMPLATES).map(function(k){return '<label class="tpl'+(BK.tpl===k?' on':'')+'"><input type="radio" name="tpl" '+(BK.tpl===k?'checked ':'')+'onchange="BK.tpl=\''+k+'\';render()"><span><b style="display:inline">'+esc(TEMPLATES[k].name)+'</b><br><span class="sub">'+esc(TEMPLATES[k].desc)+'</span></span></label>'}).join("")+'</div>'
-   +'<div class="card"><b>② 內容</b><div class="chips">'+labels.map(function(l){return '<label class="chip"><input type="checkbox" '+(o[l[0]]?'checked ':'')+'onchange="BK.o.'+l[0]+'=this.checked?1:0"> '+l[1]+'</label>'}).join("")+'</div>'+(cl!=="ok"?'<div class="sub">照片需要登入雲端才能放入。</div>':'')+'</div>'
+   +'<div class="card"><b>② 內容</b><div class="chips">'+labels.map(function(l){return '<label class="chip"><input type="checkbox" '+(o[l[0]]?'checked ':'')+'onchange="BK.o.'+l[0]+'=this.checked?1:0"> '+l[1]+'</label>'}).join("")+'</div>'+(!phOn()?'<div class="sub">這個瀏覽器無法讀取照片，PDF 不會放照片。</div>':'')+'</div>'
    +'<div class="card"><b>③ 匯出</b><div class="row" style="margin-top:8px"><div><button class="btn" '+(BUSY?'disabled ':'')+'onclick="doExport(\'pdf\')">📄 PDF</button></div><div><button class="btn" '+(BUSY?'disabled ':'')+'onclick="doExport(\'docx\')">📝 Word</button></div></div><div class="sub" id="bkp" style="margin-top:8px">'+(BUSY?'處理中，請稍候…':'')+'</div></div>'
-   +'<div class="card"><b>其他匯出</b><div class="row" style="margin-top:8px"><div><button class="btn sec" onclick="exportCsv()">記帳 CSV</button></div><div><button class="btn sec" onclick="exportJson()">完整備份 JSON</button></div></div></div>'}
+   +'<div class="card"><b>其他匯出</b><div class="row" style="margin-top:8px"><div><button class="btn sec" onclick="exportCsv()">記帳 CSV</button></div><div><button class="btn sec" onclick="exportZip()">完整備份（含照片）</button></div></div></div>'}
 VIEWS.book=vBook;
 
 /* ===== Review（回顧）===== */
@@ -1526,11 +1585,11 @@ function vSet(){
    +Object.keys(S.rates).filter(function(k){return k!=="TWD"}).map(function(k){return '<div style="min-width:44%"><label>'+esc(k)+'</label><input id="s_r_'+esc(k)+'" type="number" inputmode="decimal" step="any" min="0" value="'+esc(S.rates[k])+'"></div>'}).join("")+'</div>'
    +'<button class="btn" onclick="saveSettings()">儲存設定</button></div>'
    +'<div class="card"><b onclick="pvtTap()" style="-webkit-user-select:none;user-select:none">主題色</b><div class="seg" style="margin-top:8px;flex-wrap:wrap">'+th.map(function(t){return '<button class="'+(S.ac===t[0]?'on':'')+'" onclick="setTheme(\''+t[0]+'\')">'+t[1]+'</button>'}).join("")+'</div>'+pvtBox()+'</div>'
-   +'<div class="card"><b>備份與還原</b><div class="sub" style="margin:4px 0 8px">資料只存在這個瀏覽器。換手機或清除瀏覽資料前，請先匯出完整備份。</div><div class="row"><div><button class="btn" onclick="exportJson()">⬇️ 匯出完整備份</button></div><div><button class="btn sec" onclick="pickImport()">⬆️ 匯入備份</button></div></div>'
+   +'<div class="card"><b>備份與還原</b><div class="sub" style="margin:4px 0 8px">資料和照片只存在這個瀏覽器。「完整備份」是一個 ZIP 檔，連照片原圖一起打包；存到「檔案」App 或雲端硬碟就安全了。</div>'+bkLast()+'<div class="row"><div><button class="btn" onclick="exportZip()">⬇️ 匯出完整備份</button></div><div><button class="btn sec" onclick="pickImport()">⬆️ 匯入備份</button></div></div><button class="bt" onclick="exportJson()">只匯出資料（JSON，不含照片）</button>'
    +(lb.length?'<label>本機自動備份</label>'+lb.map(function(k,i){return '<div class="item" style="align-items:center"><div class="sub">'+esc(bkLabel(k))+'</div><div class="amt"><button class="bt" onclick="restoreLocal('+i+')">還原</button><button class="bt d" onclick="delLocal('+i+')">刪除</button></div></div>'}).join(""):'')+'</div>'
    +'<div class="card"><b>開始新旅程</b><div class="sub" style="margin:4px 0">目前這趟會收起來，可從頂端旅程名稱切換回來；也會出現在「回顧」。</div><label>新旅程名稱</label><input id="nt" placeholder="例如：2027 京都" maxlength="40"><button class="btn sec" onclick="archiveTrip()">開始新旅程</button></div>'
    +'<div class="card"><b>危險操作</b><button class="btn sec" style="border-color:var(--bad);color:var(--bad)" onclick="clearExp()">清空本趟全部記帳</button></div>'
-   +'<div class="card sub">版本 V2.1・資料格式 v'+VER+'・網路：'+(isOnline()?"🟢 已連線":"📵 離線")+'・☁️ Cloud：'+(cl==="ok"?"已連線":cl==="load"?"連線中":"未連線（"+esc(cloudErr||"")+"）")+'<br>匯率、天氣、Google Maps、Cloud 需要網路；其他功能離線都能用。</div>'}
+   +'<div class="card sub">版本 V2.1・資料格式 v'+VER+'・網路：'+(isOnline()?"🟢 已連線":"📵 離線")+(hasCloud()?'・☁️ Cloud：'+(cl==="ok"?"已連線":cl==="load"?"連線中":"未連線（"+esc(cloudErr||"")+"）"):'')+'<br>💾 '+persistLabel()+'<br>匯率、天氣、Google Maps 需要網路；其他功能離線都能用。</div>'}
 VIEWS.set=vSet;
 
 /* ===== Boot ===== */
@@ -1553,7 +1612,7 @@ function boot(){
   var z=$("zm");if(z)z.addEventListener("click",function(){z.classList.add("hide")});
   document.addEventListener("click",function(e){var a=e.target&&e.target.closest?e.target.closest("a"):null;if(a&&/google\.com\/maps/.test(a.href||"")&&!isOnline()){e.preventDefault();toast("📵 地圖需要網路，目前無法開啟 Google Maps。")}});
   netInit();render();
-  loadLocalPhotos();initCloud();
+  loadLocalPhotos();initCloud();askPersist();
   setTimeout(function(){fxUpdate(false)},900);
 }
 
