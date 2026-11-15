@@ -182,6 +182,12 @@ a{color:var(--ac)}
 .wr-sel{width:auto;min-height:36px;height:36px;padding:4px 8px;font-size:13px;border-radius:999px}
 .wr-acts2{display:flex;flex-wrap:wrap;align-items:center;gap:2px 4px;margin-top:6px}
 .dg-p{border-top:1px solid var(--bd);padding:8px 0}.dg-p:first-of-type{border-top:0}.dg-p.is-done{opacity:.65}.dg-p .l>span:last-child{flex-shrink:0;margin-left:8px}
+/* 一鍵記帳 */
+.qa-amt{text-align:center;padding:0 0 4px}.qa-amt b{display:block;font-size:36px;line-height:1.15;font-variant-numeric:tabular-nums}.qa-amt span{font-size:13px;color:var(--sub)}
+.qa-chips{display:flex;gap:6px;margin:6px -16px;padding:0 16px 2px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}.qa-chips::-webkit-scrollbar{display:none}.qa-chips button{flex:none;white-space:nowrap}.qa-chips button.on .sub{color:inherit;opacity:.85}.qa-chips button{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:99px;padding:7px 12px;font:inherit;font-size:14px;min-height:38px;cursor:pointer}
+.qa-chips button.on{background:var(--ac);border-color:var(--ac);color:var(--acx);font-weight:700}
+.qa-kp{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}.qa-kp button{min-height:48px;border:1px solid var(--bd);border-radius:12px;background:var(--bg);color:var(--tx);font:inherit;font-size:22px;cursor:pointer}
+.qa-kp button:active{background:var(--soft)}
 </style></head><body>
 <header class="top"><span id="net"></span><h1 id="ttl" role="button" onclick="tripPicker()">旅行控制中心</h1><button class="tdy" onclick="goToday()">📍 今天</button></header>
 <main id="v"></main>
@@ -2006,21 +2012,56 @@ function vTix(){
     +g[k].map(function(e){var o2=e.o,ref=e.k+":"+o2.id;
       return (e.k==="t"?transLine(o2):resvLine(o2))+'<div style="padding:0 0 8px">'+refPh(ref,"📷 票券圖片／QR Code")+'</div>'}).join("")+'</div>'}).join("")}
 /* --- 快速記帳 --- */
+/* --- 一鍵記帳：數字鍵盤＋分類按鈕＋常用名稱（點常用名稱會一起帶入分類和上次金額） --- */
+var QA={a:"",cat:"",name:""};
+function qaCur(){var c=lastCur;if(!(c in S.rates)||c==="TWD"){var a=lcAuto();if(a&&S.rates[a]>0)c=a}return (c in S.rates)?c:"TWD"}
+function qaDec(c){return !(c==="JPY"||c==="KRW"||c==="TWD")}
+/* 常用名稱：本趟和封存旅程裡出現最多次的名稱（不含未命名、帶金額的名稱） */
+function qaFav(){
+  var m={},all=S.items.concat.apply(S.items,(S.trips||[]).map(function(t){return t.items||[]}));
+  all.forEach(function(i,ix){var n=String(i.name||"").trim();if(!n||n==="（未命名）"||/\d{3,}/.test(n)||n.length>10)return;
+    var k=n;if(!m[k])m[k]={n:n,cat:i.cat,cur:i.cur,c:0,last:ix,am:[]};m[k].c++;if(i.cur===m[k].cur)m[k].am.push(i.amount);if(ix<m[k].last){m[k].last=ix;m[k].cat=i.cat}});
+  Object.keys(m).forEach(function(k){var A=m[k].am.slice().sort(function(a,b){return a-b}),f={},best=A[Math.floor((A.length-1)/2)],bc=1;A.forEach(function(v){f[v]=(f[v]||0)+1;if(f[v]>bc){bc=f[v];best=v}});m[k].a=best||0});
+  var L=Object.keys(m).map(function(k){return m[k]}).sort(function(a,b){return b.c-a.c||a.last-b.last}).slice(0,8);
+  if(L.length<4)[["早餐","餐飲"],["午餐","餐飲"],["晚餐","餐飲"],["飲料","餐飲"],["交通","交通"],["門票","門票"],["御朱印","門票"],["紀念品","紀念品"]].forEach(function(d){if(L.length<8&&!L.some(function(x){return x.n===d[0]}))L.push({n:d[0],cat:d[1],a:0})});
+  return L}
+function qaShow(){
+  var a=num(QA.a),u=$("q_u")?$("q_u").value:qaCur(),r=num($("q_r")?$("q_r").value:S.rates[u]),e=$("qa_amt");if(!e)return;
+  e.innerHTML='<b>'+(QA.a?esc(money(a,u)):'<span style="font-size:36px;color:var(--sub)">'+esc(SYM[u]||u)+'0</span>')+'</b><span>'+(QA.a&&u!=="TWD"&&r>0?'≈ NT$ '+fmt(a*r):'&nbsp;')+'</span>';
+  $("q_a").value=QA.a;$("q_c").value=QA.cat;
+  [].forEach.call(document.querySelectorAll("#qa_cats button"),function(b){b.classList.toggle("on",b.getAttribute("data-c")===QA.cat)});
+  [].forEach.call(document.querySelectorAll("#qa_fav button"),function(b){b.classList.toggle("on",b.getAttribute("data-n")===$("q_n").value.trim())});
+  try{expPv("q_")}catch(x){}}
+function qaKey(k){
+  var u=$("q_u")?$("q_u").value:qaCur();
+  if(k==="⌫")QA.a=QA.a.slice(0,-1);
+  else if(k==="."){if(qaDec(u)&&QA.a.indexOf(".")<0)QA.a=(QA.a||"0")+"."}
+  else if(QA.a.replace(".","").length<9){if(QA.a==="0")QA.a="";if(!(QA.a.indexOf(".")>=0&&QA.a.split(".")[1].length>=2))QA.a+=k}
+  if(QA.a==="00")QA.a="";qaShow()}
+function qaCat(c){QA.cat=c;qaShow()}
+function qaPick(i){var f=qaFav()[i];if(!f)return;$("q_n").value=f.n;QA.cat=f.cat||QA.cat;var u=$("q_u").value;if(!QA.a&&f.a>0&&f.cur===u)QA.a=String(f.a);qaShow()}
 function qAdd(d){
-  var cur=("JPY" in S.rates)?"JPY":"TWD",rt=S.rates[cur]>0?S.rates[cur]:1,it={date:(typeof d==="string"&&d)||today(),cat:CATS[0],name:"",amount:"",cur:cur,rate:rt,pay:lastPay,people:S.defPeople||1,peopleNames:[],note:""};
-  var body='<label>金額</label><input id="q_a" type="number" inputmode="decimal" min="0" step="any" placeholder="0" style="font-size:26px;height:56px" oninput="expPv(\'q_\')">'
-   +'<label>類別</label><select id="q_c" style="height:48px">'+CATS.map(function(c){return '<option value="'+esc(c)+'">'+(CAT_ICON[c]||"")+' '+esc(c)+'</option>'}).join("")+'</select>'
-   +'<label>名稱</label><input id="q_n" placeholder="例如：晚餐" maxlength="80" style="height:48px">'+dgField("q_","")
-   +'<div class="sub" id="q_pv" style="margin-top:8px"></div><div class="sub">'+esc(SYM[cur]||cur)+'1 = NT$'+esc(rt)+'｜日期 '+esc(md(it.date))+'｜1 人（可在「顯示更多」改）</div>'
-   +'<button type="button" class="btn sec sm" style="margin-top:10px" onclick="$(\'q_more\').classList.toggle(\'hide\')">顯示更多</button>'
-   +'<div id="q_more" class="hide"><div class="row"><div><label>日期</label><input type="date" id="q_d" value="'+esc(it.date)+'"></div><div><label>幣別</label><select id="q_u" onchange="curChg(\'q_\')">'+opts(Object.keys(S.rates),cur)+'</select></div></div>'
-   +'<div class="row"><div><label>匯率（1 單位 → 台幣）</label><input id="q_r" type="number" inputmode="decimal" min="0" step="any" value="'+esc(rt)+'" oninput="expPv(\'q_\')"></div><div><label>分攤人數</label><div class="stp"><button type="button" aria-label="減少" onclick="stepP(\'q_\',-1)">−</button><input id="q_pp" type="number" inputmode="numeric" min="1" max="99" value="'+esc(it.people)+'" oninput="expPv(\'q_\')"><button type="button" aria-label="增加" onclick="stepP(\'q_\',1)">＋</button></div></div></div>'
+  var cur=qaCur(),rt=S.rates[cur]>0?S.rates[cur]:1,it={date:(typeof d==="string"&&d)||today(),people:S.defPeople||1,pay:lastPay},fav=qaFav();
+  QA={a:"",cat:CATS[0],name:""};
+  var keys=["7","8","9","4","5","6","1","2","3",qaDec(cur)?".":"00","0","⌫"];
+  var body='<div class="qa-amt" id="qa_amt"></div>'
+   +'<i class="cq-amt" style="display:none!important"></i><input type="hidden" id="q_a"><input type="hidden" id="q_c" onchange="QA.cat=this.value;qaShow()">'
+   +'<div class="qa-chips" id="qa_cats">'+CATS.map(function(c){return '<button type="button" data-c="'+esc(c)+'" onclick="qaCat(\''+esc(c)+'\')">'+(CAT_ICON[c]||"")+' '+esc(c)+'</button>'}).join("")+'</div>'
+   +'<div class="sub" style="margin-top:4px">常用（點一下帶入名稱、分類和金額）</div><div class="qa-chips" id="qa_fav">'+fav.map(function(f,i){return '<button type="button" data-n="'+esc(f.n)+'" onclick="qaPick('+i+')">'+esc(f.n)+(f.a>0?' <span class="sub">'+esc(money(f.a,f.cur))+'</span>':'')+'</button>'}).join("")+'</div>'
+   +'<div class="qa-kp">'+keys.map(function(k){return '<button type="button" onclick="qaKey(\''+k+'\')">'+k+'</button>'}).join("")+'</div>'
+   +'<label>名稱（可不填，會用分類當名稱）</label><input id="q_n" placeholder="例如：拉麵" maxlength="80" oninput="qaShow()">'
+   +'<div class="sub" id="q_pv" style="margin-top:6px"></div><div class="sub">'+esc(md(it.date))+'・'+esc(lastPay)+'・'+it.people+' 人・'+esc(SYM[cur]||cur)+'1 = NT$'+esc(rt)+'</div>'
+   +'<button type="button" class="btn sec sm" style="margin-top:8px" onclick="$(\'q_more\').classList.toggle(\'hide\')">改日期、幣別、付款、分攤、代購…</button>'
+   +'<div id="q_more" class="hide">'+dgField("q_","")+'<div class="row"><div><label>日期</label><input type="date" id="q_d" value="'+esc(it.date)+'"></div><div><label>幣別</label><select id="q_u" onchange="curChg(\'q_\');qaShow()">'+opts(Object.keys(S.rates),cur)+'</select></div></div>'
+   +'<div class="row"><div><label>匯率（1 單位 → 台幣）</label><input id="q_r" type="number" inputmode="decimal" min="0" step="any" value="'+esc(rt)+'" oninput="qaShow()"></div><div><label>分攤人數</label><div class="stp"><button type="button" aria-label="減少" onclick="stepP(\'q_\',-1)">−</button><input id="q_pp" type="number" inputmode="numeric" min="1" max="99" value="'+esc(it.people)+'" oninput="expPv(\'q_\')"><button type="button" aria-label="增加" onclick="stepP(\'q_\',1)">＋</button></div></div></div>'
    +'<div id="q_pnw"'+(it.people>1?'':' class="hide"')+'><label>分攤人員（選填，用「、」分隔）</label><input id="q_pn" placeholder="例如：休閒仔、媽媽、朋友" maxlength="200" oninput="expPv(\'q_\')"><div class="sub" id="q_pnh"></div></div>'
    +'<div class="row"><div><label>付款方式</label><select id="q_p">'+opts(PAYS,it.pay)+'</select></div><div><label>備註</label><input id="q_m" maxlength="120"></div></div></div>';
-  openModal("＋ 快速記帳",body,"儲存",function(){
-    var r=readExp("q_");if(r.err)return modalErr(r.err);
-    var n=Object.assign({id:mkId()},r.v);lastPay=n.pay;S.items.unshift(n);save();render();toast("✅ 已記：「"+n.name+"」"+money(n.amount,n.cur))});
-  setTimeout(function(){var a=$("q_a");if(a)a.focus()},60)}
+  openModal("＋ 記一筆",body,"記下來",function(){
+    var r=readExp("q_");if(r.err)return modalErr(r.err==="請輸入大於 0 的金額"?"先用數字鍵輸入金額":r.err);
+    var n=Object.assign({id:mkId()},r.v);if(n.name==="（未命名）")n.name=n.cat;
+    lastPay=n.pay;lastCur=n.cur;S.items.unshift(n);save();render();
+    toast("✅ "+(CAT_ICON[n.cat]||"")+" "+n.name+" "+money(n.amount,n.cur),"復原",function(){S.items=S.items.filter(function(x){return x.id!==n.id});save();render()})});
+  qaShow()}
 VIEWS.home=vHome;VIEWS.days=vDays;VIEWS.day=vDay;VIEWS.tix=vTix;
 
 /* ===== V3.0 跨日交通：完整日期＋時間 ===== */
