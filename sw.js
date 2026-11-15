@@ -2,7 +2,7 @@
  * App 本身：先用快取打開（離線也能開），同時在背景抓新版，下次打開就是新版。
  * 天氣、匯率等即時資料：一律走網路，不快取。
  * 改版時把 VERSION 加 1。 */
-var VERSION = "v33";
+var VERSION = "v34";
 var CACHE = "travel-app-" + VERSION;
 var SHELL = [
   "./",
@@ -50,7 +50,9 @@ var SHELL = [
   "./themes/croc/img/walk.webp",
   "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js",
   "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
-  "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+  "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
 ];
 
 self.addEventListener("install", function (e) {

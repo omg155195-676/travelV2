@@ -842,7 +842,8 @@ function vResv(){
 function vGosh(){
   var t=S.gosh.length,n=S.gosh.filter(function(g){return g.done}).length;
   var h='<div class="card" style="background:linear-gradient(135deg,var(--soft),var(--card))"><div class="sub">⛩️ 御朱印收集進度</div><div class="big" style="color:#d6334a">'+n+' / '+t+'</div><div class="bar" style="height:14px;border-radius:7px"><i style="width:'+(t?n/t*100:0)+'%;background:linear-gradient(90deg,#ff8fb3,#d6334a)"></i></div>'+(t&&n===t?'<div style="font-weight:700;color:#d6334a">🎉 集滿了！</div>':'')+'</div>'
-   +'<button class="btn sec" style="margin:0 0 12px" onclick="editGosh(0)">＋ 新增御朱印</button>';
+   +'<button class="btn sec" style="margin:0 0 12px" onclick="editGosh(0)">＋ 新增御朱印</button>'+goshGroupCard()+(t?goshSeg():'');
+  if(t&&goshMode==="map")return h+vGoshMap();
   if(!t)return h+'<div class="card sub">還沒有項目，先新增第一個神社或寺院吧。</div>';
   return h+'<div class="card">'+S.gosh.slice().sort(byDate).map(function(g){
     return '<div class="item"><div><label class="chk"><input type="checkbox" '+(g.done?'checked ':'')+'onchange="tglG('+g.id+')"><span style="'+(g.done?'opacity:.6':'')+'"><b style="display:inline">'+esc(g.name)+'</b>'+(g.done?'<span class="stamp">済</span>':'')+'</span></label>'
@@ -854,6 +855,7 @@ function editGosh(id){
   openModal(g?"✏️ 編輯御朱印":"＋ 新增御朱印",'<label>名稱</label><input id="g_n" value="'+esc(b.name)+'" placeholder="例如：嚴島神社" maxlength="80"><div class="row"><div><label>預計日期</label><input type="date" id="g_d" value="'+esc(b.date)+'"></div><div><label>地點（選填）</label><input id="g_p" value="'+esc(b.place)+'" maxlength="100"></div></div><label>備註</label><input id="g_m" value="'+esc(b.note)+'" maxlength="200">',"儲存",function(){
     var n=$("g_n").value.trim();if(!n)return modalErr("請輸入名稱");
     var v={name:n,date:$("g_d").value,place:$("g_p").value.trim(),note:$("g_m").value.trim()};
+    if(g&&(g.place!==v.place||g.name!==v.name)&&!g.geoFix){delete g.lat;delete g.lng;delete g.geo}
     if(g)Object.assign(g,v);else S.gosh.push(normGosh(Object.assign({id:mkId(),done:false},v)));save();render();toast("已儲存")})}
 function tglG(id){S.gosh.forEach(function(g){if(g.id===id)g.done=!g.done});save();render()}
 
@@ -890,6 +892,89 @@ function vMap(){
      +pl.map(function(p,i){return '<div style="padding:5px 0;overflow-wrap:anywhere">'+(i+1)+'. <a target="_blank" rel="noopener" href="'+mapLink(p)+'">📍 '+esc(p)+'</a></div>'}).join("")
      +(rl?'<a class="btn sec sm" style="display:block;text-align:center;text-decoration:none;margin-top:8px;line-height:24px" target="_blank" rel="noopener" href="'+rl+'">🧭 開啟當天路線</a>'+(pl.length>10?'<div class="sub">路線最多帶入前 10 個地點</div>':''):'')+'</div>'});
   return off+(out?'<div class="card sub">共 '+cnt+' 個地點。點地點開 Google 地圖，「開啟當天路線」會依行程順序帶入。</div>'+out:'<div class="card sub">行程裡還沒有填寫地點。</div>')}
+/* ===== 御朱印地圖：參拜過的變紅色、巡禮達成率、位置自動查詢（OpenStreetMap） ===== */
+var goshMode="list",GM=null,GEO_BUSY=false,GEO_MSG="";
+/* 巡禮分組：名稱括號裡帶 ①② 的，例如「持光寺（尾道七佛①）」→「尾道七佛」 */
+function goshGroups(){var m={},o=[];S.gosh.forEach(function(g){var x=/（([^（）]*?)[①-⑳]）/.exec(g.name);if(!x)return;var k=x[1];if(!m[k]){m[k]=[];o.push(k)}m[k].push(g)});return o.map(function(k){return{n:k,L:m[k]}})}
+function goshGroupCard(){var G=goshGroups();if(!G.length)return "";
+  return '<div class="card"><b>🧭 巡禮達成率</b>'+G.map(function(x){var d=x.L.filter(function(g){return g.done}).length,t=x.L.length;
+    return '<div class="l" style="margin-top:8px"><span>'+esc(x.n)+'</span><b style="color:#d6334a">'+d+' / '+t+(d===t?'　滿願 🎉':'')+'</b></div><div class="bar"><i style="width:'+(d/t*100)+'%;background:#d6334a"></i></div>'}).join("")+'</div>'}
+function goshSeg(){return '<div class="seg"><button class="'+(goshMode==="list"?"on":"")+'" onclick="goshMode=\'list\';render()">📋 清單</button><button class="'+(goshMode==="map"?"on":"")+'" onclick="goshMode=\'map\';render()">🗺️ 地圖</button></div>'}
+function gKey(g){var pl=String(g.place||"").trim(),nm=String(g.name||"").replace(/（.*?）|\(.*?\)/g,"").replace(/^[☀-➿\uD83C-􏰀-\uDFFF️\s]+/,"").trim(),k=pl.split(/\s+/)[0];
+  if(!/[寺社院宮城堂閣廟殿]$/.test(k))k=nm;return{k:k,q1:(k+" "+pl.replace(k,"")).trim()||nm,nm:nm}}
+function gDist(a,b){var x=a.lat-b.lat,y=(a.lng-b.lng)*Math.cos(a.lat*Math.PI/180);return Math.sqrt(x*x+y*y)}
+function gCountry(){var c=lcAuto();return {JPY:"jp",KRW:"kr",THB:"th",TWD:"tw",HKD:"hk",CNY:"cn"}[c]||""}
+async function gSearch(q){
+  var cc=gCountry();var r=await fetch("https://nominatim.openstreetmap.org/search?format=json&limit=8&accept-language=ja&q="+encodeURIComponent(q)+(cc?"&countrycodes="+cc:""));
+  if(!r.ok)throw new Error("HTTP "+r.status);var j=await r.json();await new Promise(function(z){setTimeout(z,1100)}); /* OpenStreetMap 規定每秒最多一次 */
+  return (j||[]).map(function(x){return{lat:+x.lat,lng:+x.lon,dn:String(x.display_name||"")}})}
+/* 繁體 → 日文常用寫法（OpenStreetMap 上多半是日文漢字） */
+var JPK={"嚴":"厳","國":"国","淨":"浄","廣":"広","稻":"稲","佛":"仏","聖":"聖","櫻":"桜","澤":"沢","瀨":"瀬","鐵":"鉄","龍":"竜","藥":"薬","壽":"寿","會":"会","圓":"円","德":"徳","戶":"戸","眾":"衆","彌":"弥","觀":"観","實":"実","嶋":"島","條":"条","鄉":"郷","樂":"楽","黃":"黄","齋":"斎","與":"与","豐":"豊","萬":"万","藏":"蔵","瑤":"瑶","髮":"髪","邊":"辺","濱":"浜","驛":"駅","雙":"双","滿":"満","兒":"児","專":"専","傳":"伝","綠":"緑","邊":"辺"};
+function jpk(t){return String(t||"").replace(/[\u3400-\u9fff]/g,function(c){return JPK[c]||c})}
+/* 每間查「名稱＋地區」和「名稱」；名稱＋地區的結果都在同一處就直接採用，
+   其他的從已確定的寺社開始，一次挑一間「離同一天（或最近）已定位寺社最近」的結果 */
+async function geoAll(force){
+  if(GEO_BUSY)return;if(!isOnline()){toast("📵 查位置需要網路");return}
+  var todo=S.gosh.filter(function(g){return force?!g.geoFix:!(g.lat&&g.lng)&&g.geo!=="none"});if(!todo.length)return;
+  GEO_BUSY=true;var cand={},near=function(C){return C.length&&C.every(function(c){return gDist(c,C[0])<0.02})};
+  try{
+    for(var i=0;i<todo.length;i++){var g=todo[i],k=gKey(g),kj=jpk(k.k),nj=jpk(k.nm),A=[],B=[];GEO_MSG="查詢位置 "+(i+1)+" / "+todo.length+"："+k.nm;render();
+      var hit=function(c){var d=jpk(c.dn);return d.indexOf(kj)>=0||d.indexOf(nj)>=0};
+      var RA=[],RB=[];try{RA=await gSearch(jpk(k.q1));if(jpk(k.q1)!==kj)RB=await gSearch(kj)}catch(e){}
+      A=RA.filter(hit);B=RB.filter(hit);if(!A.length&&!B.length)A=RA.slice(0,1); /* 名稱對不上（例如 OSM 上叫「白蛇神社」）就用第一個結果 */
+      A.forEach(function(c){c.a=1});cand[g.id]={a:A,all:A.concat(B)}}
+    var fixed=S.gosh.filter(function(g){return g.lat&&g.lng&&!cand[g.id]}).map(function(g){return{lat:g.lat,lng:g.lng,date:g.date}});
+    var left=[];
+    todo.forEach(function(g){var c=cand[g.id];if(near(c.all)){var x=c.all[0];g.lat=x.lat;g.lng=x.lng;g.geo="auto";fixed.push({lat:g.lat,lng:g.lng,date:g.date})}
+      else if(c.all.length)left.push(g);else g.geo="none"});
+    var md=function(c,ref){return Math.min.apply(null,ref.map(function(r){return gDist(c,r)}))};
+    while(left.length){
+      var pick=null,pc=null,pd=1e9;
+      left.forEach(function(g){var ref=fixed.filter(function(f){return f.date===g.date});var same=ref.length>0;if(!same)ref=fixed;
+        cand[g.id].all.forEach(function(c){var d=(ref.length?md(c,ref):0)-(same?100:0)-(c.a?0.5:0);if(d<pd){pd=d;pick=g;pc=c}})});
+      if(!pick){pick=left[0];pc=cand[pick.id].all[0]}
+      pick.lat=pc.lat;pick.lng=pc.lng;pick.geo="auto";fixed.push({lat:pick.lat,lng:pick.lng,date:pick.date});left.splice(left.indexOf(pick),1)}
+  }finally{GEO_BUSY=false;GEO_MSG="";save();render()}
+  var miss=S.gosh.filter(function(g){return g.geo==="none"}).length;toast(miss?"有 "+miss+" 間找不到位置，可以在地圖下方手動設定":"📍 位置都找到了，點印章可以修正")}
+/* 手動設定：貼 Google Maps 連結或「緯度,經度」 */
+function geoFix(id){var g=S.gosh.filter(function(x){return x.id===id})[0];if(!g)return;
+  openModal("📍 設定「"+g.name.replace(/（.*?）/,"")+"」的位置",'<div class="sub">在 Google Maps 找到這間，長按地點後複製座標（例如 34.4072, 133.1957），或直接貼上分享連結。</div><input id="gf" placeholder="34.4072, 133.1957" value="'+(g.lat?esc(g.lat.toFixed(5)+", "+g.lng.toFixed(5)):"")+'">',"儲存",function(){
+    var v=$("gf").value,m=/@(-?\d+\.\d+),(-?\d+\.\d+)/.exec(v)||/(-?\d{1,3}\.\d+)\s*[,，\s]\s*(-?\d{1,3}\.\d+)/.exec(v);
+    if(!m)return modalErr("找不到座標，請貼「緯度, 經度」或含 @緯度,經度 的連結");
+    g.lat=+m[1];g.lng=+m[2];g.geo="manual";g.geoFix=1;save();render();toast("📍 已更新位置")})}
+function vGoshMap(){
+  var have=S.gosh.filter(function(g){return g.lat&&g.lng}).length,need=S.gosh.filter(function(g){return !(g.lat&&g.lng)&&g.geo!=="none"}).length,none=S.gosh.filter(function(g){return g.geo==="none"});
+  if(!isOnline())return '<div class="card warn sub">📵 地圖需要網路。清單和打勾離線都能用。</div>';
+  var h='';
+  if(GEO_BUSY)h+='<div class="card sub">⏳ '+esc(GEO_MSG)+'</div>';
+  else if(need)h+='<div class="card"><b>📍 還有 '+need+' 間沒有位置</b><div class="sub" style="margin:4px 0 8px">用名稱和地點自動到 OpenStreetMap 查（每間約 2 秒，查一次就會記住）。</div><button class="btn sm" onclick="geoAll()">開始查詢位置</button></div>';
+  h+='<div class="card" style="padding:0;overflow:hidden"><div id="gmap" style="height:420px;background:var(--soft)"></div></div>'
+   +'<div class="sub" style="margin:-4px 0 10px;text-align:center">🔴 已參拜　⚪ 還沒去　點地圖上的印章看詳細</div>';
+  if(none.length)h+='<div class="card"><b>找不到位置的</b>'+none.map(function(g){return '<div class="item"><div>'+esc(g.name)+'</div><div class="amt"><button class="bt" onclick="geoFix('+g.id+')">📍 手動設定</button></div></div>'}).join("")+'</div>';
+  if(have)h+='<button class="bt" onclick="geoAll(1)">🔄 全部重新查詢位置（手動設定的不會動）</button>';
+  return h}
+function loadLeaflet(){
+  if(window.L&&L.map)return Promise.resolve();
+  return new Promise(function(res,rej){
+    if(!document.getElementById("lfcss")){var c=document.createElement("link");c.id="lfcss";c.rel="stylesheet";c.href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css";document.head.appendChild(c)}
+    var s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js";s.onload=function(){res()};s.onerror=function(){rej(new Error("地圖元件載入失敗"))};document.head.appendChild(s)})}
+function goshMapInit(){
+  if(goshMode!=="map"||!$("gmap"))return;
+  loadLeaflet().then(function(){
+    var el=$("gmap");if(!el)return;if(GM){try{GM.remove()}catch(e){}GM=null}
+    GM=L.map(el,{zoomControl:true,attributionControl:true});
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(GM);
+    var pts=[],grp={};goshGroups().forEach(function(x){x.L.forEach(function(g){grp[g.id]=1})});
+    S.gosh.slice().sort(byDate).forEach(function(g){if(!(g.lat&&g.lng))return;pts.push([g.lat,g.lng]);
+      var num=(/[①-⑳]/.exec(g.name)||[""])[0],c=g.done?"#d6334a":"#b8aeb2";
+      var ic=L.divIcon({className:"",iconSize:[34,34],iconAnchor:[17,17],html:'<div style="width:34px;height:34px;box-sizing:border-box;border-radius:50%;border:3px solid '+c+';background:#fff;color:'+c+';display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;box-shadow:0 2px 6px rgba(0,0,0,.25);transform:rotate(-8deg)">'+(num||(g.done?"済":"未"))+'</div>'});
+      var ph=P.filter(function(p){return p.ref==="g:"+g.id}).map(pkey).map(imgUrl).filter(Boolean)[0];
+      L.marker([g.lat,g.lng],{icon:ic}).addTo(GM).bindPopup('<div style="min-width:150px"><b>'+esc(g.name)+'</b><br><span style="color:#888">'+esc(g.date||"")+(g.done?'　✅ 已參拜':'　還沒去')+'</span>'+(ph?'<br><img src="'+ph+'" style="width:150px;margin-top:6px;border-radius:6px">':'')+'<br><a target="_blank" rel="noopener" href="'+mapLink(g.place||g.name)+'">在 Google Maps 開啟</a>　<a href="#" onclick="geoFix('+g.id+');return false">修正位置</a></div>')});
+    if(pts.length)GM.fitBounds(pts,{padding:[30,30],maxZoom:15});else GM.setView([35.68,139.76],5);
+    setTimeout(function(){try{GM.invalidateSize()}catch(e){}},200);
+  }).catch(function(e){var el=$("gmap");if(el)el.innerHTML='<div class="sub" style="padding:20px">⚠️ '+esc(e.message)+'</div>'})}
+VIEWS.after_gosh=goshMapInit;
+
 VIEWS.plan=vPlan;VIEWS.trans=vTrans;VIEWS.resv=vResv;VIEWS.gosh=vGosh;VIEWS.pack=vPack;VIEWS.map=vMap;
 
 /* ===== Photos：本機優先（IndexedDB）＋ Cloud 備份 ===== */
