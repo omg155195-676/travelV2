@@ -1191,6 +1191,7 @@ function expLine(i){
 
 /* --- 範本 --- */
 var TEMPLATES={
+  guide:{name:"📕 旅遊書",desc:"依地區分章節、明體大標題、照片大圖，景點像旅遊書一樣排（PDF）",cover:true,acc:"#2b2326",cols:3,pmax:6,full:true,sum:true},
   journal:{name:"🌸 日系旅行手帳",desc:"封面、御朱印帳、每天一段（不跨頁）、花費總覽",cover:true,acc:"#d6457a",cols:3,pmax:6,full:true,sum:true},
   minimal:{name:"📋 極簡行程表",desc:"純文字緊湊行程表，適合列印帶出門",cover:false,acc:"#333333",cols:4,pmax:4,full:false,sum:false},
   photolog:{name:"📷 照片旅行誌",desc:"照片為主，每天配上簡短文字",cover:true,acc:"#1c7ed6",cols:2,pmax:8,full:false,sum:true},
@@ -1305,7 +1306,7 @@ function jRgba(c,a){var m=/^#([0-9a-f]{6})$/i.exec(c||"");if(!m)return "rgba(214
 function jSeal(ok,sz){sz=sz||38;var c=ok?"#c0392b":"#c9bcc0";return '<div style="flex:none;width:'+sz+'px;height:'+sz+'px;box-sizing:border-box;border:2.5px solid '+c+';border-radius:50%;color:'+c+';display:flex;align-items:center;justify-content:center;font-weight:700;font-size:'+Math.round(sz*.42)+'px;transform:rotate(-10deg)">'+(ok?"済":"未")+'</div>'}
 function jName(s){return String(s||"").replace(/^[☀-➿\uD83C-􏰀-\uDFFF️\s]+/,"").trim()||String(s||"")}
 function jMD(d){var a=String(d||"").split("-");return a.length>2?(+a[1])+"/"+(+a[2]):d}
-function jHdr(t,sub,c){return '<div style="display:flex;align-items:baseline;gap:14px;border-bottom:2px solid '+c+';padding-bottom:10px;margin-bottom:18px"><div style="font-size:26px;font-weight:700;color:'+c+'">'+esc(t)+'</div><div style="font-size:13px;color:#7d6d72">'+esc(sub)+'</div></div>'}
+function jHdr(t,sub,c){return '<div style="display:flex;align-items:baseline;gap:14px;border-bottom:2px solid '+c+';padding-bottom:10px;margin-bottom:18px"><div style="font-size:24px;font-weight:700;color:'+c+'">'+esc(t)+'</div><div style="font-size:12px;color:#7d6d72">'+esc(sub)+'</div></div>'}
 /* 金額：全部同一幣別就用原幣，否則用台幣 */
 function jCur(items){var c=null;for(var i=0;i<items.length;i++){if(c===null)c=items[i].cur;else if(items[i].cur!==c)return "TWD"}return c||"TWD"}
 function jAmt(list,cur){return cur==="TWD"?sumTwd(list):list.reduce(function(s,i){return s+i.amount},0)}
@@ -1318,24 +1319,24 @@ function jData(D,o){
 function jPage(host,D,no,bare){
   var p=document.createElement("div");
   p.style.cssText=JF+"width:"+PGW+"px;height:"+PGH+"px;box-sizing:border-box;position:relative;overflow:hidden;background:#fff;color:#2b2326;padding:"+(bare?"0":"48px 48px 66px");
-  if(!bare)p.innerHTML='<div style="position:absolute;left:48px;right:48px;bottom:22px;display:flex;justify-content:space-between;font-size:10px;color:#a8999e;letter-spacing:.06em"><span>'+esc(D.title)+'</span><span>'+no+'</span></div>';
+  if(!bare)p.innerHTML='<div style="position:absolute;left:48px;right:48px;bottom:22px;display:flex;justify-content:space-between;font-size:11px;color:#a8999e;letter-spacing:.06em"><span>'+esc(D.title)+'</span><span>'+no+'</span></div>';
   var b=document.createElement("div");if(bare)b.style.height="100%";p.appendChild(b);host.appendChild(p);return b}
 function jCover(host,D,J,o){
   var b=jPage(host,D,0,1),c0=J.route[0]?J.route[0].c:"#d6457a",c1=J.route[1]?J.route[1].c:c0,im=o.photo&&D.cover&&IMGC[D.cover];
-  var stat=function(v,k){return '<div style="flex:1;border-top:2px solid #2b2326;padding-top:8px"><div style="font-size:30px;font-weight:700">'+v+'</div><div style="font-size:12px;color:#7d6d72;margin-top:2px">'+k+'</div></div>'};
+  var stat=function(v,k){return '<div style="flex:1;border-top:2px solid #2b2326;padding-top:8px"><div style="font-size:28px;font-weight:700">'+v+'</div><div style="font-size:12px;color:#7d6d72;margin-top:2px">'+k+'</div></div>'};
   var st=stat(D.n,"天")+stat(J.done,"個行程走過");
   if(o.gosh&&J.gosh.length)st+=stat(J.gosh.filter(function(g){return g.done}).length,"枚御朱印");
   if(o.exp&&S.items.length)st+=stat(money(jAmt(S.items,J.cur),J.cur),"記帳合計");
   b.innerHTML='<div style="height:100%;display:flex;flex-direction:column">'
    +'<div style="position:relative;background:linear-gradient(135deg,'+c0+','+c1+');color:#fff;padding:'+(im?"60px":"110px")+' 64px 56px">'
    +(im?'<div style="height:300px;margin:0 -64px 40px;margin-top:-60px;background:url('+im.d+') center/cover no-repeat"></div>':'')
-   +'<div style="font-size:13px;letter-spacing:.3em;opacity:.85">TRAVEL JOURNAL</div>'
-   +'<div style="font-size:48px;font-weight:700;line-height:1.2;margin-top:14px">'+esc(D.title)+'</div>'
-   +(D.n?'<div style="font-size:17px;margin-top:14px;opacity:.95">'+esc(D.first.replace(/-/g,"."))+' — '+esc(D.last.replace(/-/g,".").slice(5))+'　·　'+D.n+' 天</div>':'')
-   +(J.route.length?'<div style="margin-top:26px;font-size:15px;display:flex;flex-wrap:wrap;gap:6px;align-items:center">'+J.route.map(function(r){return '<span style="background:rgba(255,255,255,.22);padding:4px 12px;border-radius:99px">'+esc(r.n)+'</span>'}).join('<span style="opacity:.7">→</span>')+'</div>':'')+'</div>'
+   +'<div style="font-size:12px;letter-spacing:.3em;opacity:.85">TRAVEL JOURNAL</div>'
+   +'<div style="font-size:52px;font-weight:700;line-height:1.2;margin-top:14px">'+esc(D.title)+'</div>'
+   +(D.n?'<div style="font-size:16px;margin-top:14px;opacity:.95">'+esc(D.first.replace(/-/g,"."))+' — '+esc(D.last.replace(/-/g,".").slice(5))+'　·　'+D.n+' 天</div>':'')
+   +(J.route.length?'<div style="margin-top:26px;font-size:14px;display:flex;flex-wrap:wrap;gap:6px;align-items:center">'+J.route.map(function(r){return '<span style="background:rgba(255,255,255,.22);padding:4px 12px;border-radius:99px">'+esc(r.n)+'</span>'}).join('<span style="opacity:.7">→</span>')+'</div>':'')+'</div>'
    +'<div style="padding:44px 64px 0;display:flex;gap:22px">'+st+'</div>'
    +(D.n?'<div style="padding:40px 64px 0"><div style="font-size:12px;color:#7d6d72;margin-bottom:10px;letter-spacing:.1em">每天在哪裡</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+D.days.map(function(x){
-     return '<div style="width:68px;background:'+x.rg.c+';color:#fff;border-radius:8px;padding:7px 0;text-align:center;line-height:1.15"><div style="font-size:15px;font-weight:700">'+jMD(x.date)+'</div><div style="font-size:10px;opacity:.9">'+esc(x.rg.n||"　")+'</div></div>'}).join("")+'</div></div>':'')
+     return '<div style="width:68px;background:'+x.rg.c+';color:#fff;border-radius:8px;padding:7px 0;text-align:center;line-height:1.15"><div style="font-size:14px;font-weight:700">'+jMD(x.date)+'</div><div style="font-size:11px;opacity:.9">'+esc(x.rg.n||"　")+'</div></div>'}).join("")+'</div></div>':'')
    +'<div style="margin-top:auto;padding:0 64px 40px;font-size:11px;color:#a8999e">由 旅行控制中心 製作・'+esc(stamp().replace(/(\d{4})(\d\d)(\d\d)/,"$1/$2/$3"))+'</div></div>'}
 function jGoshPh(g){var L=P.filter(function(p){return p.ref==="g:"+g.id}).map(pkey).filter(function(a){return IMGC[a]});return L[0]||""}
 function jGoshHead(J,full){var done=J.gosh.filter(function(g){return g.done}).length;return jHdr("御朱印帳",done+" / "+J.gosh.length+" 枚"+(full?"　·　尾道七佛 滿願":""),"#c0392b")}
@@ -1347,7 +1348,7 @@ function jGosh(host,D,J,no,o){
     b.innerHTML=jGoshHead(J,full)+'<div style="display:flex;flex-wrap:wrap;gap:10px">'+J.gosh.map(function(g){
       var rg=regionOf([g]),nm=g.name.replace(/（.*?）/,""),sub=(g.name.match(/（(.*?)）/)||[])[1]||"";
       return '<div style="width:224px;box-sizing:border-box;border:1px solid #eee2e5;border-radius:12px;padding:12px;display:flex;gap:10px;align-items:center;min-height:74px'+(g.done?'':';opacity:.55')+'">'+jSeal(g.done)
-       +'<div style="min-width:0"><div style="font-size:15px;font-weight:700;line-height:1.3">'+esc(nm)+'</div>'
+       +'<div style="min-width:0"><div style="font-size:14px;font-weight:700;line-height:1.3">'+esc(nm)+'</div>'
        +(sub?'<div style="font-size:11px;color:#c0392b;margin-top:2px">'+esc(sub)+'</div>':'')
        +'<div style="font-size:11px;color:#9a8b90;margin-top:2px">'+(g.date?jMD(g.date)+'（'+wk(g.date)+'）':'')+(rg.n?'　'+esc(rg.n):'')+'</div></div></div>'}).join("")+'</div>';
     return no}
@@ -1370,21 +1371,21 @@ function jDay(x,J,o){
     var off=!p.done,num=/^[①-⑳]$/.test(p.lab)?p.lab:"",t=/^\d{1,2}:\d{2}$/.test(p.time)?p.time:"",nt=o.note?String(p.note||"").replace(/\s+/g," "):"";if(nt.length>54)nt=nt.slice(0,53)+"…";
     return '<div style="display:flex;gap:12px;padding:5px 0;line-height:1.45'+(off?';color:#b3a6aa':'')+'"><div style="width:44px;flex:none;font-size:12px;color:'+(off?'#c9bcc0':'#9a8b90')+';padding-top:1px">'+t+'</div>'
      +'<div style="width:8px;flex:none;padding-top:7px"><div style="width:7px;height:7px;box-sizing:border-box;border-radius:50%;'+(off?'border:1.5px solid #d8cdd0':'background:'+c)+'"></div></div>'
-     +'<div style="flex:1;min-width:0"><div style="font-size:13.5px;'+(off?'':'font-weight:600')+'">'+(num?'<span style="color:'+c+';margin-right:3px">'+num+'</span>':'')+esc(jName(p.name))+(off?'<span style="font-size:10.5px;border:1px solid #d8cdd0;border-radius:99px;padding:0 6px;margin-left:6px;font-weight:400">'+(p.skip?'略過':'這次沒去')+'</span>':'')+'</div>'
+     +'<div style="flex:1;min-width:0"><div style="font-size:14px;'+(off?'':'font-weight:600')+'">'+(num?'<span style="color:'+c+';margin-right:3px">'+num+'</span>':'')+esc(jName(p.name))+(off?'<span style="font-size:11px;border:1px solid #d8cdd0;border-radius:99px;padding:0 6px;margin-left:6px;font-weight:400">'+(p.skip?'略過':'這次沒去')+'</span>':'')+'</div>'
      +(nt?'<div style="font-size:11px;color:#a8999e">'+esc(nt)+'</div>':'')+'</div></div>'}).join(""):"";
   var gs=o.gosh?x.gosh:[],ph=o.photo?x.photos.filter(function(p){return !(o.gosh&&p.ref&&p.ref.charAt(0)==="g")}).map(pkey).filter(function(a){return IMGC[a]}).slice(0,3):[];
   var chips=ex.slice().sort(function(a,b){return twd(b)-twd(a)}).map(function(i){var nm=i.name==="（未命名）"?i.cat:i.name.replace(/\d{3,}$/,"");
     return '<span style="display:inline-block;margin:0 10px 3px 0;white-space:nowrap">'+(CAT_ICON[i.cat]||"")+' '+esc(nm)+' <b style="font-weight:600">'+esc(money(J.cur==="TWD"?twd(i):i.amount,J.cur))+'</b></span>'}).join("");
   el.innerHTML='<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">'
-   +'<div style="background:'+c+';color:#fff;border-radius:10px;padding:6px 10px;text-align:center;line-height:1.05;flex:none"><div style="font-size:9px;letter-spacing:.15em">DAY</div><div style="font-size:22px;font-weight:700">'+(x.n<10?"0":"")+x.n+'</div></div>'
-   +'<div style="flex:1;min-width:0"><div style="font-size:19px;font-weight:700">'+jMD(x.date)+'<span style="font-size:13px;font-weight:400;color:#7d6d72">（'+wk(x.date)+'）</span>'+(x.rg.n?'<span style="font-size:12px;font-weight:400;color:'+c+';background:'+jRgba(c,.1)+';border-radius:99px;padding:2px 10px;margin-left:8px">'+esc(x.rg.n)+'</span>':'')+'</div>'
-   +(x.lodge.length?'<div style="font-size:11.5px;color:#9a8b90">住 '+esc(x.lodge[0].name)+'</div>':'')+'</div>'
-   +(o.exp?'<div style="text-align:right;flex:none"><div style="font-size:18px;font-weight:700">'+(ex.length?esc(money(jAmt(ex,J.cur),J.cur)):'—')+'</div><div style="font-size:10.5px;color:#9a8b90">'+(ex.length?ex.length+' 筆記帳':'這天沒有記帳')+'</div></div>':'')+'</div>'
+   +'<div style="background:'+c+';color:#fff;border-radius:10px;padding:6px 10px;text-align:center;line-height:1.05;flex:none"><div style="font-size:11px;letter-spacing:.15em">DAY</div><div style="font-size:24px;font-weight:700">'+(x.n<10?"0":"")+x.n+'</div></div>'
+   +'<div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:700">'+jMD(x.date)+'<span style="font-size:12px;font-weight:400;color:#7d6d72">（'+wk(x.date)+'）</span>'+(x.rg.n?'<span style="font-size:12px;font-weight:400;color:'+c+';background:'+jRgba(c,.1)+';border-radius:99px;padding:2px 10px;margin-left:8px">'+esc(x.rg.n)+'</span>':'')+'</div>'
+   +(x.lodge.length?'<div style="font-size:11px;color:#9a8b90">住 '+esc(x.lodge[0].name)+'</div>':'')+'</div>'
+   +(o.exp?'<div style="text-align:right;flex:none"><div style="font-size:20px;font-weight:700">'+(ex.length?esc(money(jAmt(ex,J.cur),J.cur)):'—')+'</div><div style="font-size:11px;color:#9a8b90">'+(ex.length?ex.length+' 筆記帳':'這天沒有記帳')+'</div></div>':'')+'</div>'
    +((rows||gs.length)?'<div style="display:flex;gap:18px"><div style="flex:1;min-width:0;border-left:2px solid '+jRgba(c,.25)+'">'+rows+'</div>'
    +(gs.length?'<div style="width:118px;flex:none;padding-top:4px">'+gs.map(function(g){return '<div style="display:flex;gap:7px;align-items:center;margin-bottom:8px">'+jSeal(g.done,28)+'<div style="font-size:11px;line-height:1.3;min-width:0">'+esc(g.name.replace(/（.*?）/,""))+'</div></div>'}).join("")+'</div>':'')+'</div>':'')
-   +(o.note&&x.note?'<div style="margin-top:6px;font-size:12.5px;background:#faf6f2;border-radius:8px;padding:8px 10px;white-space:pre-wrap">📝 '+esc(x.note)+'</div>':'')
+   +(o.note&&x.note?'<div style="margin-top:6px;font-size:12px;background:#faf6f2;border-radius:8px;padding:8px 10px;white-space:pre-wrap">📝 '+esc(x.note)+'</div>':'')
    +(ph.length?'<div style="display:flex;gap:8px;margin-top:8px">'+ph.map(function(a){var im=IMGC[a],f=fit(im,226,170);return '<div style="width:226px;height:170px;display:flex;align-items:center;justify-content:center;background:#f6f1f2;border-radius:8px;overflow:hidden"><img src="'+im.d+'" width="'+f.w+'" height="'+f.h+'" style="display:block"></div>'}).join("")+'</div>':'')
-   +(chips?'<div style="margin-top:8px;font-size:11.5px;color:#5e5155;background:'+jRgba(c,.06)+';border-radius:8px;padding:8px 10px 5px">'+chips+'</div>':'');
+   +(chips?'<div style="margin-top:8px;font-size:11px;color:#5e5155;background:'+jRgba(c,.06)+';border-radius:8px;padding:8px 10px 5px">'+chips+'</div>':'');
   return el}
 function jLedger(host,D,J,no){
   var b=jPage(host,D,no),cat={},mx=0,tot=jAmt(S.items,J.cur);S.items.forEach(function(i){cat[i.cat]=(cat[i.cat]||0)+jAmt([i],J.cur)});
@@ -1392,18 +1393,18 @@ function jLedger(host,D,J,no){
   var per=D.days.map(function(x){var t=jAmt(x.exp,J.cur);if(t>mx)mx=t;return{x:x,t:t}}),empty=per.filter(function(p){return !p.t}).length;
   var top=S.items.slice().sort(function(a,b){return twd(b)-twd(a)}).slice(0,5),k1=function(n){return n>=1000?(Math.round(n/100)/10)+"k":String(Math.round(n))};
   b.innerHTML=jHdr("花費總覽",S.items.length+" 筆記帳","#2b2326")
-   +'<div style="margin-bottom:24px"><div style="font-size:34px;font-weight:700">'+esc(money(tot,J.cur))+'</div>'+(J.cur!=="TWD"?'<div style="font-size:12px;color:#7d6d72">約 NT$ '+fmt(sumTwd(S.items))+'（以每筆記帳當天匯率換算）</div>':'')+'</div>'
-   +(per.length?'<div style="font-size:13px;font-weight:700;margin-bottom:10px">每天花多少</div>'
+   +'<div style="margin-bottom:24px"><div style="font-size:32px;font-weight:700">'+esc(money(tot,J.cur))+'</div>'+(J.cur!=="TWD"?'<div style="font-size:12px;color:#7d6d72">約 NT$ '+fmt(sumTwd(S.items))+'（以每筆記帳當天匯率換算）</div>':'')+'</div>'
+   +(per.length?'<div style="font-size:12px;font-weight:700;margin-bottom:10px">每天花多少</div>'
    +'<div style="display:flex;align-items:flex-end;gap:5px;height:'+(bh+34)+'px;border-bottom:1px solid #e6dcdf;margin-bottom:6px">'+per.map(function(p){
      var h=p.t&&mx?Math.max(3,Math.round(p.t/mx*bh)):0;
-     return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%"><div style="font-size:9px;color:#7d6d72;margin-bottom:3px">'+(p.t?k1(p.t):"")+'</div>'
+     return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%"><div style="font-size:11px;color:#7d6d72;margin-bottom:3px">'+(p.t?k1(p.t):"")+'</div>'
       +(p.t?'<div style="width:100%;height:'+h+'px;background:'+p.x.rg.c+';border-radius:4px 4px 0 0"></div>':'<div style="width:100%;box-sizing:border-box;height:'+Math.round(bh*.35)+'px;border:1.5px dashed #d8cdd0;border-bottom:0;border-radius:4px 4px 0 0"></div>')+'</div>'}).join("")+'</div>'
-   +'<div style="display:flex;gap:5px;margin-bottom:6px">'+per.map(function(p){return '<div style="flex:1;text-align:center;font-size:9px;color:#9a8b90">'+jMD(p.x.date)+'</div>'}).join("")+'</div>'
-   +'<div style="font-size:11.5px;color:#9a8b90;margin-bottom:22px">'+(empty?'虛線 = 這天沒有記帳（共 '+empty+' 天）。':'')+'事先付款的交通票、住宿如果沒記進來，實際花費會比這個數字高。</div>':'')
-   +'<div style="display:flex;gap:32px"><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;margin-bottom:10px">分類</div>'+ks.map(function(k){
-     return '<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12.5px"><span>'+(CAT_ICON[k]||"")+' '+esc(k)+'</span><span><b>'+esc(money(cat[k],J.cur))+'</b> <span style="color:#9a8b90">'+(tot?Math.round(cat[k]/tot*100):0)+'%</span></span></div><div style="height:6px;background:#f3ecee;border-radius:3px;margin-top:3px"><div style="height:100%;width:'+(cat[k]/cmax*100)+'%;background:#2b2326;border-radius:3px"></div></div></div>'}).join("")+'</div>'
-   +'<div style="width:250px;flex:none"><div style="font-size:13px;font-weight:700;margin-bottom:10px">最大的 5 筆</div>'+top.map(function(i){var nm=i.name==="（未命名）"?i.cat+"（未命名）":i.name;
-     return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:6px 0;border-bottom:1px solid #f3ecee"><span style="min-width:0">'+jMD(i.date)+'　'+esc(nm)+'</span><b>'+esc(money(J.cur==="TWD"?twd(i):i.amount,J.cur))+'</b></div>'}).join("")+'</div></div>'}
+   +'<div style="display:flex;gap:5px;margin-bottom:6px">'+per.map(function(p){return '<div style="flex:1;text-align:center;font-size:11px;color:#9a8b90">'+jMD(p.x.date)+'</div>'}).join("")+'</div>'
+   +'<div style="font-size:11px;color:#9a8b90;margin-bottom:22px">'+(empty?'虛線 = 這天沒有記帳（共 '+empty+' 天）。':'')+'事先付款的交通票、住宿如果沒記進來，實際花費會比這個數字高。</div>':'')
+   +'<div style="display:flex;gap:32px"><div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;margin-bottom:10px">分類</div>'+ks.map(function(k){
+     return '<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:12px"><span>'+(CAT_ICON[k]||"")+' '+esc(k)+'</span><span><b>'+esc(money(cat[k],J.cur))+'</b> <span style="color:#9a8b90">'+(tot?Math.round(cat[k]/tot*100):0)+'%</span></span></div><div style="height:6px;background:#f3ecee;border-radius:3px;margin-top:3px"><div style="height:100%;width:'+(cat[k]/cmax*100)+'%;background:#2b2326;border-radius:3px"></div></div></div>'}).join("")+'</div>'
+   +'<div style="width:250px;flex:none"><div style="font-size:12px;font-weight:700;margin-bottom:10px">最大的 5 筆</div>'+top.map(function(i){var nm=i.name==="（未命名）"?i.cat+"（未命名）":i.name;
+     return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:6px 0;border-bottom:1px solid #f3ecee"><span style="min-width:0">'+jMD(i.date)+'　'+esc(nm)+'</span><b>'+esc(money(J.cur==="TWD"?twd(i):i.amount,J.cur))+'</b></div>'}).join("")+'</div></div>'}
 async function renderJournal(D,o,prog){
   if(!window.html2canvas||!window.jspdf)throw new Error("匯出元件尚未載入（可能是網路問題），請稍後重試");
   if(o.photo&&phOn()){var ids=[];if(D.cover)ids.push(D.cover);D.days.forEach(function(x){x.photos.filter(function(p){return !(o.gosh&&p.ref&&p.ref.charAt(0)==="g")}).slice(0,3).forEach(function(p){ids.push(pkey(p))})});if(o.gosh)P.forEach(function(p){if(p.ref&&p.ref.charAt(0)==="g")ids.push(pkey(p))});
@@ -1421,6 +1422,100 @@ async function renderJournal(D,o,prog){
     for(var i=0;i<pages.length;i++){
       prog("產生 PDF "+(i+1)+" / "+pages.length);
       var cv=await window.html2canvas(pages[i],{scale:2,backgroundColor:"#ffffff",useCORS:true,logging:false,onclone:function(doc){doc.querySelectorAll("style,link[rel=stylesheet]").forEach(function(s){s.remove()});doc.body.style.background="#fff"}});
+      if(i)pdf.addPage();pdf.addImage(cv.toDataURL("image/jpeg",0.9),"JPEG",0,0,210,297);
+      await new Promise(function(r){setTimeout(r,0)})}
+    return pdf.output("blob")}
+  finally{host.remove()}}
+
+/* --- 旅遊書（PDF 專用）：區域章節、明體標題、大圖、景點條目＋側欄 --- */
+var GF="font-family:'Noto Serif TC','Hiragino Mincho ProN','Songti TC',serif;";
+var ROMA={"岡山":"OKAYAMA","廣島":"HIROSHIMA","宮島":"MIYAJIMA","尾道":"ONOMICHI","京都":"KYOTO","大阪":"OSAKA","東京":"TOKYO","奈良":"NARA"};
+async function gFont(){
+  try{if(!document.getElementById("gfont")){var l=document.createElement("link");l.id="gfont";l.rel="stylesheet";l.href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&display=swap";document.head.appendChild(l);
+      await new Promise(function(r){l.onload=r;l.onerror=r;setTimeout(r,4000)})}
+    if(document.fonts&&document.fonts.load)await Promise.race([Promise.all(["500","700","900"].map(function(w){return document.fonts.load(w+" 20px 'Noto Serif TC'","旅行岡山廣島尾道宮島第一章御朱印")})),new Promise(function(r){setTimeout(r,5000)})])}catch(e){}}
+/* 照片裁成固定比例（置中裁切），避免 html2canvas 處理 background-size */
+function gCrop(a,w,h){var im=IMGC[a];if(!im)return "";var k="c"+w+"x"+h;if(im[k])return im[k];
+  var c=document.createElement("canvas"),s=2;c.width=w*s;c.height=h*s;var x=c.getContext("2d"),r=Math.max(w/im.w,h/im.h),sw=w/r,sh=h/r,img=im.el;if(!img)return im.d;
+  try{x.drawImage(img,(im.w-sw)/2,(im.h-sh)/2,sw,sh,0,0,c.width,c.height);im[k]=c.toDataURL("image/jpeg",0.85)}catch(e){im[k]=im.d}return im[k]}
+function gChapters(D){var L=[];D.days.forEach(function(x){var n=x.rg.n||"旅途";var c=L[L.length-1];if(c&&c.n===n)c.days.push(x);else L.push({n:n,c:x.rg.c,days:[x]})});return L}
+function gDayPh(x,o){return o.photo?x.photos.filter(function(p){return !(o.gosh&&p.ref&&p.ref.charAt(0)==="g")}).map(pkey).filter(function(a){return IMGC[a]}):[]}
+function gCover(host,D,J,o){
+  var b=jPage(host,D,0,1),c0=J.route[0]?J.route[0].c:"#2b2326",cv=o.photo&&D.cover&&IMGC[D.cover]?D.cover:"";
+  if(!cv&&o.photo)D.days.some(function(x){var a=gDayPh(x,o)[0];if(a)cv=a;return !!a});
+  var sub=D.n?D.first.slice(0,4)+"　"+jMD(D.first)+" — "+jMD(D.last)+"　"+D.n+" 日の旅":"";
+  b.innerHTML='<div style="height:100%;position:relative;background:'+(cv?'#1d1719':c0)+';color:#fff;overflow:hidden">'
+   +(cv?'<img src="'+gCrop(cv,PGW,PGH)+'" width="'+PGW+'" height="'+PGH+'" style="display:block;position:absolute;left:0;top:0;opacity:.82">':'')
+   +'<div style="position:absolute;left:0;right:0;bottom:0;height:520px;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,.62))"></div>'
+   +'<div style="position:absolute;left:64px;top:64px;font-size:12px;letter-spacing:.4em;opacity:.9">TRAVEL GUIDE BOOK</div>'
+   +'<div style="position:absolute;left:64px;right:64px;bottom:150px">'
+   +'<div style="'+GF+'font-size:64px;font-weight:900;line-height:1.15;letter-spacing:.02em">'+esc(D.title.replace(/^\d{4}\s*/,""))+'</div>'
+   +'<div style="width:72px;height:3px;background:#fff;margin:22px 0 16px"></div>'
+   +'<div style="'+GF+'font-size:20px;font-weight:500;letter-spacing:.08em">'+esc(sub)+'</div></div>'
+   +'<div style="position:absolute;left:64px;right:64px;bottom:48px;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;letter-spacing:.1em;opacity:.9">'
+   +J.route.map(function(r){return '<span>'+esc(ROMA[r.n]||r.n)+'</span>'}).join('<span style="opacity:.6">—</span>')+'</div></div>'}
+function gToc(host,D,J,chs,no){
+  var b=jPage(host,D,no);
+  b.innerHTML='<div style="'+GF+'font-size:12px;letter-spacing:.4em;color:#9a8b90;margin-top:30px">CONTENTS</div><div style="'+GF+'font-size:40px;font-weight:900;margin:6px 0 34px">目次</div>'
+   +chs.map(function(c,i){return '<div style="display:flex;align-items:baseline;gap:16px;padding:14px 0;border-bottom:1px solid #eee2e5">'
+     +'<div style="'+GF+'font-size:28px;font-weight:900;color:'+c.c+';width:56px">'+(i<9?"0":"")+(i+1)+'</div>'
+     +'<div style="flex:1;min-width:0"><div style="'+GF+'font-size:24px;font-weight:700">'+esc(c.n)+'<span style="font-family:sans-serif;font-size:11px;letter-spacing:.2em;color:#9a8b90;margin-left:10px">'+esc(ROMA[c.n]||"")+'</span></div>'
+     +'<div style="font-size:12px;color:#7d6d72;margin-top:2px">'+jMD(c.days[0].date)+(c.days.length>1?' — '+jMD(c.days[c.days.length-1].date):'')+'・'+c.days.length+' 天</div></div>'
+     +'<div style="font-size:12px;color:#9a8b90">p.'+c.page+'</div></div>'}).join("")
+   +'<div style="display:flex;gap:16px;margin-top:22px;font-size:12px;color:#7d6d72">'+(J.gosh.length?'<span>御朱印帳　p.'+J.goshPage+'</span>':'')+(J.ledPage?'<span>旅費メモ　p.'+J.ledPage+'</span>':'')+'</div>'}
+function gChapHead(c,i){
+  var hi=[];c.days.forEach(function(x){x.plan.forEach(function(p){if(p.done&&(p.imp===2||/[☀-➿\uD83C-\uDBFF]/.test(p.name))&&hi.length<6)hi.push(jName(p.name).replace(/（.*?）/g,""))})});
+  var el=document.createElement("div");
+  el.innerHTML='<div style="background:'+c.c+';color:#fff;margin:-48px -48px 26px;padding:52px 48px 30px;position:relative">'
+   +'<div style="font-size:11px;letter-spacing:.4em;opacity:.85">CHAPTER '+(i<9?"0":"")+(i+1)+'</div>'
+   +'<div style="display:flex;align-items:flex-end;gap:16px;margin-top:6px"><div style="'+GF+'font-size:52px;font-weight:900;line-height:1">'+esc(c.n)+'</div>'
+   +'<div style="font-size:12px;letter-spacing:.3em;opacity:.85;padding-bottom:6px">'+esc(ROMA[c.n]||"")+'</div>'
+   +'<div style="margin-left:auto;'+GF+'font-size:14px;padding-bottom:6px">'+jMD(c.days[0].date)+(c.days.length>1?' — '+jMD(c.days[c.days.length-1].date):'')+'</div></div>'
+   +(hi.length?'<div style="margin-top:16px;font-size:12px;line-height:1.8;opacity:.95">'+hi.map(function(h){return '<span style="display:inline-block;border:1px solid rgba(255,255,255,.6);border-radius:99px;padding:0 10px;margin:0 6px 4px 0">'+esc(h)+'</span>'}).join("")+'</div>':'')+'</div>';
+  return el}
+function gDay(x,J,o){
+  var el=document.createElement("div"),c=x.rg.c,ex=o.exp?x.exp:[],gs=o.gosh?x.gosh:[],ph=gDayPh(x,o),n=0;el.style.cssText="margin-bottom:26px";
+  var hero=ph[0]?'<img src="'+gCrop(ph[0],PGW-96,250)+'" width="'+(PGW-96)+'" height="250" style="display:block;border-radius:4px;margin-bottom:6px">':'';
+  var thumbs=ph.length>1?'<div style="display:flex;gap:6px;margin-bottom:14px">'+ph.slice(1,4).map(function(a){return '<img src="'+gCrop(a,(PGW-96-12)/3,110)+'" width="'+Math.floor((PGW-96-12)/3)+'" height="110" style="display:block;border-radius:4px">'}).join("")+'</div>':(hero?'<div style="height:10px"></div>':'');
+  var rows=o.itin?x.plan.map(function(p){
+    var off=!p.done,t=/^\d{1,2}:\d{2}$/.test(p.time)?p.time:"",spot=!!p.place&&!off,nt=o.note?String(p.note||"").replace(/\s+/g," "):"";if(nt.length>70)nt=nt.slice(0,69)+"…";
+    if(spot){n++;return '<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px dotted #e6dcdf"><div style="flex:none;width:24px;height:24px;border-radius:50%;background:'+c+';color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:2px">'+n+'</div>'
+      +'<div style="flex:1;min-width:0"><div style="display:flex;gap:8px;align-items:baseline"><div style="'+GF+'font-size:16px;font-weight:700;line-height:1.35">'+esc(jName(p.name))+'</div><div style="margin-left:auto;font-size:11px;color:#9a8b90;flex:none">'+t+'</div></div>'
+      +'<div style="font-size:11px;color:'+c+';letter-spacing:.05em;margin-top:1px">'+esc(p.place)+'</div>'
+      +(nt?'<div style="font-size:11px;color:#7d6d72;line-height:1.55;margin-top:2px">'+esc(nt)+'</div>':'')+'</div></div>'}
+    return '<div style="display:flex;gap:12px;padding:4px 0;font-size:12px;'+(off?'color:#b3a6aa':'color:#5e5155')+'"><div style="width:24px;flex:none"></div><div style="flex:1;min-width:0">'+esc(jName(p.name))+(off?'<span style="font-size:11px;border:1px solid #d8cdd0;border-radius:99px;padding:0 6px;margin-left:6px">'+(p.skip?'略過':'這次沒去')+'</span>':'')+'</div><div style="font-size:11px;color:#b3a6aa;flex:none">'+t+'</div></div>'}).join(""):"";
+  var side='';
+  if(gs.length)side+='<div style="border:1px solid #f0d9dc;border-radius:6px;padding:10px;margin-bottom:10px"><div style="font-size:11px;letter-spacing:.25em;color:#c0392b;margin-bottom:8px">御朱印</div>'+gs.map(function(g){return '<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">'+jSeal(g.done,26)+'<div style="font-size:11px;line-height:1.3;min-width:0">'+esc(g.name.replace(/（.*?）/,""))+'</div></div>'}).join("")+'</div>';
+  if(o.exp)side+='<div style="background:#faf6f2;border-radius:6px;padding:10px;margin-bottom:10px"><div style="font-size:11px;letter-spacing:.25em;color:#9a8b90;margin-bottom:4px">旅費メモ</div><div style="'+GF+'font-size:20px;font-weight:700">'+(ex.length?esc(money(jAmt(ex,J.cur),J.cur)):'—')+'</div>'
+    +(ex.length?'<div style="font-size:11px;color:#7d6d72;line-height:1.6;margin-top:4px">'+ex.slice().sort(function(a,b){return twd(b)-twd(a)}).slice(0,6).map(function(i){var nm=i.name==="（未命名）"?i.cat:i.name.replace(/\d{3,}$/,"");return esc(nm)+' '+esc(money(J.cur==="TWD"?twd(i):i.amount,J.cur))}).join("<br>")+(ex.length>6?'<br>…還有 '+(ex.length-6)+' 筆':'')+'</div>':'<div style="font-size:11px;color:#9a8b90">這天沒有記帳</div>')+'</div>';
+  if(x.lodge.length)side+='<div style="font-size:11px;color:#7d6d72;padding:0 2px">🛏 '+esc(x.lodge[0].name)+'</div>';
+  el.innerHTML='<div style="display:flex;align-items:flex-end;gap:14px;border-bottom:2px solid #2b2326;padding-bottom:8px;margin-bottom:12px">'
+   +'<div style="'+GF+'font-size:40px;font-weight:900;line-height:.9;color:'+c+'">'+(x.n<10?"0":"")+x.n+'</div>'
+   +'<div style="padding-bottom:2px"><div style="font-size:11px;letter-spacing:.3em;color:#9a8b90">DAY</div><div style="'+GF+'font-size:16px;font-weight:700">'+jMD(x.date)+'（'+wk(x.date)+'）</div></div>'
+   +(x.note&&o.note?'<div style="margin-left:auto;max-width:330px;font-size:12px;color:#5e5155;'+GF+'line-height:1.5;text-align:right">「'+esc(x.note.slice(0,80))+'」</div>':'')+'</div>'
+   +hero+thumbs
+   +'<div style="display:flex;gap:22px"><div style="flex:1;min-width:0">'+rows+'</div>'+(side?'<div style="width:178px;flex:none">'+side+'</div>':'')+'</div>';
+  return el}
+async function renderGuide(D,o,prog){
+  if(!window.html2canvas||!window.jspdf)throw new Error("匯出元件尚未載入（可能是網路問題），請稍後重試");
+  prog("載入字型…");await gFont();
+  if(o.photo&&phOn()){var ids=[];if(D.cover)ids.push(D.cover);D.days.forEach(function(x){x.photos.slice(0,6).forEach(function(p){ids.push(pkey(p))})});if(o.gosh)P.forEach(function(p){if(p.ref&&p.ref.charAt(0)==="g")ids.push(pkey(p))});
+    for(var k=0;k<ids.length;k++){prog("載入照片 "+(k+1)+" / "+ids.length);try{var im=await loadImg(ids[k],1600);if(!im.el)im.el=await new Promise(function(res){var g=new Image();g.onload=function(){res(g)};g.onerror=function(){res(null)};g.src=im.d})}catch(e){}}}
+  var J=jData(D,o),chs=gChapters(D),host=document.createElement("div");host.style.cssText="position:fixed;left:-20000px;top:0;width:"+PGW+"px;background:#fff";document.body.appendChild(host);
+  try{
+    /* 先排內文算出頁碼，再補目次 */
+    var body=document.createElement("div"),no=3,lim=PGH-48-66,b=null;host.appendChild(body);
+    var mk=function(){var p=jPage(body,D,no++);return p};
+    chs.forEach(function(ch,i){ch.page=no;b=mk();b.appendChild(gChapHead(ch,i));
+      ch.days.forEach(function(x){if(!(x.plan.length||x.exp.length||x.gosh.length||x.note))return;var el=gDay(x,J,o);b.appendChild(el);
+        if(b.offsetHeight>lim&&b.childNodes.length>1){b.removeChild(el);b=mk();b.appendChild(el)}})});
+    if(o.gosh&&J.gosh.length){J.goshPage=no;no=jGosh(body,D,J,no,o)}
+    if(o.exp&&S.items.length){J.ledPage=no;jLedger(body,D,J,no++)}
+    var front=document.createElement("div");host.insertBefore(front,body);gCover(front,D,J,o);gToc(front,D,J,chs,2);
+    var pages=[].slice.call(front.children).concat([].slice.call(body.children)),pdf=new window.jspdf.jsPDF({unit:"mm",format:"a4",orientation:"portrait"});
+    for(var i=0;i<pages.length;i++){
+      prog("產生 PDF "+(i+1)+" / "+pages.length);
+      var cv=await window.html2canvas(pages[i],{scale:2,backgroundColor:"#ffffff",useCORS:true,logging:false,onclone:function(doc){doc.querySelectorAll("style,link[rel=stylesheet]:not(#gfont)").forEach(function(s){s.remove()});doc.body.style.background="#fff"}});
       if(i)pdf.addPage();pdf.addImage(cv.toDataURL("image/jpeg",0.9),"JPEG",0,0,210,297);
       await new Promise(function(r){setTimeout(r,0)})}
     return pdf.output("blob")}
@@ -1478,7 +1573,7 @@ async function doExport(kind){
     var D=tripData(),B=buildBlocks(BK.tpl,o,D),miss=0;
     if(!B.length)throw new Error("依目前勾選的內容，沒有可輸出的資料");
     if(blockAids(B).length){if(!phOn())B=B.filter(function(b){return b.t!=="imgs"}).map(function(b){if(b.t==="cover")b.img="";return b});else miss=await loadAll(B,prog)}
-    var blob=kind!=="pdf"?await renderDocx(B,prog):(BK.tpl==="journal"?await renderJournal(D,o,prog):await renderPdf(B,prog));
+    var blob=kind!=="pdf"?await renderDocx(B,prog):(BK.tpl==="guide"?await renderGuide(D,o,prog):BK.tpl==="journal"?await renderJournal(D,o,prog):await renderPdf(B,prog));
     BUSY=false;render();
     await saveFile(fname(S.trip)+"_"+fname(T.name.replace(/^\S+\s/,""))+"_"+stamp()+(kind==="pdf"?".pdf":".docx"),blob);
     if(miss)toast("有 "+miss+" 張照片載入失敗，已略過")
