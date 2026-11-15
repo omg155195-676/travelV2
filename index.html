@@ -513,7 +513,7 @@ function readExp(x){
 function vAdd(){
   var cur=lastCur;if(!(cur in S.rates))cur="TWD";
   var it={date:today(),cat:CATS[0],name:"",amount:"",cur:cur,rate:S.rates[cur]>0?S.rates[cur]:1,pay:lastPay,people:S.defPeople||1,note:""};
-  return summary()+'<button class="btn" style="margin:0 0 12px;font-size:18px;padding:16px" onclick="qAdd()">＋ 快速記帳</button>'+fxCard()+dgCard()+'<div class="card"><b>＋ 記一筆（完整表單）</b>'+expFields("a_",it)
+  return summary()+'<button class="btn" style="margin:0 0 12px;font-size:18px;padding:16px" onclick="qAdd()">＋ 快速記帳</button>'+missCard()+prepaidCard()+fxCard()+dgCard()+'<div class="card"><b>＋ 記一筆（完整表單）</b>'+expFields("a_",it)
    +(phOn()?'<label>照片（選填，例如收據、商品）</label><input type="file" id="a_f" accept="image/*" multiple>':'')
    +'<button class="btn" onclick="add()">新增一筆</button><div class="warn sub" id="er"></div><div class="sub" id="am"></div></div>'}
 function add(){
@@ -1977,12 +1977,36 @@ function wrapMove(id,d){var p=S.plan.filter(function(x){return x.id===id})[0];if
   toast("已移到 "+md(d)+"：「"+p.name+"」","復原",function(){p.date=od;p.skip=os;save();render()})}
 function wrapPark(id){var p=S.plan.filter(function(x){return x.id===id})[0];if(!p)return;p.skip=true;save();render();
   toast("已放進待補區：「"+p.name+"」","復原",function(){p.skip=false;save();render()})}
+/* --- 補記：已經過去、卻一筆記帳都沒有的旅行日 --- */
+function missDays(){
+  var ti=tripInfo(),t=today(),ns=S.noSpend||{};if(!ti.n||t<=ti.first)return [];
+  var has={};S.items.forEach(function(i){has[i.date]=1});
+  return ti.ds.filter(function(d){return d<t&&!has[d]&&!ns[d]})}
+function missCard(){
+  var L=missDays();if(!L.length)return "";var d=L[L.length-1],y=addDays(today(),-1),lab=d===y?'昨天（'+md(d)+'）':md(d)+'（週'+wk(d)+'）';
+  return '<div class="card" style="border-left:6px solid var(--ac)"><b>🧾 '+esc(lab)+'沒有記帳</b>'
+   +(L.length>1?'<div class="sub">另外還有 '+(L.length-1)+' 天沒記：'+esc(L.slice(0,-1).map(md).join("、"))+'</div>':'')
+   +'<div class="sub" style="margin:4px 0 8px">記得的話補一筆；想不起來就填個大概的總數，總花費才不會偏低。</div>'
+   +'<div class="row"><div><button class="btn sm" style="width:100%" onclick="qAdd(\''+d+'\')">＋ 補記一筆</button></div><div><button class="btn sec sm" style="width:100%" onclick="qAdd(\''+d+'\',{name:\'當天其他花費（估計）\',cat:\'其他\'})">大概花了多少</button></div></div>'
+   +'<button class="bt" onclick="noSpend(\''+d+'\')">這天真的沒花錢</button></div>'}
+function noSpend(d){if(!S.noSpend)S.noSpend={};S.noSpend[d]=1;save();render();toast("好的，"+md(d)+" 不再提醒","復原",function(){delete S.noSpend[d];save();render()})}
+/* --- 出發前預付：大筆支出先記，總花費才完整 --- */
+var PREPAID=[["✈️","機票","交通","TWD"],["🏨","住宿","住宿","TWD"],["🚄","JR Pass／新幹線","交通","JPY"],["📶","網卡／eSIM","其他","TWD"],["🛡️","旅遊保險","其他","TWD"],["🎫","預約門票／活動","門票","JPY"]];
+function preDone(n){return S.items.some(function(i){return i.name===n})}
+function prepaidCard(open){
+  var ti=tripInfo(),dn=PREPAID.filter(function(x){return preDone(x[1])}).length;
+  var pre=S.items.filter(function(i){return ti.n&&i.date<ti.first}),tot=sumTwd(pre);
+  return '<div class="card"><div class="l"><b>🧳 出發前預付（大筆支出）</b><span class="sub">'+dn+' / '+PREPAID.length+'</span></div>'
+   +'<div class="sub" style="margin:2px 0 6px">機票、住宿這類出發前就付掉的錢先記下來，總花費和每日預算才會準。'+(pre.length?'目前已記 NT$ '+fmt(tot)+'。':'')+'</div>'
+   +'<div class="qa-chips" style="flex-wrap:wrap;margin:6px 0">'+PREPAID.map(function(x,i){var ok=preDone(x[1]);return '<button type="button" class="'+(ok?'on':'')+'" onclick="preAdd('+i+')">'+(ok?'✓ ':x[0]+' ')+esc(x[1])+'</button>'}).join("")+'</div>'
+   +'<div class="sub">記過的項目再點一次可以再加一筆（例如來回各一張機票）。</div></div>'}
+function preAdd(i){var x=PREPAID[i],ti=tripInfo(),t=today(),d=(ti.n&&t>=ti.first)?addDays(ti.first,-1):t;qAdd(d,{name:x[1],cat:x[2],cur:x[3],pay:"信用卡"})}
 function vHome(){
   var ti=tripInfo(),t=today();
   var wr=wrapCard(),bl=backlogCard();
-  if(!ti.n||t<ti.first||t>ti.last)return quickBar()+wr+vHomeBase()+bl;
+  if(!ti.n||t<ti.first||t>ti.last)return quickBar()+missCard()+(ti.n&&t<ti.first?prepaidCard():"")+wr+vHomeBase()+bl;
   var x=dayData(t);x.fc=true;
-  return quickBar()+wr+dayHead(t,x,"📍 今天")+secPlan(t,x)+bl+secTix(t,x)+secTrans(t,x)+secExp(t,x)+secPhoto(t,x)+secGosh(t,x)+secResv(t,x)
+  return quickBar()+missCard()+wr+dayHead(t,x,"📍 今天")+secPlan(t,x)+bl+secTix(t,x)+secTrans(t,x)+secExp(t,x)+secPhoto(t,x)+secGosh(t,x)+secResv(t,x)
    +(x.note?'<div class="card"><b>📝 今日備註</b><div style="margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere">'+esc(x.note)+'</div></div>':'')
    +fxCard()+budgetCard(budgetInfo())+'<div class="sub" style="text-align:center;margin:8px 0">'+esc(S.trip)+'</div>'}
 /* --- 每日旅行總覽 / 當天詳情 --- */
@@ -2040,17 +2064,17 @@ function qaKey(k){
   if(QA.a==="00")QA.a="";qaShow()}
 function qaCat(c){QA.cat=c;qaShow()}
 function qaPick(i){var f=qaFav()[i];if(!f)return;$("q_n").value=f.n;QA.cat=f.cat||QA.cat;var u=$("q_u").value;if(!QA.a&&f.a>0&&f.cur===u)QA.a=String(f.a);qaShow()}
-function qAdd(d){
-  var cur=qaCur(),rt=S.rates[cur]>0?S.rates[cur]:1,it={date:(typeof d==="string"&&d)||today(),people:S.defPeople||1,pay:lastPay},fav=qaFav();
-  QA={a:"",cat:CATS[0],name:""};
+function qAdd(d,pre){
+  pre=pre||{};var cur=(pre.cur&&S.rates[pre.cur]>0)?pre.cur:qaCur(),rt=S.rates[cur]>0?S.rates[cur]:1,it={date:(typeof d==="string"&&d)||today(),people:S.defPeople||1,pay:pre.pay||lastPay},fav=qaFav();
+  QA={a:"",cat:pre.cat||CATS[0],name:""};
   var keys=["7","8","9","4","5","6","1","2","3",qaDec(cur)?".":"00","0","⌫"];
   var body='<div class="qa-amt" id="qa_amt"></div>'
    +'<i class="cq-amt" style="display:none!important"></i><input type="hidden" id="q_a"><input type="hidden" id="q_c" onchange="QA.cat=this.value;qaShow()">'
    +'<div class="qa-chips" id="qa_cats">'+CATS.map(function(c){return '<button type="button" data-c="'+esc(c)+'" onclick="qaCat(\''+esc(c)+'\')">'+(CAT_ICON[c]||"")+' '+esc(c)+'</button>'}).join("")+'</div>'
    +'<div class="sub" style="margin-top:4px">常用（點一下帶入名稱、分類和金額）</div><div class="qa-chips" id="qa_fav">'+fav.map(function(f,i){return '<button type="button" data-n="'+esc(f.n)+'" onclick="qaPick('+i+')">'+esc(f.n)+(f.a>0?' <span class="sub">'+esc(money(f.a,f.cur))+'</span>':'')+'</button>'}).join("")+'</div>'
    +'<div class="qa-kp">'+keys.map(function(k){return '<button type="button" onclick="qaKey(\''+k+'\')">'+k+'</button>'}).join("")+'</div>'
-   +'<label>名稱（可不填，會用分類當名稱）</label><input id="q_n" placeholder="例如：拉麵" maxlength="80" oninput="qaShow()">'
-   +'<div class="sub" id="q_pv" style="margin-top:6px"></div><div class="sub">'+esc(md(it.date))+'・'+esc(lastPay)+'・'+it.people+' 人・'+esc(SYM[cur]||cur)+'1 = NT$'+esc(rt)+'</div>'
+   +'<label>名稱（可不填，會用分類當名稱）</label><input id="q_n" placeholder="例如：拉麵" maxlength="80" value="'+esc(pre.name||"")+'" oninput="qaShow()">'
+   +'<div class="sub" id="q_pv" style="margin-top:6px"></div><div class="sub">'+(it.date!==today()?'<b>'+esc(md(it.date))+'</b>':esc(md(it.date)))+'・'+esc(it.pay)+'・'+it.people+' 人・'+esc(SYM[cur]||cur)+'1 = NT$'+esc(rt)+'</div>'
    +'<button type="button" class="btn sec sm" style="margin-top:8px" onclick="$(\'q_more\').classList.toggle(\'hide\')">改日期、幣別、付款、分攤、代購…</button>'
    +'<div id="q_more" class="hide">'+dgField("q_","")+'<div class="row"><div><label>日期</label><input type="date" id="q_d" value="'+esc(it.date)+'"></div><div><label>幣別</label><select id="q_u" onchange="curChg(\'q_\');qaShow()">'+opts(Object.keys(S.rates),cur)+'</select></div></div>'
    +'<div class="row"><div><label>匯率（1 單位 → 台幣）</label><input id="q_r" type="number" inputmode="decimal" min="0" step="any" value="'+esc(rt)+'" oninput="qaShow()"></div><div><label>分攤人數</label><div class="stp"><button type="button" aria-label="減少" onclick="stepP(\'q_\',-1)">−</button><input id="q_pp" type="number" inputmode="numeric" min="1" max="99" value="'+esc(it.people)+'" oninput="expPv(\'q_\')"><button type="button" aria-label="增加" onclick="stepP(\'q_\',1)">＋</button></div></div></div>'
