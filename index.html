@@ -1561,6 +1561,82 @@ async function renderDocx(B,prog){
   prog("封裝 Word 檔…");
   return zip.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"})}
 
+/* --- Word 版手帳／旅遊書：內容與 PDF 相同（封面、御朱印帳、每日、花費總覽），可在 Word 裡繼續編輯 --- */
+async function renderDocxBook(D,o,prog,guide){
+  if(!window.JSZip)throw new Error("匯出元件尚未載入（可能是網路問題），請稍後重試");
+  if(o.photo&&phOn()){var ids=[];if(D.cover)ids.push(D.cover);D.days.forEach(function(x){x.photos.filter(function(p){return !(o.gosh&&p.ref&&p.ref.charAt(0)==="g")}).slice(0,3).forEach(function(p){ids.push(pkey(p))})});if(o.gosh)P.forEach(function(p){if(p.ref&&p.ref.charAt(0)==="g")ids.push(pkey(p))});
+    for(var k=0;k<ids.length;k++){prog("載入照片 "+(k+1)+" / "+ids.length);try{await loadImg(ids[k])}catch(e){}}}
+  var J=jData(D,o),zip=new JSZip(),rels=[],media=0,did=1,body="",HF=guide?"PMingLiU":"Microsoft JhengHei";
+  /* 字級與 PDF 一致：11/12/14/16/20/24/28/40（Word 以半點為單位，pt≈px×0.75） */
+  var SZ=function(px){return Math.round(px*0.75*2)};
+  function r(t,x){x=x||{};var f=x.h?HF:"Microsoft JhengHei";return '<w:r><w:rPr><w:rFonts w:ascii="'+(x.h&&guide?"Georgia":"Calibri")+'" w:hAnsi="'+(x.h&&guide?"Georgia":"Calibri")+'" w:eastAsia="'+f+'"/>'+(x.b?'<w:b/>':'')+'<w:color w:val="'+(x.c||"2B2326")+'"/><w:sz w:val="'+SZ(x.px||14)+'"/>'+(x.sp?'<w:spacing w:val="'+x.sp+'"/>':'')+'</w:rPr><w:t xml:space="preserve">'+xe(t)+'</w:t></w:r>'}
+  function p(inner,x){x=x||{};return '<w:p><w:pPr>'+(x.keep?'<w:keepNext/>':'')+(x.pb?'<w:pageBreakBefore/>':'')+(x.shd?'<w:shd w:val="clear" w:color="auto" w:fill="'+x.shd+'"/>':'')+(x.bd?'<w:pBdr><w:bottom w:val="single" w:sz="12" w:space="4" w:color="'+x.bd+'"/></w:pBdr>':'')+'<w:spacing w:before="'+(x.bf||0)+'" w:after="'+(x.af==null?60:x.af)+'"/>'+(x.ind?'<w:ind w:left="'+x.ind+'"/>':'')+(x.jc?'<w:jc w:val="'+x.jc+'"/>':'')+'</w:pPr>'+inner+'</w:p>'}
+  function img(a,mw,mh){var im=IMGC[a];if(!im)return"";media++;var rid="rIdM"+media;zip.file("word/media/img"+media+".jpg",im.d.split(",")[1],{base64:true});rels.push('<Relationship Id="'+rid+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/img'+media+'.jpg"/>');var f=fit(im,mw,mh);return wdraw(rid,++did,Math.round(f.w),Math.round(f.h))}
+  function cell(inner,w,x){x=x||{};return '<w:tc><w:tcPr><w:tcW w:w="'+w+'" w:type="dxa"/>'+(x.shd?'<w:shd w:val="clear" w:color="auto" w:fill="'+x.shd+'"/>':'')+'<w:vAlign w:val="'+(x.v||"top")+'"/></w:tcPr>'+(inner||p(""))+'</w:tc>'}
+  function table(rows,ws,x){x=x||{};var b=x.border?'<w:top w:val="single" w:sz="4" w:color="EEE2E5"/><w:left w:val="single" w:sz="4" w:color="EEE2E5"/><w:bottom w:val="single" w:sz="4" w:color="EEE2E5"/><w:right w:val="single" w:sz="4" w:color="EEE2E5"/><w:insideH w:val="single" w:sz="4" w:color="EEE2E5"/><w:insideV w:val="single" w:sz="4" w:color="EEE2E5"/>':'<w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/>';
+    return '<w:tbl><w:tblPr><w:tblW w:w="'+ws.reduce(function(s,v){return s+v},0)+'" w:type="dxa"/><w:tblLayout w:type="fixed"/><w:tblBorders>'+b+'</w:tblBorders><w:tblCellMar><w:top w:w="'+(x.pad||40)+'" w:type="dxa"/><w:left w:w="100" w:type="dxa"/><w:bottom w:w="'+(x.pad||40)+'" w:type="dxa"/><w:right w:w="100" w:type="dxa"/></w:tblCellMar></w:tblPr><w:tblGrid>'+ws.map(function(v){return '<w:gridCol w:w="'+v+'"/>'}).join("")+'</w:tblGrid>'
+      +rows.map(function(rw){return '<w:tr><w:trPr><w:cantSplit/></w:trPr>'+rw.map(function(c,i){return cell(c.t,ws[i],c)}).join("")+'</w:tr>'}).join("")+'</w:tbl>'+p("",{af:0})}
+  var hx=function(c){return hex(c,"D6457A")},W=9638; /* 內文寬度（dxa） */
+  var nm=function(g){return g.name.replace(/（.*?）/,"")},sb=function(g){return (g.name.match(/（(.*?)）/)||[])[1]||""};
+  /* 封面 */
+  var c0=J.route[0]?J.route[0].c:"#d6457a";
+  body+=p("",{af:guide?2400:1800});
+  if(o.photo&&D.cover&&IMGC[D.cover])body+=p(img(D.cover,16*EMU,11*EMU),{jc:"center",af:400});
+  body+=p(r(guide?"TRAVEL GUIDE BOOK":"TRAVEL JOURNAL",{px:12,c:"9A8B90",sp:60}),{af:120})
+    +p(r(D.title,{px:40,b:1,c:hx(c0),h:1}),{af:200})
+    +(D.n?p(r(D.first.replace(/-/g,".")+" — "+D.last.replace(/-/g,".").slice(5)+"　·　"+D.n+" 天",{px:16,c:"5E5155"}),{af:200}):"")
+    +(J.route.length?p(r(J.route.map(function(x){return x.n}).join(" → "),{px:14,c:"5E5155"}),{af:600}):"");
+  var st=[D.n+" 天",J.done+" 個行程走過"];if(o.gosh&&J.gosh.length)st.push(J.gosh.filter(function(g){return g.done}).length+" 枚御朱印");if(o.exp&&S.items.length)st.push("記帳合計 "+money(jAmt(S.items,J.cur),J.cur));
+  body+=p(r(st.join("　｜　"),{px:16,b:1}),{af:0});
+  /* 每日 */
+  var chs=guide?gChapters(D):[{n:"",days:D.days}],first=true;
+  chs.forEach(function(ch,ci){
+    if(guide){body+=p(r("CHAPTER "+(ci<9?"0":"")+(ci+1)+"　",{px:12,c:"FFFFFF",sp:40})+r(ch.n+"　",{px:28,b:1,c:"FFFFFF",h:1})+r((ROMA[ch.n]||"")+"　"+jMD(ch.days[0].date)+(ch.days.length>1?" — "+jMD(ch.days[ch.days.length-1].date):""),{px:12,c:"FFFFFF"}),{pb:1,shd:hx(ch.c),bf:0,af:240,keep:1});first=false}
+    ch.days.forEach(function(x){
+      if(!(x.plan.length||x.exp.length||x.gosh.length||x.note))return;
+      var c=hx(x.rg.c),ex=o.exp?x.exp:[],gs=o.gosh?x.gosh:[];
+      body+=p(r("DAY "+(x.n<10?"0":"")+x.n+"　",{px:20,b:1,c:c,h:1})+r(jMD(x.date)+"（"+wk(x.date)+"）",{px:20,b:1,h:1})+(x.rg.n?r("　"+x.rg.n,{px:14,c:c}):"")+(o.exp?r("　　"+(ex.length?money(jAmt(ex,J.cur),J.cur):"沒有記帳"),{px:14,b:1,c:"5E5155"}):""),{pb:first&&!guide,bd:c,bf:240,af:80,keep:1});first=false;
+      if(x.lodge.length)body+=p(r("住 "+x.lodge[0].name,{px:12,c:"9A8B90"}),{af:60,keep:1});
+      if(o.note&&x.note)body+=p(r("📝 "+x.note,{px:14}),{shd:"FAF6F2",af:80});
+      var ph=gDayPh(x,o).slice(0,3);if(ph.length)body+=p(ph.map(function(a){return img(a,5.1*EMU,3.8*EMU)+r(" ")}).join(""),{af:80});
+      if(o.itin&&x.plan.length){var spot=0;body+=table(x.plan.map(function(q){
+        var off=!q.done,t=/^\d{1,2}:\d{2}$/.test(q.time)?q.time:"",nt=o.note?String(q.note||"").replace(/\s+/g," "):"",isS=guide&&!!q.place&&!off;if(isS)spot++;
+        return [{t:p(r(t,{px:12,c:off?"C9BCC0":"9A8B90"}),{af:0})},
+          {t:p((isS?r(spot+"　",{px:16,b:1,c:c}):"")+r(jName(q.name),{px:isS?16:14,b:!off,c:off?"B3A6AA":"2B2326",h:isS})+(off?r("　"+(q.skip?"略過":"這次沒去"),{px:11,c:"B3A6AA"}):""),{af:0})
+            +(isS?p(r(q.place,{px:11,c:c}),{af:0}):"")+(nt&&!off?p(r(nt,{px:11,c:"A8999E"}),{af:0}):"")}]}),[1000,W-1000],{pad:30})}
+      if(gs.length)body+=p(r("御朱印　",{px:12,b:1,c:"C0392B"})+r(gs.map(function(g){return nm(g)+(g.done?" 済":"（未）")}).join("、"),{px:12,c:"5E5155"}),{af:60});
+      if(ex.length)body+=p(ex.slice().sort(function(a,b){return twd(b)-twd(a)}).map(function(i){var n2=i.name==="（未命名）"?i.cat:i.name.replace(/\d{3,}$/,"");return r((CAT_ICON[i.cat]||"")+" "+n2+" ",{px:12,c:"5E5155"})+r(money(J.cur==="TWD"?twd(i):i.amount,J.cur)+"　",{px:12,b:1,c:"5E5155"})}).join(""),{shd:"F8F4F5",af:120});
+    })});
+  /* 御朱印帳 */
+  if(o.gosh&&J.gosh.length){
+    var done=J.gosh.filter(function(g){return g.done}).length,seven=J.gosh.filter(function(g){return /七佛/.test(g.name)}),full=seven.length===7&&seven.every(function(g){return g.done});
+    body+=p(r("御朱印帳　",{px:28,b:1,c:"C0392B",h:1})+r(done+" / "+J.gosh.length+" 枚"+(full?"　·　尾道七佛 滿願":""),{px:14,c:"7D6D72"}),{pb:1,bd:"C0392B",af:200});
+    var cw=Math.floor(W/3),rows=[];
+    for(var i=0;i<J.gosh.length;i+=3){rows.push(J.gosh.slice(i,i+3).map(function(g){var a=o.photo?jGoshPh(g):"",rg=regionOf([g]);
+      return {t:(a?p(img(a,4.6*EMU,5.4*EMU),{jc:"center",af:60}):"")+p(r(g.done?"済　":"未　",{px:16,b:1,c:g.done?"C0392B":"C9BCC0"})+r(nm(g),{px:16,b:1,h:1}),{af:0})+(sb(g)?p(r(sb(g),{px:11,c:"C0392B"}),{af:0}):"")+p(r((g.date?jMD(g.date)+"（"+wk(g.date)+"）":"")+(rg.n?"　"+rg.n:""),{px:11,c:"9A8B90"}),{af:0})}}));
+      while(rows[rows.length-1].length<3)rows[rows.length-1].push({t:p("")})}
+    body+=table(rows,[cw,cw,W-cw*2],{border:1,pad:100})}
+  /* 花費總覽 */
+  if(o.exp&&S.items.length){
+    var tot=jAmt(S.items,J.cur),cat={};S.items.forEach(function(i){cat[i.cat]=(cat[i.cat]||0)+jAmt([i],J.cur)});
+    var empty=D.days.filter(function(x){return !x.exp.length}).map(function(x){return jMD(x.date)});
+    body+=p(r("花費總覽　",{px:28,b:1,h:1})+r(S.items.length+" 筆記帳",{px:14,c:"7D6D72"}),{pb:1,bd:"2B2326",af:200})
+      +p(r(money(tot,J.cur),{px:32,b:1}),{af:40})+(J.cur!=="TWD"?p(r("約 NT$ "+fmt(sumTwd(S.items))+"（以每筆記帳當天匯率換算）",{px:12,c:"7D6D72"}),{af:200}):"")
+      +p(r("每天",{px:16,b:1}),{af:80})
+      +table(D.days.map(function(x){var t=jAmt(x.exp,J.cur);return [{t:p(r(jMD(x.date)+"（"+wk(x.date)+"）",{px:12}),{af:0})},{t:p(r(x.rg.n||"",{px:12,c:hx(x.rg.c)}),{af:0})},{t:p(r(t?money(t,J.cur):"沒有記帳",{px:12,b:!!t,c:t?"2B2326":"B3A6AA"}),{af:0,jc:"right"})}]}),[2400,2400,W-4800],{pad:20})
+      +(empty.length?p(r("沒有記帳的日子："+empty.join("、")+"。事先付款的交通票、住宿如果沒記進來，實際花費會比這個數字高。",{px:11,c:"9A8B90"}),{af:200}):"")
+      +p(r("分類",{px:16,b:1}),{af:80,bf:120})
+      +table(Object.keys(cat).sort(function(a,b){return cat[b]-cat[a]}).map(function(k){return [{t:p(r((CAT_ICON[k]||"")+" "+k,{px:14}),{af:0})},{t:p(r(money(cat[k],J.cur),{px:14,b:1}),{af:0,jc:"right"})},{t:p(r((tot?Math.round(cat[k]/tot*100):0)+"%",{px:12,c:"9A8B90"}),{af:0,jc:"right"})}]}),[4800,3200,W-8000],{pad:20})}
+  var NS='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"';
+  zip.file("[Content_Types].xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="jpg" ContentType="image/jpeg"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/></Types>');
+  zip.file("_rels/.rels",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>');
+  zip.file("word/_rels/document.xml.rels",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdS" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rIdF" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>'+rels.join("")+'</Relationships>');
+  zip.file("word/styles.xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri" w:eastAsia="Microsoft JhengHei"/><w:sz w:val="21"/><w:lang w:val="en-US" w:eastAsia="zh-TW"/></w:rPr></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style></w:styles>');
+  zip.file("word/footer1.xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:ftr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:color w:val="A8999E"/><w:sz w:val="16"/></w:rPr><w:t xml:space="preserve">'+xe(D.title)+'　</w:t></w:r><w:r><w:rPr><w:color w:val="A8999E"/><w:sz w:val="16"/></w:rPr><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:rPr><w:color w:val="A8999E"/><w:sz w:val="16"/></w:rPr><w:instrText xml:space="preserve"> PAGE </w:instrText></w:r><w:r><w:rPr><w:color w:val="A8999E"/><w:sz w:val="16"/></w:rPr><w:fldChar w:fldCharType="end"/></w:r></w:p></w:ftr>');
+  zip.file("word/document.xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document '+NS+'><w:body>'+body+'<w:sectPr><w:footerReference w:type="default" r:id="rIdF"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="708" w:footer="567" w:gutter="0"/><w:titlePg/></w:sectPr></w:body></w:document>');
+  prog("封裝 Word 檔…");
+  return zip.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"})}
+
 /* --- 輸出流程 --- */
 var BUSY=false;
 function prog(t){var e=$("bkp");if(e)e.textContent=t}
@@ -1573,7 +1649,7 @@ async function doExport(kind){
     var D=tripData(),B=buildBlocks(BK.tpl,o,D),miss=0;
     if(!B.length)throw new Error("依目前勾選的內容，沒有可輸出的資料");
     if(blockAids(B).length){if(!phOn())B=B.filter(function(b){return b.t!=="imgs"}).map(function(b){if(b.t==="cover")b.img="";return b});else miss=await loadAll(B,prog)}
-    var blob=kind!=="pdf"?await renderDocx(B,prog):(BK.tpl==="guide"?await renderGuide(D,o,prog):BK.tpl==="journal"?await renderJournal(D,o,prog):await renderPdf(B,prog));
+    var blob=kind!=="pdf"?((BK.tpl==="guide"||BK.tpl==="journal")?await renderDocxBook(D,o,prog,BK.tpl==="guide"):await renderDocx(B,prog)):(BK.tpl==="guide"?await renderGuide(D,o,prog):BK.tpl==="journal"?await renderJournal(D,o,prog):await renderPdf(B,prog));
     BUSY=false;render();
     await saveFile(fname(S.trip)+"_"+fname(T.name.replace(/^\S+\s/,""))+"_"+stamp()+(kind==="pdf"?".pdf":".docx"),blob);
     if(miss)toast("有 "+miss+" 張照片載入失敗，已略過")
