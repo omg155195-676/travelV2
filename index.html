@@ -514,7 +514,7 @@ function vAdd(){
   var cur=lastCur;if(!(cur in S.rates))cur="TWD";
   var it={date:today(),cat:CATS[0],name:"",amount:"",cur:cur,rate:S.rates[cur]>0?S.rates[cur]:1,pay:lastPay,people:S.defPeople||1,note:""};
   return summary()+'<button class="btn" style="margin:0 0 12px;font-size:18px;padding:16px" onclick="qAdd()">＋ 快速記帳</button>'+missCard()+prepaidCard()+fxCard()+dgCard()+'<div class="card"><b>＋ 記一筆（完整表單）</b>'+expFields("a_",it)
-   +(phOn()?'<label>照片（選填，例如收據、商品）</label><input type="file" id="a_f" accept="image/*" multiple>':'')
+   +(phOn()?'<label>照片（選填，例如收據、商品）</label><input type="file" id="a_f" accept="'+PHA+'" onclick="phPick(this)" multiple>':'')
    +'<button class="btn" onclick="add()">新增一筆</button><div class="warn sub" id="er"></div><div class="sub" id="am"></div></div>'}
 function add(){
   var r=readExp("a_");if(r.err){$("er").textContent=r.err;return}
@@ -1028,21 +1028,27 @@ async function syncPhotos(){
   for(var i=0;i<todo.length;i++){try{var b=await idbGet(todo[i].lid);if(!b)continue;var r=await CB.as.upload(b,{type:"image/jpeg"});todo[i].aid=r.id;ok++;save()}catch(e){break}}
   try{if(ok){await savePh();toast("☁️ 已備份 "+ok+" 張照片到 Cloud")}}catch(e){}
   syncing=false;if(ok&&tab==="photo")render()}
+/* 照片選取：明確列出格式，iPhone 就會直接交出原始 HEIC，不必先轉成 JPEG（省下按打勾後的等待） */
+var PHA="image/heic,image/heif,image/jpeg,image/png,image/webp,image/gif";
+function phPick(inp){try{toast("📂 選好照片按打勾後，請稍候幾秒…")}catch(e){}}
 function shrink(f){return new Promise(function(res,rej){var im=new Image(),u=URL.createObjectURL(f);
   im.onload=function(){try{var r=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=Math.max(1,Math.round(im.width*r));c.height=Math.max(1,Math.round(im.height*r));var g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(function(b){b?res(b):rej(new Error("blob"))},"image/jpeg",0.85)}catch(e){rej(e)}};
-  im.onerror=function(){URL.revokeObjectURL(u);rej(new Error("無法讀取這張圖片"))};im.src=u})}
+  im.onerror=function(){URL.revokeObjectURL(u);
+    if(window.createImageBitmap){createImageBitmap(f).then(function(bm){try{var r=Math.min(1,1600/Math.max(bm.width,bm.height)),c=document.createElement("canvas");c.width=Math.max(1,Math.round(bm.width*r));c.height=Math.max(1,Math.round(bm.height*r));var g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(bm,0,0,c.width,c.height);c.toBlob(function(b){b?res(b):rej(new Error("blob"))},"image/jpeg",0.85)}catch(e){rej(e)}}).catch(function(){rej(new Error("無法讀取這張圖片的格式"))})}
+    else rej(new Error("無法讀取這張圖片的格式"))};im.src=u})}
 function say(t){kMsg=t;var e=$("km");if(e)e.textContent=t}
 function phImg(p,cls){var k=pkey(p),u=k?imgUrl(k):"";return u?'<img src="'+esc(u)+'" loading="lazy" alt="" onerror="imgBad(this)" onclick="zoom(\''+esc(k)+'\')">':'<div class="tph">📷</div>'}
 function imgBad(i){var d=document.createElement("div");d.className="tph";d.style.fontSize="12px";d.style.textAlign="center";d.textContent="⚠️ 圖片無法顯示";if(i.parentNode)i.replaceWith(d)}
 function delThumbs(list){return '<div class="grid">'+list.map(function(p){return '<div class="tile">'+phImg(p)+'<button class="tdel" aria-label="刪除這張圖片" onclick="event.stopPropagation();askDelPh('+p.id+')">✕</button></div>'}).join("")+'</div>'}
 function thumbs(list,max){
   return '<div class="grid">'+list.slice(0,max).map(function(p){return '<div class="tile">'+phImg(p)+'</div>'}).join("")+'</div>'+(list.length>max?'<div class="sub">另有 '+(list.length-max)+' 張，到「照片」查看</div>':'')}
-function addLabel(spanId,fn){return '<label class="sub addph"><span id="'+spanId+'">📷 加照片</span><input type="file" accept="image/*" multiple style="display:none" onchange="'+fn+'"></label>'}
+function addLabel(spanId,fn){return '<label class="sub addph"><span id="'+spanId+'">📷 加照片</span><input type="file" accept="'+PHA+'" onclick="phPick(this)" multiple style="display:none" onchange="'+fn+'"></label>'}
 function planPh(p){if(!phOn())return"";var ph=P.filter(function(x){return x.pid===p.id&&ptrip(x)===S.tid});return '<div style="margin-top:6px">'+(ph.length?delThumbs(ph):'')+addLabel("pp"+p.id,"addPP("+p.id+",this)")+'</div>'}
 function refPh(ref,label){if(!phOn())return"";var ph=P.filter(function(x){return x.ref===ref&&ptrip(x)===S.tid});return '<div style="margin-top:6px" data-ref="'+esc(ref)+'" data-lab="'+esc(label||"")+'">'+(ph.length?delThumbs(ph):'')+addLabel("rf"+ref.replace(":","_"),"addRef('"+ref+"',this)").replace("📷 加照片",label||"📷 加照片")+'</div>'}
 /* 本機先存、再嘗試 Cloud；回傳成功張數 */
 async function pushPhotos(fl,meta,labId){
   var lab=$(labId)||$("km"),ok=0;
+  if(lab)lab.textContent="⏳ 讀取 "+fl.length+" 張照片…";await new Promise(function(r){setTimeout(r,30)});
   for(var i=0;i<fl.length;i++){
     if(lab)lab.textContent="處理中 "+(i+1)+" / "+fl.length+"…";
     try{
@@ -1071,7 +1077,7 @@ function refreshRefs(){if(!document.body.classList.contains("mo"))return;[].slic
 /* 新增交通／預約時先選圖片，儲存後自動上傳 */
 var PEND=[];
 function pendBox(label){if(!phOn())return'<div class="sub" style="margin-top:8px">儲存後，可以在這筆資料上加圖片或 QR Code。</div>';
-  PEND=[];return '<div style="margin-top:8px"><label class="sub addph"><span id="pend_l">'+esc(label)+'</span><input type="file" accept="image/*" multiple style="display:none" onchange="stagePend(this,\''+esc(label)+'\')"></label><div class="sub">選好的圖片會在按「儲存」後自動上傳。</div></div>'}
+  PEND=[];return '<div style="margin-top:8px"><label class="sub addph"><span id="pend_l">'+esc(label)+'</span><input type="file" accept="'+PHA+'" onclick="phPick(this)" multiple style="display:none" onchange="stagePend(this,\''+esc(label)+'\')"></label><div class="sub">選好的圖片會在按「儲存」後自動上傳。</div></div>'}
 function stagePend(inp,label){var fl=[].slice.call(inp.files);inp.value="";if(!fl.length)return;PEND=PEND.concat(fl);var e=$("pend_l");if(e)e.textContent="✅ 已選 "+PEND.length+" 張（儲存後上傳）｜再加一張"}
 async function flushPend(ref){var fl=PEND;PEND=[];if(!fl.length)return;toast("⏳ 圖片上傳中…");var n=await upRef(ref,fl);
   if(n===fl.length)toast("✅ 已儲存，並上傳 "+n+" 張圖片");else toast("⚠️ 有 "+(fl.length-n)+" 張圖片沒有存成功，請打開這筆資料重新上傳")}
@@ -1105,7 +1111,7 @@ function phUpload(d){
   var places=[],seen={};S.plan.forEach(function(p){if(p.place&&!seen[p.place]){seen[p.place]=1;places.push(p.place)}});
   return '<div class="card"><b>＋ 加照片</b><div class="row"><div><label>照片日期</label><input type="date" id="kd" value="'+esc(d)+'"></div><div><label>地點（選填）</label><input id="kp" list="kpl" maxlength="60"><datalist id="kpl">'+places.map(function(x){return '<option value="'+esc(x)+'">'}).join("")+'</datalist></div></div>'
    +'<label>說明（選填，同一批共用）</label><input id="kc" maxlength="100">'
-   +'<div class="row" style="margin-top:10px"><div><label class="btn" style="margin:0;text-align:center">📷 拍照<input type="file" accept="image/*" capture="environment" style="display:none" onchange="addPh(this)"></label></div><div><label class="btn sec" style="margin:0;text-align:center">🖼️ 相簿（可多張）<input type="file" accept="image/*" multiple style="display:none" onchange="addPh(this)"></label></div></div>'
+   +'<div class="row" style="margin-top:10px"><div><label class="btn" style="margin:0;text-align:center">📷 拍照<input type="file" accept="'+PHA+'" onclick="phPick(this)" capture="environment" style="display:none" onchange="addPh(this)"></label></div><div><label class="btn sec" style="margin:0;text-align:center">🖼️ 相簿（可多張）<input type="file" accept="'+PHA+'" onclick="phPick(this)" multiple style="display:none" onchange="addPh(this)"></label></div></div>'
    +'<div class="sub" id="km" style="margin-top:6px">'+esc(kMsg)+'</div></div>'}
 function cloudBanner(){
   var pn=pendingPh();
@@ -1140,7 +1146,7 @@ async function setCover(inp){
   render()}
 function hero(){
   var ti=tripInfo(),sub=ti.n?ti.first+' ～ '+ti.last+'・'+ti.n+' 天':'',cu=S.cover?imgUrl(S.cover):"";
-  var lab=function(c){return phOn()?'<label style="display:inline-block;margin:0;color:'+c+';cursor:pointer"><span id="cvm">📷 '+(S.cover?'更換封面':'設定封面')+'</span><input type="file" accept="image/*" style="display:none" onchange="setCover(this)"></label>'+(S.cover?'<button class="bt" style="margin-left:12px;color:'+c+'" onclick="clrCv()">移除</button>':''):''};
+  var lab=function(c){return phOn()?'<label style="display:inline-block;margin:0;color:'+c+';cursor:pointer"><span id="cvm">📷 '+(S.cover?'更換封面':'設定封面')+'</span><input type="file" accept="'+PHA+'" onclick="phPick(this)" style="display:none" onchange="setCover(this)"></label>'+(S.cover?'<button class="bt" style="margin-left:12px;color:'+c+'" onclick="clrCv()">移除</button>':''):''};
   if(cu)return '<div class="card" style="padding:0;overflow:hidden"><img src="'+esc(cu)+'" alt="" style="width:100%;display:block" onclick="zoom(\''+esc(S.cover)+'\')"><div style="padding:12px 14px"><div style="font-size:20px;font-weight:700;overflow-wrap:anywhere">'+esc(S.trip)+'</div><div class="sub">'+sub+'</div><div style="margin-top:8px;font-size:13px">'+lab("var(--ac)")+'</div></div></div>';
   return '<div style="background:linear-gradient(135deg,var(--g1),var(--g2));color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.45);border-radius:16px;padding:48px 16px 14px;margin-bottom:12px;min-height:150px;display:flex;flex-direction:column;justify-content:flex-end"><div style="font-size:24px;font-weight:700;overflow-wrap:anywhere">'+esc(S.trip)+'</div><div style="font-size:14px;opacity:.9">'+sub+'</div><div style="margin-top:10px;font-size:13px">'+lab("#fff")+'</div></div>'}
 VIEWS.photo=vPhoto;
